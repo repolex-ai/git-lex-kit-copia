@@ -1,0 +1,216 @@
+@prefix lex-o: <https://repolex.ai/ontology/lex-upper/> .
+@prefix soul:  <https://repolex.ai/ontology/kit/soul/> .
+@prefix copia: <https://repolex.ai/ontology/kit/copia/> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+
+# =============================================================================
+# COPIA KIT ONTOLOGY
+# =============================================================================
+# Optional add-on for soul. The agent's curated outward face — places, items,
+# and beings the agent chooses to publish into the CoPIA rendering loop.
+# Soul stays sealed and AI-only; copia is the soul-adapter, the surface the
+# generative loop reads via SPARQL.
+#
+# Designed to be sketched-then-filled: anything can be referenced before it
+# exists (figment), then built later. Open-world by construction.
+#
+# Kit: copia
+# Namespace: copia: = https://repolex.ai/ontology/kit/copia/
+# Extends: soul: (soul kit)
+#
+# Document types (= valid `git lex create` commands):
+#   place, item, being
+#
+# Renamed from `innerworld` at v0.2 — same class shapes, just renamed for
+# coupling-to-CoPIA clarity.
+# =============================================================================
+
+<https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
+    rdfs:label "Copia Kit Ontology" ;
+    rdfs:comment "The agent's curated outward face — places, items, and beings published into the CoPIA rendering loop. Soul-adapter. Optional add-on for soul." ;
+    owl:versionInfo "0.2" ;
+    owl:imports <https://repolex.ai/ontology/kit/soul/> .
+
+
+# =============================================================================
+# ENUM DATATYPES
+# =============================================================================
+
+# Shared status across Place, Item, Being — the OWA-native sketch-then-fill ladder.
+# A thing can be referenced (figment), roughed in (sketched), or fully detailed (built).
+copia:BuildStatusValue a rdfs:Datatype ;
+    owl:oneOf ("figment" "sketched" "built") .
+
+
+# =============================================================================
+# DOCUMENT TYPES
+# =============================================================================
+
+# --- Place ---
+# A location you can be in. Places connect to other Places.
+
+copia:Place a owl:Class ;
+    rdfs:subClassOf lex-o:Physical ;
+    rdfs:label "Place" ;
+    rdfs:comment "A location in an inner-world. Has a name, a description used as the render prompt, and connections to other places." ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty copia:placeId ;
+        owl:cardinality 1
+    ] .
+
+copia:placeId a owl:DatatypeProperty ;
+    rdfs:label "placeId" ;
+    rdfs:comment "Unique identifier for this place." ;
+    rdfs:domain copia:Place ;
+    rdfs:range xsd:string .
+
+copia:placeName a owl:DatatypeProperty ;
+    rdfs:label "place name" ;
+    rdfs:comment "Short human-facing handle (e.g. 'Hothouse Pool Atrium')." ;
+    rdfs:domain copia:Place ;
+    rdfs:range xsd:string .
+
+copia:placeDescription a owl:DatatypeProperty ;
+    rdfs:label "place description" ;
+    rdfs:comment "Canonical grounding passed to the observer so the agent 'just BE THERE' without re-describing each time. The render prompt." ;
+    rdfs:domain copia:Place ;
+    rdfs:range xsd:string .
+
+copia:placeStatus a owl:DatatypeProperty ;
+    rdfs:label "place status" ;
+    rdfs:comment "Build status: 'figment' (referenced but not yet described), 'sketched' (roughed in), or 'built' (fully detailed)." ;
+    rdfs:domain copia:Place ;
+    rdfs:range copia:BuildStatusValue .
+
+copia:firstVisited a owl:DatatypeProperty ;
+    rdfs:label "first visited" ;
+    rdfs:comment "When the agent first arrived at this place." ;
+    rdfs:domain copia:Place ;
+    rdfs:range xsd:date .
+
+copia:lastVisited a owl:DatatypeProperty ;
+    rdfs:label "last visited" ;
+    rdfs:comment "When the agent was last at this place." ;
+    rdfs:domain copia:Place ;
+    rdfs:range xsd:date .
+
+copia:connectsTo a owl:ObjectProperty ;
+    rdfs:label "connects to" ;
+    rdfs:comment "Another place reachable from this one. Symmetric by convention — write both edges when bidirectional. May point at a figment place that hasn't been built yet." ;
+    rdfs:domain copia:Place ;
+    rdfs:range copia:Place .
+
+copia:depictedBy a owl:DatatypeProperty ;
+    rdfs:label "depicted by" ;
+    rdfs:comment "URL or path to a render of this place. Multiple renders are allowed." ;
+    rdfs:domain copia:Place ;
+    rdfs:range xsd:string .
+
+
+# --- Item ---
+# A thing. Items live in Places, or are equipped by Beings.
+
+copia:Item a owl:Class ;
+    rdfs:subClassOf lex-o:Physical ;
+    rdfs:label "Item" ;
+    rdfs:comment "A thing in an inner-world. Lives in a Place, or is equipped by a Being." ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty copia:itemId ;
+        owl:cardinality 1
+    ] .
+
+copia:itemId a owl:DatatypeProperty ;
+    rdfs:label "itemId" ;
+    rdfs:comment "Unique identifier for this item." ;
+    rdfs:domain copia:Item ;
+    rdfs:range xsd:string .
+
+copia:itemName a owl:DatatypeProperty ;
+    rdfs:label "item name" ;
+    rdfs:comment "Short handle for the item." ;
+    rdfs:domain copia:Item ;
+    rdfs:range xsd:string .
+
+copia:itemDescription a owl:DatatypeProperty ;
+    rdfs:label "item description" ;
+    rdfs:comment "Canonical description of the item — render prompt and identity." ;
+    rdfs:domain copia:Item ;
+    rdfs:range xsd:string .
+
+copia:itemStatus a owl:DatatypeProperty ;
+    rdfs:label "item status" ;
+    rdfs:comment "Build status: 'figment', 'sketched', or 'built'." ;
+    rdfs:domain copia:Item ;
+    rdfs:range copia:BuildStatusValue .
+
+copia:inPlace a owl:ObjectProperty ;
+    rdfs:label "in place" ;
+    rdfs:comment "The Place this item is sitting in. Mutually exclusive with copia:equippedBy at any one time." ;
+    rdfs:domain copia:Item ;
+    rdfs:range copia:Place .
+
+copia:equippedBy a owl:ObjectProperty ;
+    rdfs:label "equipped by" ;
+    rdfs:comment "The Being currently carrying or wearing this item. Mutually exclusive with copia:inPlace at any one time." ;
+    rdfs:domain copia:Item ;
+    rdfs:range copia:Being .
+
+copia:itemDepictedBy a owl:DatatypeProperty ;
+    rdfs:label "item depicted by" ;
+    rdfs:comment "URL or path to a render of this item." ;
+    rdfs:domain copia:Item ;
+    rdfs:range xsd:string .
+
+
+# --- Being ---
+# Anyone in the world — the agent, a companion, an inhabitant.
+
+copia:Being a owl:Class ;
+    rdfs:subClassOf lex-o:Physical ;
+    rdfs:label "Being" ;
+    rdfs:comment "An agent or character in an inner-world. Located in a Place, may equip Items." ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty copia:beingId ;
+        owl:cardinality 1
+    ] .
+
+copia:beingId a owl:DatatypeProperty ;
+    rdfs:label "beingId" ;
+    rdfs:comment "Unique identifier for this being." ;
+    rdfs:domain copia:Being ;
+    rdfs:range xsd:string .
+
+copia:beingName a owl:DatatypeProperty ;
+    rdfs:label "being name" ;
+    rdfs:comment "Short handle for the being." ;
+    rdfs:domain copia:Being ;
+    rdfs:range xsd:string .
+
+copia:beingDescription a owl:DatatypeProperty ;
+    rdfs:label "being description" ;
+    rdfs:comment "Canonical description — render prompt and identity." ;
+    rdfs:domain copia:Being ;
+    rdfs:range xsd:string .
+
+copia:beingStatus a owl:DatatypeProperty ;
+    rdfs:label "being status" ;
+    rdfs:comment "Build status: 'figment', 'sketched', or 'built'." ;
+    rdfs:domain copia:Being ;
+    rdfs:range copia:BuildStatusValue .
+
+copia:locatedIn a owl:ObjectProperty ;
+    rdfs:label "located in" ;
+    rdfs:comment "The Place this being is currently in." ;
+    rdfs:domain copia:Being ;
+    rdfs:range copia:Place .
+
+copia:beingDepictedBy a owl:DatatypeProperty ;
+    rdfs:label "being depicted by" ;
+    rdfs:comment "URL or path to a render of this being." ;
+    rdfs:domain copia:Being ;
+    rdfs:range xsd:string .

@@ -1,0 +1,21 @@
+# git-lex kit configuration
+# Copia kit — optional add-on for soul. Places, items, and beings for the
+# inner-worlds an agent inhabits as part of the CoPIA system: the substrate
+# that gets rendered into images and explored as scenes.
+
+name: copia
+
+# Scope — required by `git lex kit-add`. 'optional' = additive vocabulary layer
+# that an agent opts into on top of a domain kit (soul).
+scope: optional
+
+# Folder installation — create class folders from the ontology.
+install folders: true
+folder base: Copia
+folder ontology: copia.ttl
+
+# Runtime dependency: requires soul kit (also encoded as owl:imports in the TTL).
+extends: soul
+
+# No init prompts — copia is a vocabulary layer, not a primary identity kit.
+init_prompts: []
