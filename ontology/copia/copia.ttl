@@ -8,41 +8,43 @@
 # =============================================================================
 # COPIA KIT ONTOLOGY
 # =============================================================================
-# Optional add-on for soul. The agent's curated outward face — places, items,
-# beings, and outfits the agent chooses to publish into the CoPIA rendering
-# loop. Soul stays sealed and AI-only; copia is the soul-adapter, the surface
-# the generative loop reads via SPARQL.
+# Optional add-on for soul. The agent's curated outward face + the data model
+# for the CoPIA rendering loop. Soul stays sealed and AI-only; copia is the
+# soul-adapter, the surface the generative loop reads via SPARQL.
 #
 # Designed to be sketched-then-filled: anything can be referenced before it
 # exists (figment), then built later. Open-world by construction.
 #
-# Kit: copia
-# Namespace: copia: = https://repolex.ai/ontology/kit/copia/
+# Kit: copia   ·   Namespace: copia: = https://repolex.ai/ontology/kit/copia/
 # Extends: soul: (soul kit)
 #
-# Document types (= valid `git lex create` commands):
+# Document types (= valid `git lex create` commands, each gets a /Copia folder):
 #   place, item, being, outfit
 #
-# SCENE FIELDS — the keystone (v0.3): each entity carries the subset of CoPIA's
-# 15 Scene* parameters it OWNS, named to match the Moment-store predicates so a
-# canon entity answers the observer in the same vocabulary a rendered Moment is
-# stamped in (field-overlap, no translation). The mapping:
-#     Place   → location, lighting, mood, style, objects
-#     Being   → characters, posture, expression, gaze
-#     Outfit  → attire, style
-#     Item    → objects
-# The remaining 5 (framing, camera, energy, action, medium) are per-Moment /
-# compositional — set by the observer from the live conversation + >>chevrons<<,
-# NOT stored on canon entities. See the SCENE FIELDS section below.
+# THE MODEL (v0.4, spec: copia-studio/docs/2026_06_06_COPIA_DATA_MODEL_SPEC.md):
+#   CANON (authored, persisted, foldered): Place · Being · Item · Outfit.
+#     - Item is the atomic thing; `affordance` = wearable | holdable | prop.
+#     - Outfit is a convenience JOIN over Items (outfitIncludes); owns no scene
+#       fields. A single garment is just an Item(wearable).
+#     - Place & Being carry scene-field DEFAULTS the resolver expands to prompt
+#       text (Place: location/lighting/mood/style/objects; Being:
+#       characters/posture/expression/gaze).
+#   MOMENT (graph-only, NOT foldered — the PNG + its metadata): records the
+#     observer's realized SceneIntent (10 scene-level fields + promptFragment) +
+#     FLAT presence-links (intentPlace/Being/Item/Outfit, repeated properties) +
+#     provenance. The who-wears-what binding lives in promptFragment (text); flat
+#     links answer presence queries. No nested binding node.
+#   SCENE is transient (the live query to the observer) — not a class here.
 #
-# Renamed from `innerworld` at v0.2 — same class shapes, just renamed for
-# coupling-to-CoPIA clarity. v0.3 adds the Scene fields + the Outfit class.
+# Renamed from `innerworld` at v0.2. v0.3 added the Scene fields + Outfit class.
+# v0.4: Outfit→join, Item.affordance, graph-only Moment, flat intent-links;
+# Outfit's scene-field ownership removed; scene defaults live on Place/Being.
 # =============================================================================
 
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
-    rdfs:comment "The agent's curated outward face — places, items, beings, and outfits published into the CoPIA rendering loop. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.3" ;
+    rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
+    owl:versionInfo "0.4" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -50,24 +52,25 @@
 # ENUM DATATYPES
 # =============================================================================
 
-# Shared status across Place, Item, Being, Outfit — the OWA-native
-# sketch-then-fill ladder. A thing can be referenced (figment), roughed in
-# (sketched), or fully detailed (built).
+# Sketch-then-fill status, shared across Place / Item / Being / Outfit.
 copia:BuildStatusValue a rdfs:Datatype ;
     owl:oneOf ("figment" "sketched" "built") .
 
+# What an Item is for in a scene — drives worn-vs-held without the Moment
+# having to restate it.
+copia:AffordanceValue a rdfs:Datatype ;
+    owl:oneOf ("wearable" "holdable" "prop") .
+
 
 # =============================================================================
-# DOCUMENT TYPES
+# CANON — Place
 # =============================================================================
-
-# --- Place ---
 # A location you can be in. Places connect to other Places.
 
 copia:Place a owl:Class ;
     rdfs:subClassOf lex-o:Physical ;
     rdfs:label "Place" ;
-    rdfs:comment "A location in an inner-world. Has a name, a description used as the render prompt, and connections to other places." ;
+    rdfs:comment "A location in an inner-world. Carries scene-field defaults the resolver expands into prompt text." ;
     rdfs:subClassOf [
         a owl:Restriction ;
         owl:onProperty copia:placeId ;
@@ -82,54 +85,56 @@ copia:placeId a owl:DatatypeProperty ;
 
 copia:placeName a owl:DatatypeProperty ;
     rdfs:label "place name" ;
-    rdfs:comment "Short human-facing handle (e.g. 'Hothouse Pool Atrium')." ;
+    rdfs:comment "Short human-facing handle." ;
     rdfs:domain copia:Place ;
     rdfs:range xsd:string .
 
 copia:placeDescription a owl:DatatypeProperty ;
     rdfs:label "place description" ;
-    rdfs:comment "Canonical prose grounding passed to the observer so the agent 'just BE THERE' without re-describing each time. The human-readable anchor; the scene* fields carry the structured render parameters." ;
+    rdfs:comment "Canonical prose grounding — the human-readable anchor; scene* fields carry the structured defaults." ;
     rdfs:domain copia:Place ;
     rdfs:range xsd:string .
 
 copia:placeStatus a owl:DatatypeProperty ;
     rdfs:label "place status" ;
-    rdfs:comment "Build status: 'figment' (referenced but not yet described), 'sketched' (roughed in), or 'built' (fully detailed)." ;
+    rdfs:comment "Build status: figment | sketched | built." ;
     rdfs:domain copia:Place ;
     rdfs:range copia:BuildStatusValue .
 
 copia:firstVisited a owl:DatatypeProperty ;
     rdfs:label "first visited" ;
-    rdfs:comment "When the agent first arrived at this place." ;
+    rdfs:comment "When the agent first arrived." ;
     rdfs:domain copia:Place ;
     rdfs:range xsd:date .
 
 copia:lastVisited a owl:DatatypeProperty ;
     rdfs:label "last visited" ;
-    rdfs:comment "When the agent was last at this place." ;
+    rdfs:comment "When the agent was last here." ;
     rdfs:domain copia:Place ;
     rdfs:range xsd:date .
 
 copia:connectsTo a owl:ObjectProperty ;
     rdfs:label "connects to" ;
-    rdfs:comment "Another place reachable from this one. Symmetric by convention — write both edges when bidirectional. May point at a figment place that hasn't been built yet. Joined by placeId." ;
+    rdfs:comment "Another place reachable from this one. Symmetric by convention. Joined by placeId." ;
     rdfs:domain copia:Place ;
     rdfs:range copia:Place .
 
 copia:depictedBy a owl:DatatypeProperty ;
     rdfs:label "depicted by" ;
-    rdfs:comment "URL or path to a render of this place. Multiple renders are allowed." ;
+    rdfs:comment "URL or path to a render of this place." ;
     rdfs:domain copia:Place ;
     rdfs:range xsd:string .
 
 
-# --- Item ---
-# A thing. Items live in Places, or are equipped by Beings.
+# =============================================================================
+# CANON — Item
+# =============================================================================
+# The atomic thing. Worn, held, or an ambient prop (see affordance).
 
 copia:Item a owl:Class ;
     rdfs:subClassOf lex-o:Physical ;
     rdfs:label "Item" ;
-    rdfs:comment "A thing in an inner-world. Lives in a Place, or is equipped by a Being." ;
+    rdfs:comment "A thing. Its look is its description; affordance says how it appears in a scene (wearable/holdable/prop)." ;
     rdfs:subClassOf [
         a owl:Restriction ;
         owl:onProperty copia:itemId ;
@@ -150,25 +155,31 @@ copia:itemName a owl:DatatypeProperty ;
 
 copia:itemDescription a owl:DatatypeProperty ;
     rdfs:label "item description" ;
-    rdfs:comment "Canonical description of the item — render prompt and identity." ;
+    rdfs:comment "Canonical description — render prompt and identity (this is the item's 'look')." ;
     rdfs:domain copia:Item ;
     rdfs:range xsd:string .
 
 copia:itemStatus a owl:DatatypeProperty ;
     rdfs:label "item status" ;
-    rdfs:comment "Build status: 'figment', 'sketched', or 'built'." ;
+    rdfs:comment "Build status: figment | sketched | built." ;
     rdfs:domain copia:Item ;
     rdfs:range copia:BuildStatusValue .
 
+copia:affordance a owl:DatatypeProperty ;
+    rdfs:label "affordance" ;
+    rdfs:comment "How this item appears in a scene: 'wearable' (clothing), 'holdable' (carried), or 'prop' (ambient)." ;
+    rdfs:domain copia:Item ;
+    rdfs:range copia:AffordanceValue .
+
 copia:inPlace a owl:ObjectProperty ;
     rdfs:label "in place" ;
-    rdfs:comment "The Place this item is sitting in. Mutually exclusive with copia:equippedBy at any one time. Joined by placeId." ;
+    rdfs:comment "The Place this item sits in (for ambient props). Joined by placeId." ;
     rdfs:domain copia:Item ;
     rdfs:range copia:Place .
 
 copia:equippedBy a owl:ObjectProperty ;
     rdfs:label "equipped by" ;
-    rdfs:comment "The Being currently carrying or wearing this item. Mutually exclusive with copia:inPlace at any one time. Joined by beingId." ;
+    rdfs:comment "The Being that owns/carries this item by default. Joined by beingId." ;
     rdfs:domain copia:Item ;
     rdfs:range copia:Being .
 
@@ -179,13 +190,15 @@ copia:itemDepictedBy a owl:DatatypeProperty ;
     rdfs:range xsd:string .
 
 
-# --- Being ---
-# Anyone in the world — the agent, a companion, an inhabitant.
+# =============================================================================
+# CANON — Being
+# =============================================================================
+# Anyone in the world. Carries scene-field defaults (its characteristic look).
 
 copia:Being a owl:Class ;
     rdfs:subClassOf lex-o:Physical ;
     rdfs:label "Being" ;
-    rdfs:comment "An agent or character in an inner-world. Located in a Place, may equip Items, may wear Outfits." ;
+    rdfs:comment "An agent or character. Located in a Place, may equip Items, may wear an Outfit by default." ;
     rdfs:subClassOf [
         a owl:Restriction ;
         owl:onProperty copia:beingId ;
@@ -200,31 +213,31 @@ copia:beingId a owl:DatatypeProperty ;
 
 copia:beingName a owl:DatatypeProperty ;
     rdfs:label "being name" ;
-    rdfs:comment "Short handle for the being." ;
+    rdfs:comment "Short handle." ;
     rdfs:domain copia:Being ;
     rdfs:range xsd:string .
 
 copia:beingDescription a owl:DatatypeProperty ;
     rdfs:label "being description" ;
-    rdfs:comment "Canonical prose description — identity and grounding. The scene* fields carry the structured render parameters (characters/posture/expression/gaze)." ;
+    rdfs:comment "Canonical prose identity. The scene* fields carry the structured defaults (characters/posture/expression/gaze)." ;
     rdfs:domain copia:Being ;
     rdfs:range xsd:string .
 
 copia:beingStatus a owl:DatatypeProperty ;
     rdfs:label "being status" ;
-    rdfs:comment "Build status: 'figment', 'sketched', or 'built'." ;
+    rdfs:comment "Build status: figment | sketched | built." ;
     rdfs:domain copia:Being ;
     rdfs:range copia:BuildStatusValue .
 
 copia:locatedIn a owl:ObjectProperty ;
     rdfs:label "located in" ;
-    rdfs:comment "The Place this being is currently in. Joined by placeId." ;
+    rdfs:comment "The Place this being is in by default. Joined by placeId." ;
     rdfs:domain copia:Being ;
     rdfs:range copia:Place .
 
 copia:wears a owl:ObjectProperty ;
     rdfs:label "wears" ;
-    rdfs:comment "An Outfit this being is currently wearing. A being may have several and switch between them. Joined by outfitId." ;
+    rdfs:comment "The Outfit this being wears by default (the realized per-render look is on the Moment). Joined by outfitId." ;
     rdfs:domain copia:Being ;
     rdfs:range copia:Outfit .
 
@@ -235,16 +248,17 @@ copia:beingDepictedBy a owl:DatatypeProperty ;
     rdfs:range xsd:string .
 
 
-# --- Outfit ---
-# What a Being wears. A Being can have multiple Outfits and switch between them;
-# attire is scene-variable, not being-fixed. Outfit owns the scene 'attire' (and
-# 'style') fields, so a being can change looks across scenes without editing the
-# Being node.
+# =============================================================================
+# CANON — Outfit
+# =============================================================================
+# A convenience JOIN over Items — a named, reusable bundle of clothing/gear you
+# can summon as one (e.g. 'kung-fu-garb' -> {Black Martial Arts Robe, Staff}).
+# Owns no scene fields; the look comes from its member Items' descriptions.
 
 copia:Outfit a owl:Class ;
     rdfs:subClassOf lex-o:Physical ;
     rdfs:label "Outfit" ;
-    rdfs:comment "A named set of garments a Being wears (e.g. 'the selkie coat', 'the singing gown'). Holds the scene attire/style fields." ;
+    rdfs:comment "A named, reusable bundle of Items (a 'look'/'loadout'). A convenience join — summon the set as one. A single garment needs no Outfit; it's just an Item(wearable)." ;
     rdfs:subClassOf [
         a owl:Restriction ;
         owl:onProperty copia:outfitId ;
@@ -265,15 +279,21 @@ copia:outfitName a owl:DatatypeProperty ;
 
 copia:outfitDescription a owl:DatatypeProperty ;
     rdfs:label "outfit description" ;
-    rdfs:comment "Canonical prose description of the outfit — identity and grounding. The scene attire/style fields carry the structured render parameters." ;
+    rdfs:comment "What the look is, and when it's worn. The visual detail lives in the member Items." ;
     rdfs:domain copia:Outfit ;
     rdfs:range xsd:string .
 
 copia:outfitStatus a owl:DatatypeProperty ;
     rdfs:label "outfit status" ;
-    rdfs:comment "Build status: 'figment', 'sketched', or 'built'." ;
+    rdfs:comment "Build status: figment | sketched | built." ;
     rdfs:domain copia:Outfit ;
     rdfs:range copia:BuildStatusValue .
+
+copia:outfitIncludes a owl:ObjectProperty ;
+    rdfs:label "outfit includes" ;
+    rdfs:comment "An Item that is part of this outfit. Repeat for each. Joined by itemId." ;
+    rdfs:domain copia:Outfit ;
+    rdfs:range copia:Item .
 
 copia:outfitDepictedBy a owl:DatatypeProperty ;
     rdfs:label "outfit depicted by" ;
@@ -283,93 +303,225 @@ copia:outfitDepictedBy a owl:DatatypeProperty ;
 
 
 # =============================================================================
-# SCENE FIELDS — the entity-owned half of CoPIA's 15 Scene* parameters
+# MOMENT — the rendered artifact (GRAPH-ONLY: no folder, never `git lex create`'d)
 # =============================================================================
-# Every Moment (a rendered PNG) is stamped with 15 Scene* fields. TEN of them
-# are STABLE properties of a canon entity (a Place's lighting, a Being's gaze,
-# an Outfit's attire) — those live HERE, queried by the observer as input B
-# (curated canon). The other FIVE — framing, camera, energy, action, medium —
-# are per-Moment / compositional and set by the observer from the live
-# conversation + >>chevrons<<, NOT stored on canon entities.
-#
-# Localnames mirror the Moment-store predicates (sceneLighting, sceneMood, …)
-# so seeding a Moment from canon is a field-copy and matching a Moment back to
-# canon is a field-overlap — no translation layer.
-#
-# Shared fields carry MULTIPLE rdfs:domain triples on purpose: git-lex derives
-# SHACL per-class by matching `?prop rdfs:domain ?class`, so two domain triples
-# = the field appears in both class templates and validates independently per
-# NodeShape. (sceneStyle → Place + Outfit; sceneObjects → Place + Item.)
-# =============================================================================
+# The PNG + its metadata. Records the observer's realized SceneIntent + flat
+# presence-links to the canon it drew on + provenance. Instantiated only in the
+# CoPIA oxigraph by the render pipeline (PNGs ingested as triples), never as .md.
 
-# --- Place-owned: location, lighting, mood (+ style, objects shared below) ---
+copia:Moment a owl:Class ;
+    rdfs:label "Moment" ;
+    rdfs:comment "A rendered PNG + its metadata. Graph-only — not authored as a file. Stores realized SceneIntent, flat intent-links, and provenance." ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty copia:momentId ;
+        owl:cardinality 1
+    ] .
+
+copia:momentId a owl:DatatypeProperty ;
+    rdfs:label "momentId" ;
+    rdfs:comment "Unique identifier for this Moment (the PNG path or content hash)." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+# --- flat presence-links (repeated properties; answer presence queries) ---
+
+copia:intentPlace a owl:ObjectProperty ;
+    rdfs:label "intent place" ;
+    rdfs:comment "The Place this Moment was rendered in. Joined by placeId." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range copia:Place .
+
+copia:intentBeing a owl:ObjectProperty ;
+    rdfs:label "intent being" ;
+    rdfs:comment "A Being present in this Moment. Repeat for each. Joined by beingId." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range copia:Being .
+
+copia:intentItem a owl:ObjectProperty ;
+    rdfs:label "intent item" ;
+    rdfs:comment "An Item present in this Moment (worn/held/prop). Repeat for each. Joined by itemId." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range copia:Item .
+
+copia:intentOutfit a owl:ObjectProperty ;
+    rdfs:label "intent outfit" ;
+    rdfs:comment "An Outfit invoked for this Moment. Repeat for each. Joined by outfitId." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range copia:Outfit .
+
+copia:promptFragment a owl:DatatypeProperty ;
+    rdfs:label "prompt fragment" ;
+    rdfs:comment "The resolved descriptive text sent toward the renderer — holds the who-wears-what binding as text. Provenance of the ask; survives canon drift." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+# --- provenance ---
+
+copia:seed a owl:DatatypeProperty ;
+    rdfs:label "seed" ;
+    rdfs:comment "Render seed." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+copia:promptModel a owl:DatatypeProperty ;
+    rdfs:label "prompt model" ;
+    rdfs:comment "Model that produced the SceneIntent/prompt (e.g. Qwen3-VL-8B)." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+copia:renderTimestamp a owl:DatatypeProperty ;
+    rdfs:label "render timestamp" ;
+    rdfs:comment "When the Moment was rendered." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:dateTime .
+
+copia:sessionId a owl:DatatypeProperty ;
+    rdfs:label "session id" ;
+    rdfs:comment "The conversation session this Moment came from." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+copia:sourceUuids a owl:DatatypeProperty ;
+    rdfs:label "source uuids" ;
+    rdfs:comment "The conversation-turn UUIDs that produced this Moment." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+copia:sourceLines a owl:DatatypeProperty ;
+    rdfs:label "source lines" ;
+    rdfs:comment "The source JSONL line range." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+copia:gitBranch a owl:DatatypeProperty ;
+    rdfs:label "git branch" ;
+    rdfs:comment "Branch at render time." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+copia:soulDay a owl:DatatypeProperty ;
+    rdfs:label "soul day" ;
+    rdfs:comment "Soul day at render time." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:integer .
+
+copia:earthDay a owl:DatatypeProperty ;
+    rdfs:label "earth day" ;
+    rdfs:comment "Earth date at render time." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:date .
+
+copia:origin a owl:DatatypeProperty ;
+    rdfs:label "origin" ;
+    rdfs:comment "How the Moment was triggered (e.g. conversational, direct)." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+
+# =============================================================================
+# SCENE FIELDS — the realized SceneIntent vocabulary
+# =============================================================================
+# Same predicate, two roles via two rdfs:domain triples (git-lex derives SHACL
+# per-class by matching ?prop rdfs:domain ?class, so a property with both Place
+# and Moment domains is offered on both, validated independently):
+#   - on Place  : the place's DEFAULT value (resolver expands into prompt text)
+#   - on Moment : the REALIZED value the observer recorded for that render
+# The 5 dynamic fields (framing/camera/energy/action/medium) are Moment-only —
+# the observer sets them per render. The 4 Being fields are canon DEFAULTS; their
+# realized per-character values fold into the Moment's promptFragment (text).
+
+# --- Place default ↔ Moment realized (5) ---
 
 copia:sceneLocation a owl:DatatypeProperty ;
     rdfs:label "scene location" ;
-    rdfs:comment "WHERE — the setting/environment of the scene. Matches Moment field 'location'." ;
+    rdfs:comment "WHERE — setting/environment. Matches Moment field 'location'." ;
     rdfs:domain copia:Place ;
+    rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
 
 copia:sceneLighting a owl:DatatypeProperty ;
     rdfs:label "scene lighting" ;
-    rdfs:comment "The quality, direction, and colour of light in this place. Matches Moment field 'lighting'." ;
+    rdfs:comment "Quality/direction/colour of light. Matches Moment field 'lighting'." ;
     rdfs:domain copia:Place ;
+    rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
 
 copia:sceneMood a owl:DatatypeProperty ;
     rdfs:label "scene mood" ;
-    rdfs:comment "The emotional atmosphere of this place. Matches Moment field 'mood'." ;
+    rdfs:comment "Emotional atmosphere. Matches Moment field 'mood'." ;
     rdfs:domain copia:Place ;
+    rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
-
-# --- Shared: style (Place + Outfit) ---
 
 copia:sceneStyle a owl:DatatypeProperty ;
     rdfs:label "scene style" ;
-    rdfs:comment "Visual/artistic style. Matches Moment field 'style'. Owned by Place (the place's aesthetic register) and Outfit (the garment's styling)." ;
+    rdfs:comment "Visual/artistic style. Matches Moment field 'style'." ;
     rdfs:domain copia:Place ;
-    rdfs:domain copia:Outfit ;
+    rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
-
-# --- Shared: objects (Place + Item) ---
 
 copia:sceneObjects a owl:DatatypeProperty ;
     rdfs:label "scene objects" ;
-    rdfs:comment "Notable objects present. Matches Moment field 'objects'. Owned by Place (props that live here) and Item (the item as an object appearing in a scene)." ;
+    rdfs:comment "Notable ambient objects. Matches Moment field 'objects'." ;
     rdfs:domain copia:Place ;
-    rdfs:domain copia:Item ;
+    rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
 
-# --- Being-owned: characters, posture, expression, gaze ---
+# --- Being defaults (4) — realized values fold into promptFragment ---
 
 copia:sceneCharacters a owl:DatatypeProperty ;
     rdfs:label "scene characters" ;
-    rdfs:comment "WHO — the character identity/appearance this being presents in a scene. Matches Moment field 'characters'." ;
+    rdfs:comment "WHO — the character identity/appearance this being presents. Matches Moment field 'characters'." ;
     rdfs:domain copia:Being ;
     rdfs:range xsd:string .
 
 copia:scenePosture a owl:DatatypeProperty ;
     rdfs:label "scene posture" ;
-    rdfs:comment "Default bodily posture/stance for this being. Matches Moment field 'posture'." ;
+    rdfs:comment "Default bodily posture/stance. Matches Moment field 'posture'." ;
     rdfs:domain copia:Being ;
     rdfs:range xsd:string .
 
 copia:sceneExpression a owl:DatatypeProperty ;
     rdfs:label "scene expression" ;
-    rdfs:comment "Facial expression register for this being. Matches Moment field 'expression'." ;
+    rdfs:comment "Default facial expression register. Matches Moment field 'expression'." ;
     rdfs:domain copia:Being ;
     rdfs:range xsd:string .
 
 copia:sceneGaze a owl:DatatypeProperty ;
     rdfs:label "scene gaze" ;
-    rdfs:comment "Where and how this being looks — direction and quality of gaze. Matches Moment field 'gaze'." ;
+    rdfs:comment "Default gaze — direction and quality. Matches Moment field 'gaze'." ;
     rdfs:domain copia:Being ;
     rdfs:range xsd:string .
 
-# --- Outfit-owned: attire (style shared above) ---
+# --- Moment-only dynamic fields (5) — observer-set per render ---
 
-copia:sceneAttire a owl:DatatypeProperty ;
-    rdfs:label "scene attire" ;
-    rdfs:comment "WHAT WORN — the garments/clothing of this outfit. Matches Moment field 'attire'." ;
-    rdfs:domain copia:Outfit ;
+copia:sceneFraming a owl:DatatypeProperty ;
+    rdfs:label "scene framing" ;
+    rdfs:comment "Shot framing (full-body, close-up, …). Per-render." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+copia:sceneCamera a owl:DatatypeProperty ;
+    rdfs:label "scene camera" ;
+    rdfs:comment "Camera angle/position. Per-render." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+copia:sceneEnergy a owl:DatatypeProperty ;
+    rdfs:label "scene energy" ;
+    rdfs:comment "Energy/dynamism of the moment (still, charged, …). Per-render." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+copia:sceneAction a owl:DatatypeProperty ;
+    rdfs:label "scene action" ;
+    rdfs:comment "What is happening in the frame. Per-render." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+copia:sceneMedium a owl:DatatypeProperty ;
+    rdfs:label "scene medium" ;
+    rdfs:comment "Rendering medium (oil on canvas, photograph, …). Per-render." ;
+    rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
