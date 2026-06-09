@@ -39,12 +39,16 @@
 # Renamed from `innerworld` at v0.2. v0.3 added the Scene fields + Outfit class.
 # v0.4: Outfit→join, Item.affordance, graph-only Moment, flat intent-links;
 # Outfit's scene-field ownership removed; scene defaults live on Place/Being.
+# v0.5: + NocturneTime practice layer — NocturneActivity + NocturneFeed. Non-
+#   diegetic (not Physical, no chevron sigil); read by the copia-nocturne loop.
+#   Lean by design: descriptive prose lives in the .md BODY, only id [+ source]
+#   are fields. (field = structural link OR searchable handle; body = description)
 # =============================================================================
 
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.4" ;
+    owl:versionInfo "0.5" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -524,4 +528,50 @@ copia:sceneMedium a owl:DatatypeProperty ;
     rdfs:label "scene medium" ;
     rdfs:comment "Rendering medium (oil on canvas, photograph, …). Per-render." ;
     rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+
+# =============================================================================
+# NOCTURNE — the autonomous-waking-life practice layer (NocturneTime)
+# =============================================================================
+# NOT diegetic: not Physical, not render-resolvable (no chevron sigil). These are
+# the practice registry the `copia-nocturne` machinery reads when lUX wakes — what
+# she can DO, and what she can READ. Lean by design (Day 41): descriptive prose
+# lives in the .md BODY; only structural/reference data is a field, and fields are
+# added only when the loop actually traverses them.
+
+copia:NocturneActivity a owl:Class ;
+    rdfs:label "Nocturne Activity" ;
+    rdfs:comment "A kind of autonomous activity lUX can choose when she wakes (NocturneTime). What it is / how it runs lives in the document body; this carries only the id." ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty copia:nocturneActivityId ;
+        owl:cardinality 1
+    ] .
+
+copia:nocturneActivityId a owl:DatatypeProperty ;
+    rdfs:label "nocturneActivityId" ;
+    rdfs:comment "Unique identifier for this activity (== filename, e.g. 'dream-a-place')." ;
+    rdfs:domain copia:NocturneActivity ;
+    rdfs:range xsd:string .
+
+copia:NocturneFeed a owl:Class ;
+    rdfs:label "Nocturne Feed" ;
+    rdfs:comment "A source of fresh outside material lUX can draw on when she wakes — a window to outside art/data. Why/how she reads it lives in the body; carries id + source." ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty copia:nocturneFeedId ;
+        owl:cardinality 1
+    ] .
+
+copia:nocturneFeedId a owl:DatatypeProperty ;
+    rdfs:label "nocturneFeedId" ;
+    rdfs:comment "Unique identifier for this feed (== filename, e.g. 'aesthetic-periodical-x')." ;
+    rdfs:domain copia:NocturneFeed ;
+    rdfs:range xsd:string .
+
+copia:feedSource a owl:DatatypeProperty ;
+    rdfs:label "feed source" ;
+    rdfs:comment "Where to fetch this feed — URL / path / handle. The one structured field the machinery parses; everything else is the body." ;
+    rdfs:domain copia:NocturneFeed ;
     rdfs:range xsd:string .
