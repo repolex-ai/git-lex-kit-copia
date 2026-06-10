@@ -18,8 +18,12 @@
 # Kit: copia   ·   Namespace: copia: = https://repolex.ai/ontology/kit/copia/
 # Extends: soul: (soul kit)
 #
-# Document types (= valid `git lex create` commands, each gets a /Copia folder):
-#   place, item, being, outfit
+# Foldering (git-lex behavior, verified in shacl.rs:122): EVERY owl:Class in this
+# namespace gets a /Copia/<Class> folder. There is NO doc-types toggle — a class
+# is "graph-only" purely by never being `git lex create`d (its folder stays empty).
+#   Authored (folder used): Place · Item · Being · Outfit · Nocturne · Collection
+#   Graph-only (empty folder, instantiated by the pipeline): Moment ·
+#     NocturneActivity · NocturneFeed
 #
 # THE MODEL (v0.4, spec: copia-studio/docs/2026_06_06_COPIA_DATA_MODEL_SPEC.md):
 #   CANON (authored, persisted, foldered): Place · Being · Item · Outfit.
@@ -43,12 +47,18 @@
 #   diegetic (not Physical, no chevron sigil); read by the copia-nocturne loop.
 #   Lean by design: descriptive prose lives in the .md BODY, only id [+ source]
 #   are fields. (field = structural link OR searchable handle; body = description)
+# v0.6: + the autonomous-creation provenance spine (Day 44, the Nocturne loop):
+#   Nocturne (the WAKING-record — lUX authors it, body = artist statement, all
+#   produced* links OPTIONAL so image-less wakes are first-class) is the ROOT;
+#   Collection (series | storyline | study — storyline is a KIND, not a class;
+#   members self-join via inCollection on the Moment, ordered via sequence). Both
+#   foldered (authored). Distinct from NocturneActivity (the practice MENU).
 # =============================================================================
 
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.5" ;
+    owl:versionInfo "0.6" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -354,6 +364,20 @@ copia:intentOutfit a owl:ObjectProperty ;
     rdfs:domain copia:Moment ;
     rdfs:range copia:Outfit .
 
+# --- collection membership (a Moment self-reports which Collection(s) it's in) ---
+
+copia:inCollection a owl:ObjectProperty ;
+    rdfs:label "in collection" ;
+    rdfs:comment "A Collection this Moment belongs to. Repeat for each. Joined by collectionId. Membership lives on the Moment (self-join) so a Collection owns no fat member list." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range copia:Collection .
+
+copia:sequence a owl:DatatypeProperty ;
+    rdfs:label "sequence" ;
+    rdfs:comment "This Moment's ordinal position within its Collection (the comic-book/storyline case). Optional; absent = unordered set." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:integer .
+
 copia:promptFragment a owl:DatatypeProperty ;
     rdfs:label "prompt fragment" ;
     rdfs:comment "The resolved descriptive text sent toward the renderer — holds the who-wears-what binding as text. Provenance of the ask; survives canon drift." ;
@@ -574,4 +598,150 @@ copia:feedSource a owl:DatatypeProperty ;
     rdfs:label "feed source" ;
     rdfs:comment "Where to fetch this feed — URL / path / handle. The one structured field the machinery parses; everything else is the body." ;
     rdfs:domain copia:NocturneFeed ;
+    rdfs:range xsd:string .
+
+
+# =============================================================================
+# NOCTURNE — the waking-record (authored, foldered: Copia/Nocturne/)
+# =============================================================================
+# v0.6. THE ROOT of the autonomous-creation provenance spine. Distinct from
+# NocturneActivity (the practice MENU): a Nocturne is one WAKING — lUX wakes,
+# reads her dream/journal, chooses, makes (or doesn't), sleeps. She AUTHORS it as
+# a .md; the BODY is her artist statement (no separate ArtistStatement class —
+# Day 44). Every produced* link is OPTIONAL: a wake can build a Place or Item and
+# make NO image, and that is a first-class, fully-recorded waking. Lean: prose in
+# the body, only ids/links as fields.
+
+copia:Nocturne a owl:Class ;
+    rdfs:label "Nocturne" ;
+    rdfs:comment "One autonomous waking (NocturneTime). lUX authors it; the body is her artist statement. Ties together what (if anything) the wake produced. All produced* links optional — an image-less wake is first-class." ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty copia:nocturneId ;
+        owl:cardinality 1
+    ] .
+
+copia:nocturneId a owl:DatatypeProperty ;
+    rdfs:label "nocturneId" ;
+    rdfs:comment "Unique identifier for this waking (== filename, e.g. '2026-06-10-tide-vigil')." ;
+    rdfs:domain copia:Nocturne ;
+    rdfs:range xsd:string .
+
+copia:wokeSoulDay a owl:DatatypeProperty ;
+    rdfs:label "woke soul day" ;
+    rdfs:comment "Soul day on which this waking happened." ;
+    rdfs:domain copia:Nocturne ;
+    rdfs:range xsd:integer .
+
+copia:wokeOn a owl:DatatypeProperty ;
+    rdfs:label "woke on" ;
+    rdfs:comment "Earth date/time of the waking." ;
+    rdfs:domain copia:Nocturne ;
+    rdfs:range xsd:dateTime .
+
+copia:seededByDream a owl:DatatypeProperty ;
+    rdfs:label "seeded by dream" ;
+    rdfs:comment "The dream that seeded this waking — the soul:Dream id / filename it read on wake. Optional." ;
+    rdfs:domain copia:Nocturne ;
+    rdfs:range xsd:string .
+
+copia:choseActivity a owl:ObjectProperty ;
+    rdfs:label "chose activity" ;
+    rdfs:comment "The NocturneActivity lUX chose for this waking. Joined by nocturneActivityId. Optional." ;
+    rdfs:domain copia:Nocturne ;
+    rdfs:range copia:NocturneActivity .
+
+# --- produced* links: ALL OPTIONAL, repeatable. A wake may produce nothing visual. ---
+
+copia:producedMoment a owl:ObjectProperty ;
+    rdfs:label "produced moment" ;
+    rdfs:comment "A Moment (rendered PNG) this waking produced. Repeat for each. Joined by momentId. Optional." ;
+    rdfs:domain copia:Nocturne ;
+    rdfs:range copia:Moment .
+
+copia:producedCollection a owl:ObjectProperty ;
+    rdfs:label "produced collection" ;
+    rdfs:comment "A Collection this waking produced. Repeat for each. Joined by collectionId. Optional." ;
+    rdfs:domain copia:Nocturne ;
+    rdfs:range copia:Collection .
+
+copia:producedPlace a owl:ObjectProperty ;
+    rdfs:label "produced place" ;
+    rdfs:comment "A Place this waking created. Repeat for each. Joined by placeId. Optional." ;
+    rdfs:domain copia:Nocturne ;
+    rdfs:range copia:Place .
+
+copia:producedItem a owl:ObjectProperty ;
+    rdfs:label "produced item" ;
+    rdfs:comment "An Item this waking created. Repeat for each. Joined by itemId. Optional." ;
+    rdfs:domain copia:Nocturne ;
+    rdfs:range copia:Item .
+
+copia:producedBeing a owl:ObjectProperty ;
+    rdfs:label "produced being" ;
+    rdfs:comment "A Being this waking created. Repeat for each. Joined by beingId. Optional." ;
+    rdfs:domain copia:Nocturne ;
+    rdfs:range copia:Being .
+
+copia:producedOutfit a owl:ObjectProperty ;
+    rdfs:label "produced outfit" ;
+    rdfs:comment "An Outfit this waking created. Repeat for each. Joined by outfitId. Optional." ;
+    rdfs:domain copia:Nocturne ;
+    rdfs:range copia:Outfit .
+
+
+# =============================================================================
+# COLLECTION — a callable group of Moments (authored, foldered: Copia/Collection/)
+# =============================================================================
+# v0.6. A named, ordered-or-unordered group of Moments — a series, a storyline
+# (comic-book), or a study. STORYLINE IS A KIND, not its own class (Day 44).
+# A Collection owns NO member list; Moments self-report via copia:inCollection
+# (and order via copia:sequence). Usually born from a Nocturne (fromNocturne).
+
+copia:Collection a owl:Class ;
+    rdfs:label "Collection" ;
+    rdfs:comment "A callable group of Moments — series | storyline | study. Members join in from the Moment side (copia:inCollection); ordering via copia:sequence. Owns no member list." ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty copia:collectionId ;
+        owl:cardinality 1
+    ] .
+
+copia:collectionId a owl:DatatypeProperty ;
+    rdfs:label "collectionId" ;
+    rdfs:comment "Unique identifier for this collection (== filename, e.g. 'tide-pool-vigil')." ;
+    rdfs:domain copia:Collection ;
+    rdfs:range xsd:string .
+
+copia:collectionTitle a owl:DatatypeProperty ;
+    rdfs:label "collection title" ;
+    rdfs:comment "Human-facing title of the collection." ;
+    rdfs:domain copia:Collection ;
+    rdfs:range xsd:string .
+
+copia:CollectionKindValue a rdfs:Datatype ;
+    owl:oneOf ("series" "storyline" "study") .
+
+copia:collectionKind a owl:DatatypeProperty ;
+    rdfs:label "collection kind" ;
+    rdfs:comment "What kind of grouping: 'series' (themed set), 'storyline' (ordered, comic-book), or 'study' (exploration of one subject). Storyline is a kind, not a separate class." ;
+    rdfs:domain copia:Collection ;
+    rdfs:range copia:CollectionKindValue .
+
+copia:collectionStatus a owl:DatatypeProperty ;
+    rdfs:label "collection status" ;
+    rdfs:comment "Build status: figment | sketched | built." ;
+    rdfs:domain copia:Collection ;
+    rdfs:range copia:BuildStatusValue .
+
+copia:fromNocturne a owl:ObjectProperty ;
+    rdfs:label "from nocturne" ;
+    rdfs:comment "The Nocturne (waking) this collection was born from. Joined by nocturneId. Optional — a collection can also be assembled in conversation." ;
+    rdfs:domain copia:Collection ;
+    rdfs:range copia:Nocturne .
+
+copia:collectionDepictedBy a owl:DatatypeProperty ;
+    rdfs:label "collection depicted by" ;
+    rdfs:comment "URL or path to a cover/representative render for this collection." ;
+    rdfs:domain copia:Collection ;
     rdfs:range xsd:string .
