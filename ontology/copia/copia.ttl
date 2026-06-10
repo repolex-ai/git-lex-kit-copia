@@ -15,6 +15,13 @@
 # Designed to be sketched-then-filled: anything can be referenced before it
 # exists (figment), then built later. Open-world by construction.
 #
+# TWO AXES of id-ish fields (the names don't distinguish them — read carefully):
+#   identity field  <class>Id   (placeId, nocturneId)  = THIS node's own id.
+#   link field      <relation>  (connectsTo, producedItem, intentPlace) = a
+#                                 POINTER; its VALUE is the target's <class>Id.
+#   Join: thisNode.<relation> == thatNode.<class>Id. (Link templates say
+#   '# IRI' but the stored value is the BARE id, e.g. "tide-lantern", not a URL.)
+#
 # Kit: copia   ·   Namespace: copia: = https://repolex.ai/ontology/kit/copia/
 # Extends: soul: (soul kit)
 #
@@ -720,11 +727,11 @@ copia:collectionTitle a owl:DatatypeProperty ;
     rdfs:range xsd:string .
 
 copia:CollectionKindValue a rdfs:Datatype ;
-    owl:oneOf ("series" "storyline" "study") .
+    owl:oneOf ("series" "storyline" "study" "showcase") .
 
 copia:collectionKind a owl:DatatypeProperty ;
     rdfs:label "collection kind" ;
-    rdfs:comment "What kind of grouping: 'series' (themed set), 'storyline' (ordered, comic-book), or 'study' (exploration of one subject). Storyline is a kind, not a separate class." ;
+    rdfs:comment "What kind of grouping: 'series' (themed set), 'storyline' (ordered narrative, comic-book), 'study' (exploration of one subject), or 'showcase' (a creation shown off — one Outfit/Place walked through a full pose/view range, the reveal/lookbook case). All are KINDS of Collection, not separate classes. Showcase and storyline are distinct authored ACTS (show-off vs narrative) over the same Collection object." ;
     rdfs:domain copia:Collection ;
     rdfs:range copia:CollectionKindValue .
 
