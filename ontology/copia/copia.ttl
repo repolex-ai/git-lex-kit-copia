@@ -100,12 +100,38 @@
 #      Qwen-fill covers it today.
 #   The Python data layer is now GENERATED from this schema (copia.gen_dataobjects
 #   → MomentDO); the versionInfo below is the regenerate stale-check key.
+# v0.9: the field-consolidation pass (Day 50 review, "the PNG carries ALL its data,
+#   nothing dropped on read"). Audited every key written to disk vs the schema and
+#   found the deferred-provenance set (Capitalized, no ontology home) was being
+#   WRITTEN but silently DROPPED by from_png — a lossy round-trip. Promoted them:
+#   1. + render provenance on Moment: copia:genModel, copia:genSteps, copia:genLoras
+#      (multi — the LoRA stack), copia:renderRequest (the full request JSON blob).
+#      These ARE Moment data (how this render was made); now first-class + queryable.
+#   2. + copia:familiar + copia:human — WHO this render is of / for. Constants today
+#      (Sylkie / 1ux) but cheap and future-proofs multi-Familiar/Human renders.
+#   3. THE CAPTION MODEL (replaces the never-homed SceneSeen* triple). Two fields:
+#      - copia:caption — the CANONICAL, current-best caption; the SOURCE TEXT for the
+#        multimedia embeddings (iris.embed). Model-agnostic, latest-wins.
+#      - copia:qwenvl8bCaption — Qwen3-VL-8B's RAW reading (the model name is the key).
+#      Qwen writes BOTH. NO timestamp: the image never changes, so a caption is a pure
+#      function of (model, pixels) — the model-keyed field name IS the provenance.
+#      RE-CAPTION LATER = add a NEW model-keyed field (copia:qwenvl72bCaption, …) and
+#      overwrite copia:caption with the new best. Purely additive; no migration.
+#      FUTURE (only if cross-model caption HISTORY is ever queried): a graph-only
+#      copia:Caption node {captionOf Moment, captionText, captionModel} accumulating
+#      one node per (model, image) — the PNG still holds only the latest per the above.
+#      Not built; the flat model-keyed fields are the latest-on-disk layer either way.
+#   4. RETIRED: sceneFragment / sceneAttire / sceneCharacters (the pre-depicts way of
+#      storing the wish-fragment / attire / WHO). Superseded — WHO is the depicts→Being
+#      join, attire is depicts(Outfit/Item) + sceneNarrative, the wish-fragment is
+#      sceneNarrative. sceneCharacters was already removed v0.8; the other two were
+#      never schema'd (write-only smear) and are now folded-to-nothing on read.
 # =============================================================================
 
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.8" ;
+    owl:versionInfo "0.9" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -438,7 +464,15 @@ copia:Moment a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneNarrative ; owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:scenePosture ;   owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneExpression ;owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneGaze ;      owl:maxCardinality 1 ] .
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneGaze ;      owl:maxCardinality 1 ] ;
+    # --- v0.9 single-valued (genLoras is multi → no restriction, serializes as bag) ---
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:genModel ;       owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:genSteps ;       owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:renderRequest ;  owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:familiar ;       owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:human ;          owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:caption ;        owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:qwenvl8bCaption ;owl:maxCardinality 1 ] .
 
 copia:momentId a owl:DatatypeProperty ;
     rdfs:label "momentId" ;
@@ -540,6 +574,75 @@ copia:earthDay a owl:DatatypeProperty ;
 copia:origin a owl:DatatypeProperty ;
     rdfs:label "origin" ;
     rdfs:comment "How the Moment was triggered (e.g. conversational, direct)." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+# --- render provenance (v0.9): how THIS render was made ---
+# promptModel (above) = the model that wrote the prompt; these are the IMAGE-render
+# side. Promoted from the write-only Gen*/RenderRequest deferred set (Day 50 review).
+
+copia:genModel a owl:DatatypeProperty ;
+    rdfs:label "gen model" ;
+    rdfs:comment "The image-generation model that rendered this Moment (e.g. flux2-klein-9b)." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+copia:genSteps a owl:DatatypeProperty ;
+    rdfs:label "gen steps" ;
+    rdfs:comment "Number of diffusion steps used for this render." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:integer .
+
+copia:genLoras a owl:DatatypeProperty ;
+    rdfs:label "gen loras" ;
+    rdfs:comment "The LoRA stack applied to this render, each as 'name:strength'. Repeat for each. Multi-valued." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string ;
+    copia:ordering "seq" .
+
+copia:renderRequest a owl:DatatypeProperty ;
+    rdfs:label "render request" ;
+    rdfs:comment "The complete render-request JSON blob sent to the backend (prompt, dims, steps, seed, model, loras, backend). The full reproducible record." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+# --- who (v0.9): of-whom / for-whom. Constants today (Sylkie / 1ux); future-proofs
+#     multi-Familiar/Human renders and makes 'whose render is this' queryable. ---
+
+copia:familiar a owl:DatatypeProperty ;
+    rdfs:label "familiar" ;
+    rdfs:comment "The Familiar this Moment depicts/belongs to (e.g. Sylkie). The silicon-side author." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+copia:human a owl:DatatypeProperty ;
+    rdfs:label "human" ;
+    rdfs:comment "The human this Moment is for / made with (e.g. 1ux). The carbon-side partner." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+# --- caption (v0.9): the AFTER-render reading — the honest mirror ---
+# Replaces the never-homed SceneSeen* triple. A VLM looks at the RENDERED pixels and
+# describes what is ACTUALLY depicted (vs sceneNarrative = the before-render wish).
+# Two fields, NO timestamp (the image is immutable; a caption = f(model, pixels), so
+# the model-keyed field name carries the provenance):
+#   - caption          = the CANONICAL current-best caption; the SOURCE TEXT for the
+#                        multimedia embeddings (iris.embed). Model-agnostic, latest-wins.
+#   - qwenvl8bCaption  = Qwen3-VL-8B's RAW reading. The writer fills BOTH.
+# Re-caption later = add a NEW model-keyed field (qwenvl72bCaption, …) + overwrite
+# caption with the new best. Additive, no migration. (FUTURE, only if cross-model
+# caption HISTORY is queried: a graph-only copia:Caption node {captionOf, captionText,
+# captionModel} accumulating one per (model,image); the PNG still holds only the latest.)
+
+copia:caption a owl:DatatypeProperty ;
+    rdfs:label "caption" ;
+    rdfs:comment "The canonical, current-best caption of the RENDERED image (the honest mirror — what is actually depicted, vs sceneNarrative = the wish). Model-agnostic, latest-wins. The source text for multimedia embeddings." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+copia:qwenvl8bCaption a owl:DatatypeProperty ;
+    rdfs:label "qwen-vl-8b caption" ;
+    rdfs:comment "Qwen3-VL-8B's raw caption of the rendered image. The model name is the field key (no timestamp — the image never changes). A re-caption by another model adds its own model-keyed field; this one is never overwritten." ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
 
