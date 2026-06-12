@@ -86,12 +86,26 @@
 #      Resolving the hierarchy (a Storyline IS-A Sequence IS-A Group) is an RDFS
 #      reasoning step done Pool-side, NOT in git-lex (which stores only the direct
 #      type + the literal subClassOf triples).
+# v0.8: the render-pipeline pass (Day 50, "one Moment, one flow"). The Moment is
+#   the carried object — born sparse, filled (some fields literal, corpus Things as
+#   depicts ids), Qwen fills blanks, written at blink. Changes:
+#   1. + copia:sceneNarrative on Moment — the prose body (the "imaginary-.md" body);
+#      the pre-render narrative handed to Qwen, or the prompt itself for nocturne.
+#      Distinct from promptFragment (kept = the UI append-to-autogen-prompt channel).
+#   2. sceneCharacters REMOVED — WHO is the depicts→Being join now (a Being's
+#      identity is its description, reached via copia:depicts), not a scene field.
+#   3. posture/expression/gaze gain a Moment domain (were Being-only): single-being
+#      portraits realize them on the Moment. Multi-character detailed staging is a
+#      FUTURE copia:Scene Thing (sceneId on Moment) — not built; sceneNarrative +
+#      Qwen-fill covers it today.
+#   The Python data layer is now GENERATED from this schema (copia.gen_dataobjects
+#   → MomentDO); the versionInfo below is the regenerate stale-check key.
 # =============================================================================
 
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.7" ;
+    owl:versionInfo "0.8" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -420,7 +434,11 @@ copia:Moment a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneCamera ;    owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneEnergy ;    owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneAction ;    owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneMedium ;    owl:maxCardinality 1 ] .
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneMedium ;    owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneNarrative ; owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:scenePosture ;   owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneExpression ;owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneGaze ;      owl:maxCardinality 1 ] .
 
 copia:momentId a owl:DatatypeProperty ;
     rdfs:label "momentId" ;
@@ -575,30 +593,35 @@ copia:sceneObjects a owl:DatatypeProperty ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
 
-# --- Being defaults (4) — realized values fold into promptFragment ---
-
-copia:sceneCharacters a owl:DatatypeProperty ;
-    rdfs:label "scene characters" ;
-    rdfs:comment "WHO — the character identity/appearance this being presents. Matches Moment field 'characters'." ;
-    rdfs:domain copia:Being ;
-    rdfs:range xsd:string .
+# --- Per-character fields (3) — Being default ↔ Moment realized ---
+# WHO is no longer a scene field: `characters` is replaced by the depicts→Being
+# join (the Being's identity IS its description, reached via copia:depicts).
+# posture/expression/gaze carry a Being DEFAULT and a Moment REALIZED value (two
+# rdfs:domain triples, like location/lighting). Single-being portraits (the
+# common case today) realize these directly on the Moment. MULTI-character
+# detailed staging (who-looks-at-whom, per-being posture) is a FUTURE copia:Scene
+# Thing referenced by a Moment sceneId — until then, sceneNarrative + Qwen-fill
+# cover it. (sceneCharacters removed v0.8 — superseded by depicts.)
 
 copia:scenePosture a owl:DatatypeProperty ;
     rdfs:label "scene posture" ;
-    rdfs:comment "Default bodily posture/stance. Matches Moment field 'posture'." ;
+    rdfs:comment "Bodily posture/stance. On Being = default; on Moment = realized for this render." ;
     rdfs:domain copia:Being ;
+    rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
 
 copia:sceneExpression a owl:DatatypeProperty ;
     rdfs:label "scene expression" ;
-    rdfs:comment "Default facial expression register. Matches Moment field 'expression'." ;
+    rdfs:comment "Facial expression. On Being = default; on Moment = realized for this render." ;
     rdfs:domain copia:Being ;
+    rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
 
 copia:sceneGaze a owl:DatatypeProperty ;
     rdfs:label "scene gaze" ;
-    rdfs:comment "Default gaze — direction and quality. Matches Moment field 'gaze'." ;
+    rdfs:comment "Gaze — direction and quality. On Being = default; on Moment = realized for this render." ;
     rdfs:domain copia:Being ;
+    rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
 
 # --- Moment-only dynamic fields (5) — observer-set per render ---
@@ -630,6 +653,18 @@ copia:sceneAction a owl:DatatypeProperty ;
 copia:sceneMedium a owl:DatatypeProperty ;
     rdfs:label "scene medium" ;
     rdfs:comment "Rendering medium (oil on canvas, photograph, …). Per-render." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+# --- sceneNarrative — the prose body of a Moment ---
+# The free-text scene description: "Sylkie melting Rob with golden arrows; a
+# cherub floats above." The imaginary-.md BODY. The pre-render source we resolve
+# the depicts ids alongside and hand to Qwen (Qwen fills the structured scene*
+# blanks from it); for nocturne it IS the prompt. Distinct from promptFragment,
+# which is the UI's append-to-autogen-prompt channel — NOT the narrative.
+copia:sceneNarrative a owl:DatatypeProperty ;
+    rdfs:label "scene narrative" ;
+    rdfs:comment "Free-text scene description (the Moment's prose body). The pre-render narrative handed to Qwen, or — for nocturne — the prompt itself. Not the prompt; not promptFragment." ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
 
