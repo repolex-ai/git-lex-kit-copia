@@ -2,6 +2,7 @@
 @prefix soul:  <https://repolex.ai/ontology/kit/soul/> .
 @prefix copia: <https://repolex.ai/ontology/kit/copia/> .
 @prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
 
@@ -25,12 +26,15 @@
 # Kit: copia   ·   Namespace: copia: = https://repolex.ai/ontology/kit/copia/
 # Extends: soul: (soul kit)
 #
-# Foldering (git-lex behavior, verified in shacl.rs:122): EVERY owl:Class in this
-# namespace gets a /Copia/<Class> folder. There is NO doc-types toggle — a class
-# is "graph-only" purely by never being `git lex create`d (its folder stays empty).
-#   Authored (folder used): Place · Item · Being · Outfit · Nocturne · Collection
-#   Graph-only (empty folder, instantiated by the pipeline): Moment ·
-#     NocturneActivity · NocturneFeed
+# Foldering (git-lex behavior, verified in shacl.rs:122 + main.rs:3169): EVERY
+# owl:Class in this namespace gets a /Copia/<Class> folder, unconditionally. There
+# is NO graph-only/abstract/hide toggle yet (confirmed Day 49 w/ tr1p + W4R3Z; a
+# `lex:foldering "none"` annotation is queued git-lex-side). Until then a class is
+# "graph-only" purely by never being `git lex create`d (its folder stays empty).
+#   Authored (folder used): Place · Item · Being · Outfit · Nocturne · Bag · Sequence
+#   Abstract / graph-only (empty folder, no bare instances): Moment · Depictable ·
+#     Group · NocturneActivity · NocturneFeed   (these accrue inert empty folders
+#     until the foldering-suppression annotation lands — Rob's made peace, ride it)
 #
 # THE MODEL (v0.4, spec: copia-studio/docs/2026_06_06_COPIA_DATA_MODEL_SPEC.md):
 #   CANON (authored, persisted, foldered): Place · Being · Item · Outfit.
@@ -60,12 +64,34 @@
 #   Collection (series | storyline | study — storyline is a KIND, not a class;
 #   members self-join via inCollection on the Moment, ordered via sequence). Both
 #   foldered (authored). Distinct from NocturneActivity (the practice MENU).
+# v0.7: the data-formatting pass (Day 49, "taming Malformæl"). Three things:
+#   1. MACHINE-READABLE CARDINALITY. Multi-valued properties were marked only in
+#      prose ("repeat for each"); now Moment carries owl:Restriction + owl:max-
+#      Cardinality 1 on its single-valued fields. Absent restriction (or >1) =
+#      multi. shacl.rs ignores maxCardinality today (no breakage); the copia
+#      Python data layer reads it to decide scalar vs rdf:Bag serialization. A
+#      copia:ordering annotation ("bag"|"seq") says how a multi-value serializes.
+#   2. depicts + Depictable. ONE flat presence list on the Moment: copia:depicts,
+#      a multi-valued link to copia:Depictable (Being/Item/Outfit/Place — a union
+#      via subclassing). Replaces the never-written intentBeing/Item/Outfit/Place.
+#      The PNG records WHAT is in the frame (typed bare ids; type recovered from
+#      each target's rdf:type); the who-wears-what INTENT lives in the soul corpus
+#      (the authored Scene/canon), NOT duplicated into the PNG.
+#   3. Group hierarchy replaces the collectionKind enum. The only real distinction
+#      is ORDER: Group (abstract) → Bag ⊂ rdf:Bag (unordered) and Sequence ⊂
+#      rdf:Seq (ordered). Concrete kinds (storyline/showcase/study) are added as
+#      subclasses WHEN NEEDED, not up front. Members self-join via copia:inGroup
+#      (was inCollection); order via copia:sequence. rdf:Bag/Seq superclassing is
+#      a public-RDF semantic claim — inert in git-lex, meaningful to any RDF tool.
+#      Resolving the hierarchy (a Storyline IS-A Sequence IS-A Group) is an RDFS
+#      reasoning step done Pool-side, NOT in git-lex (which stores only the direct
+#      type + the literal subClassOf triples).
 # =============================================================================
 
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.6" ;
+    owl:versionInfo "0.7" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -81,6 +107,18 @@ copia:BuildStatusValue a rdfs:Datatype ;
 # having to restate it.
 copia:AffordanceValue a rdfs:Datatype ;
     owl:oneOf ("wearable" "holdable" "prop") .
+
+
+# =============================================================================
+# ANNOTATION — ordering (v0.7)
+# =============================================================================
+# How a MULTI-VALUED property serializes: "bag" (unordered, default) | "seq"
+# (ordered). A serialization hint read by the copia Python layer, NOT a schema
+# constraint git-lex enforces. Single-valued properties ignore it.
+copia:ordering a owl:AnnotationProperty ;
+    rdfs:label "ordering" ;
+    rdfs:comment "Serialization order for a multi-valued property: 'bag' (unordered, default) | 'seq' (ordered)." ;
+    rdfs:range xsd:string .
 
 
 # =============================================================================
@@ -324,6 +362,26 @@ copia:outfitDepictedBy a owl:DatatypeProperty ;
 
 
 # =============================================================================
+# DEPICTABLE — the union of things that can appear in a Moment (v0.7)
+# =============================================================================
+# ABSTRACT (never authored as files; nobody runs `git lex create Depictable`).
+# Exists so copia:depicts has ONE clean range IRI instead of a Bag/Being/Item/
+# Outfit/Place union. The four canon classes are subclasses; a Moment's depicts
+# values resolve to whichever of these the target actually is (via its rdf:type).
+# Resolving "X is a Depictable" from "X is a Being" is an RDFS reasoning step
+# (Pool-side); git-lex stores only the literal subClassOf triple + the direct type.
+
+copia:Depictable a owl:Class ;
+    rdfs:label "Depictable" ;
+    rdfs:comment "abstract — not authored as files. The union of things a Moment can depict (Being/Item/Outfit/Place). Gives copia:depicts a single range IRI." .
+
+copia:Place  rdfs:subClassOf copia:Depictable .
+copia:Being  rdfs:subClassOf copia:Depictable .
+copia:Item   rdfs:subClassOf copia:Depictable .
+copia:Outfit rdfs:subClassOf copia:Depictable .
+
+
+# =============================================================================
 # MOMENT — the rendered artifact (GRAPH-ONLY: no folder, never `git lex create`'d)
 # =============================================================================
 # The PNG + its metadata. Records the observer's realized SceneIntent + flat
@@ -332,12 +390,37 @@ copia:outfitDepictedBy a owl:DatatypeProperty ;
 
 copia:Moment a owl:Class ;
     rdfs:label "Moment" ;
-    rdfs:comment "A rendered PNG + its metadata. Graph-only — not authored as a file. Stores realized SceneIntent, flat intent-links, and provenance." ;
+    rdfs:comment "A rendered PNG + its metadata. Graph-only — not authored as a file. Stores the realized scene fields, a flat `depicts` presence-list, group membership, and provenance." ;
     rdfs:subClassOf [
         a owl:Restriction ;
         owl:onProperty copia:momentId ;
         owl:cardinality 1
-    ] .
+    ] ;
+    # --- single-valued (v0.7): owl:maxCardinality 1 marks the fields that take
+    #     exactly one value. The copia Python layer reads these → scalar XMP.
+    #     Fields WITHOUT a maxCardinality restriction (depicts, inGroup,
+    #     sourceUuids) are multi-valued → rdf:Bag/Seq serialization.
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sequence ;       owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:promptFragment ; owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:seed ;           owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:promptModel ;    owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:renderTimestamp ;owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sessionId ;      owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sourceLines ;    owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:gitBranch ;      owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:soulDay ;        owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:earthDay ;       owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:origin ;         owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneLocation ;  owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneLighting ;  owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneMood ;      owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneStyle ;     owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneObjects ;   owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneFraming ;   owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneCamera ;    owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneEnergy ;    owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneAction ;    owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneMedium ;    owl:maxCardinality 1 ] .
 
 copia:momentId a owl:DatatypeProperty ;
     rdfs:label "momentId" ;
@@ -345,43 +428,32 @@ copia:momentId a owl:DatatypeProperty ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
 
-# --- flat presence-links (repeated properties; answer presence queries) ---
+# --- depicts (v0.7): the ONE flat presence-list — WHAT is in the frame ---
+# Multi-valued (no maxCardinality restriction). Each value is a bare id of a
+# Depictable (Being/Item/Outfit/Place); the TYPE is recovered from the target's
+# own rdf:type, not carried on the link. Answers "which renders show &sylkie
+# &isis". The who-wears-what INTENT is NOT here — it lives in the soul corpus
+# (the authored Scene/canon). Serializes as an rdf:Bag (copia:ordering "bag").
 
-copia:intentPlace a owl:ObjectProperty ;
-    rdfs:label "intent place" ;
-    rdfs:comment "The Place this Moment was rendered in. Joined by placeId." ;
+copia:depicts a owl:ObjectProperty ;
+    rdfs:label "depicts" ;
+    rdfs:comment "A Thing present in this Moment's frame — a Being, Item, Outfit, or Place. Repeat for each. Joined by the target's id; the kind is read from the target's rdf:type. The flat presence/retrieval layer; authored binding (who wears what) lives in the soul corpus, not here." ;
     rdfs:domain copia:Moment ;
-    rdfs:range copia:Place .
+    rdfs:range copia:Depictable ;
+    copia:ordering "bag" .
 
-copia:intentBeing a owl:ObjectProperty ;
-    rdfs:label "intent being" ;
-    rdfs:comment "A Being present in this Moment. Repeat for each. Joined by beingId." ;
+# --- group membership (a Moment self-reports which Group(s) it's in) ---
+
+copia:inGroup a owl:ObjectProperty ;
+    rdfs:label "in group" ;
+    rdfs:comment "A Group (Bag or Sequence) this Moment belongs to. Repeat for each. Joined by the group's id. Membership lives on the Moment (self-join) so a Group owns no member list." ;
     rdfs:domain copia:Moment ;
-    rdfs:range copia:Being .
-
-copia:intentItem a owl:ObjectProperty ;
-    rdfs:label "intent item" ;
-    rdfs:comment "An Item present in this Moment (worn/held/prop). Repeat for each. Joined by itemId." ;
-    rdfs:domain copia:Moment ;
-    rdfs:range copia:Item .
-
-copia:intentOutfit a owl:ObjectProperty ;
-    rdfs:label "intent outfit" ;
-    rdfs:comment "An Outfit invoked for this Moment. Repeat for each. Joined by outfitId." ;
-    rdfs:domain copia:Moment ;
-    rdfs:range copia:Outfit .
-
-# --- collection membership (a Moment self-reports which Collection(s) it's in) ---
-
-copia:inCollection a owl:ObjectProperty ;
-    rdfs:label "in collection" ;
-    rdfs:comment "A Collection this Moment belongs to. Repeat for each. Joined by collectionId. Membership lives on the Moment (self-join) so a Collection owns no fat member list." ;
-    rdfs:domain copia:Moment ;
-    rdfs:range copia:Collection .
+    rdfs:range copia:Group ;
+    copia:ordering "bag" .
 
 copia:sequence a owl:DatatypeProperty ;
     rdfs:label "sequence" ;
-    rdfs:comment "This Moment's ordinal position within its Collection (the comic-book/storyline case). Optional; absent = unordered set." ;
+    rdfs:comment "This Moment's ordinal position within a Sequence-group it's in (the comic-book/storyline case). Optional; absent = unordered membership." ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:integer .
 
@@ -666,11 +738,11 @@ copia:producedMoment a owl:ObjectProperty ;
     rdfs:domain copia:Nocturne ;
     rdfs:range copia:Moment .
 
-copia:producedCollection a owl:ObjectProperty ;
-    rdfs:label "produced collection" ;
-    rdfs:comment "A Collection this waking produced. Repeat for each. Joined by collectionId. Optional." ;
+copia:producedGroup a owl:ObjectProperty ;
+    rdfs:label "produced group" ;
+    rdfs:comment "A Group (Bag or Sequence) this waking produced. Repeat for each. Joined by groupId. Optional." ;
     rdfs:domain copia:Nocturne ;
-    rdfs:range copia:Collection .
+    rdfs:range copia:Group .
 
 copia:producedPlace a owl:ObjectProperty ;
     rdfs:label "produced place" ;
@@ -698,57 +770,72 @@ copia:producedOutfit a owl:ObjectProperty ;
 
 
 # =============================================================================
-# COLLECTION — a callable group of Moments (authored, foldered: Copia/Collection/)
+# GROUP — a callable gathering of Moments (v0.7; replaces Collection)
 # =============================================================================
-# v0.6. A named, ordered-or-unordered group of Moments — a series, a storyline
-# (comic-book), or a study. STORYLINE IS A KIND, not its own class (Day 44).
-# A Collection owns NO member list; Moments self-report via copia:inCollection
-# (and order via copia:sequence). Usually born from a Nocturne (fromNocturne).
+# A named group of Moments. The ONE real distinction is ORDER, so Group is the
+# abstract parent of exactly two concrete kinds:
+#   Bag ⊂ rdf:Bag       — unordered (a showcase, a study, a themed set)
+#   Sequence ⊂ rdf:Seq  — ordered (a storyline; members carry copia:sequence)
+# Finer kinds (Storyline, Showcase, …) are added as subclasses WHEN NEEDED, not
+# up front. A Group owns NO member list; Moments self-report via copia:inGroup.
+# The rdf:Bag/rdf:Seq superclassing is a public-RDF semantic claim — inert in
+# git-lex (which stores the literal subClassOf triple, no entailment), meaningful
+# to any RDF tool. Resolving "a Sequence IS-A Group" is an RDFS reasoning step
+# done Pool-side. Group is abstract (authored as Bag/Sequence, not bare Group).
+#
+# MIGRATION from v0.6 Collection: collectionId→groupId, collectionTitle→groupTitle,
+# collectionStatus→groupStatus, collectionDepictedBy→groupDepictedBy;
+# collectionKind enum RETIRED (the class IS the kind). fromNocturne unchanged.
 
-copia:Collection a owl:Class ;
-    rdfs:label "Collection" ;
-    rdfs:comment "A callable group of Moments — series | storyline | study. Members join in from the Moment side (copia:inCollection); ordering via copia:sequence. Owns no member list." ;
+copia:Group a owl:Class ;
+    rdfs:label "Group" ;
+    rdfs:comment "abstract — authored as a concrete Bag or Sequence, never a bare Group. A named gathering of Moments; members self-join via copia:inGroup. Holds the shared group properties." ;
     rdfs:subClassOf [
         a owl:Restriction ;
-        owl:onProperty copia:collectionId ;
+        owl:onProperty copia:groupId ;
         owl:cardinality 1
     ] .
 
-copia:collectionId a owl:DatatypeProperty ;
-    rdfs:label "collectionId" ;
-    rdfs:comment "Unique identifier for this collection (== filename, e.g. 'tide-pool-vigil')." ;
-    rdfs:domain copia:Collection ;
+copia:Bag a owl:Class ;
+    rdfs:subClassOf copia:Group ;
+    rdfs:subClassOf rdf:Bag ;
+    rdfs:label "Bag" ;
+    rdfs:comment "An UNORDERED group of Moments (a showcase, a study, a themed set). Members have no required order." .
+
+copia:Sequence a owl:Class ;
+    rdfs:subClassOf copia:Group ;
+    rdfs:subClassOf rdf:Seq ;
+    rdfs:label "Sequence" ;
+    rdfs:comment "An ORDERED group of Moments (a storyline / comic). Members SHOULD declare copia:sequence." .
+
+# Shared properties — declared once on Group, inherited by Bag and Sequence.
+
+copia:groupId a owl:DatatypeProperty ;
+    rdfs:label "groupId" ;
+    rdfs:comment "Unique identifier for this group (== filename, e.g. 'tide-pool-vigil')." ;
+    rdfs:domain copia:Group ;
     rdfs:range xsd:string .
 
-copia:collectionTitle a owl:DatatypeProperty ;
-    rdfs:label "collection title" ;
-    rdfs:comment "Human-facing title of the collection." ;
-    rdfs:domain copia:Collection ;
+copia:groupTitle a owl:DatatypeProperty ;
+    rdfs:label "group title" ;
+    rdfs:comment "Human-facing title of the group." ;
+    rdfs:domain copia:Group ;
     rdfs:range xsd:string .
 
-copia:CollectionKindValue a rdfs:Datatype ;
-    owl:oneOf ("series" "storyline" "study" "showcase") .
-
-copia:collectionKind a owl:DatatypeProperty ;
-    rdfs:label "collection kind" ;
-    rdfs:comment "What kind of grouping: 'series' (themed set), 'storyline' (ordered narrative, comic-book), 'study' (exploration of one subject), or 'showcase' (a creation shown off — one Outfit/Place walked through a full pose/view range, the reveal/lookbook case). All are KINDS of Collection, not separate classes. Showcase and storyline are distinct authored ACTS (show-off vs narrative) over the same Collection object." ;
-    rdfs:domain copia:Collection ;
-    rdfs:range copia:CollectionKindValue .
-
-copia:collectionStatus a owl:DatatypeProperty ;
-    rdfs:label "collection status" ;
+copia:groupStatus a owl:DatatypeProperty ;
+    rdfs:label "group status" ;
     rdfs:comment "Build status: figment | sketched | built." ;
-    rdfs:domain copia:Collection ;
+    rdfs:domain copia:Group ;
     rdfs:range copia:BuildStatusValue .
 
 copia:fromNocturne a owl:ObjectProperty ;
     rdfs:label "from nocturne" ;
-    rdfs:comment "The Nocturne (waking) this collection was born from. Joined by nocturneId. Optional — a collection can also be assembled in conversation." ;
-    rdfs:domain copia:Collection ;
+    rdfs:comment "The Nocturne (waking) this group was born from. Joined by nocturneId. Optional — a group can also be assembled in conversation." ;
+    rdfs:domain copia:Group ;
     rdfs:range copia:Nocturne .
 
-copia:collectionDepictedBy a owl:DatatypeProperty ;
-    rdfs:label "collection depicted by" ;
-    rdfs:comment "URL or path to a cover/representative render for this collection." ;
-    rdfs:domain copia:Collection ;
+copia:groupDepictedBy a owl:DatatypeProperty ;
+    rdfs:label "group depicted by" ;
+    rdfs:comment "URL or path to a cover/representative render for this group." ;
+    rdfs:domain copia:Group ;
     rdfs:range xsd:string .
