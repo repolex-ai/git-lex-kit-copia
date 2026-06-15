@@ -131,7 +131,7 @@
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.9" ;
+    owl:versionInfo "0.9.1" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -573,9 +573,26 @@ copia:earthDay a owl:DatatypeProperty ;
 
 copia:origin a owl:DatatypeProperty ;
     rdfs:label "origin" ;
-    rdfs:comment "How the Moment was triggered (e.g. conversational, direct)." ;
+    rdfs:comment "How the Moment came to be: conversational | wander | orbit | nocturne (rendered by CoPIA), or share (outside media a human handed in — pixels not painted here). Drives priority for rendered origins; share skips the render worklist entirely." ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
+
+# --- share provenance (v0.9): outside media handed in, not rendered ---
+# A 'share'-origin Moment has pixels but no wish behind it — no prompt/seed/gen*.
+# What it DOES carry that a render doesn't: who handed it over and when. These are
+# first-class facts about the share (as much as origin is), not deferred extras.
+
+copia:sharedBy a owl:DatatypeProperty ;
+    rdfs:label "shared by" ;
+    rdfs:comment "Who handed this image in (for an origin='share' Moment). E.g. 'rob'." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+copia:sharedAt a owl:DatatypeProperty ;
+    rdfs:label "shared at" ;
+    rdfs:comment "When this image was shared into the Pool (ISO-8601). The share-side twin of renderTimestamp." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:dateTime .
 
 # --- render provenance (v0.9): how THIS render was made ---
 # promptModel (above) = the model that wrote the prompt; these are the IMAGE-render
