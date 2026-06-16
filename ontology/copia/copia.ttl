@@ -665,7 +665,7 @@ copia:earthDay a owl:DatatypeProperty ;
 
 copia:origin a owl:DatatypeProperty ;
     rdfs:label "origin" ;
-    rdfs:comment "How the Moment came to be: conversational | wander | orbit | nocturne (rendered by CoPIA), or share (outside media a human handed in — pixels not painted here). Drives priority for rendered origins; share skips the render worklist entirely." ;
+    rdfs:comment "How the Moment came to be: conversational | wander | orbit | nocturne (rendered by CoPIA), movement (one frame of a generated MOTION — an OpenPose skeleton frame, or its posed-character render; the clip is a copia:Sequence the frame self-joins via inGroup, ordered by copia:sequence), or share (outside media a human handed in — pixels not painted here). Drives priority for rendered origins; share skips the render worklist entirely; movement frames are batch-rendered off a Sequence, not the conversational worklist." ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
 
