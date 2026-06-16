@@ -159,12 +159,19 @@
 #   /regionScore) ride XMP for search; heavy per-pixel masks live in a lazy sidecar.
 #   Rob's key call: a region is just one more Depictable, not a separate bag. See
 #   docs/2026_06_16_NESTED_OBJECT_BAGS_AND_SAM3REGION.md (copia repo).
+# v0.9.4: the extraction-marker. + copia:sam3ExtractedAt on Moment (xsd:dateTime,
+#   single-valued). The "we tried, found N regions" marker — `pool extract-regions`
+#   sets it after running iris.segment + writing the region Descriptions, regardless
+#   of whether N>0. Lets the command skip already-processed Moments AND distinguish
+#   "ran but found nothing" from "never ran." A SPARQL "Moments processed before X"
+#   query supports re-extraction triggers when iris.segment evolves (new model, better
+#   polygon, etc.) without conflating with zero-region renders.
 # =============================================================================
 
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.9.3" ;
+    owl:versionInfo "0.9.4" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -555,7 +562,9 @@ copia:Moment a owl:Class ;
     # --- v0.9.2 single-valued render fields ---
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:renderPrompt ;   owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:width ;          owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:height ;         owl:maxCardinality 1 ] .
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:height ;         owl:maxCardinality 1 ] ;
+    # --- v0.9.4 extraction marker ---
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sam3ExtractedAt ;owl:maxCardinality 1 ] .
 
 copia:momentId a owl:DatatypeProperty ;
     rdfs:label "momentId" ;
@@ -775,6 +784,21 @@ copia:height a owl:DatatypeProperty ;
     rdfs:comment "Image height in pixels." ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:integer .
+
+# --- sam3ExtractedAt (v0.9.4): the SAM3 extraction marker ---
+# Set by `pool extract-regions` after running iris.segment + writing the region
+# Descriptions for this Moment — REGARDLESS of how many regions were found.
+# Lets the command skip already-processed Moments AND distinguish "ran but found
+# nothing" (N=0 is a valid result) from "never ran" (no marker). A SPARQL
+# "Moments processed before <X>" query supports re-extraction triggers when
+# iris.segment evolves (new model, better polygon simplification, etc.) without
+# conflating with zero-region renders.
+
+copia:sam3ExtractedAt a owl:DatatypeProperty ;
+    rdfs:label "sam3 extracted at" ;
+    rdfs:comment "When SAM3 region extraction last ran on this Moment. Set by `pool extract-regions` after iris.segment completes — even when zero regions were found, so 'ran but empty' is distinguishable from 'never ran.' Re-extraction tools query for marker absence or marker-before-threshold." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:dateTime .
 
 
 # =============================================================================
