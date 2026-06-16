@@ -150,12 +150,21 @@
 #      no back-compat code. The ontology is the source of truth; the data files
 #      and the graph both flow from it. This is what "consistent end to end"
 #      actually buys us.
+#
+# v0.9.3: the SAM3 region layer (Day 63, sylkie + 1ux). copia:Sam3Region — a new
+#   Depictable. SAM3 text-segments a render; each region is a graph-only node that
+#   copia:depicts points at like any Being/Item (Moment depicts Sam3Region:rock/01).
+#   No new relation — depicts is reused (its range is already Depictable; type from
+#   rdf:type). Four light datatype props (regionDescriptor/regionPolygon/regionBbox
+#   /regionScore) ride XMP for search; heavy per-pixel masks live in a lazy sidecar.
+#   Rob's key call: a region is just one more Depictable, not a separate bag. See
+#   docs/2026_06_16_NESTED_OBJECT_BAGS_AND_SAM3REGION.md (copia repo).
 # =============================================================================
 
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.9.2" ;
+    owl:versionInfo "0.9.3" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -443,6 +452,50 @@ copia:Place  rdfs:subClassOf copia:Depictable .
 copia:Being  rdfs:subClassOf copia:Depictable .
 copia:Item   rdfs:subClassOf copia:Depictable .
 copia:Outfit rdfs:subClassOf copia:Depictable .
+copia:Sam3Region rdfs:subClassOf copia:Depictable .
+
+
+# =============================================================================
+# SAM3REGION — a segmented region of a Moment (GRAPH-ONLY, PNG-born)
+# v0.9.3 (Day 63). depicts made pixel-precise: SAM3 text-segments a render into
+# regions, each a generic visual entity (rock/hand/sky) bound to WHERE it lives in
+# the pixels. A Sam3Region IS a Depictable, so copia:depicts points at it exactly
+# like a Being/Item — `Moment depicts Sam3Region:rock/01`. No new relation. Like
+# Moment, it's graph-only (born from the PNG, never `git lex create`'d). A reading
+# of the rendered pixels (kin to caption), re-runnable. Heavy per-pixel masks live
+# in a lazy sidecar keyed by the region id; only the light facts below ride XMP.
+# =============================================================================
+copia:Sam3Region a owl:Class ;
+    rdfs:label "Sam3Region" ;
+    rdfs:comment "A SAM3-segmented region of a Moment — a generic visual entity (rock, hand, sky) bound to where it lives in the pixels. A Depictable: copia:depicts points at it like any Being/Item. Graph-only (PNG-born, no .md). Identity: Sam3Region:<descriptor>/<NN>, per-descriptor per-Moment (rock/01, rock/02). Instance segmentation — one descriptor can yield many regions." ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:regionDescriptor ; owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:regionPolygon ;    owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:regionBbox ;       owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:regionScore ;      owl:maxCardinality 1 ] .
+
+copia:regionDescriptor a owl:DatatypeProperty ;
+    rdfs:label "region descriptor" ;
+    rdfs:comment "The singular noun this region IS (rock, hand, sky) — the SAM3 text query that found it. SINGULAR always (rock, never rocks) so corpus queries don't reconcile plurals." ;
+    rdfs:domain copia:Sam3Region ;
+    rdfs:range xsd:string .
+
+copia:regionPolygon a owl:DatatypeProperty ;
+    rdfs:label "region polygon" ;
+    rdfs:comment "Coarse vertex outline 'x0,y0;x1,y1;…' (~12-20 verts, Douglas-Peucker simplified from the SAM3 mask). Light enough for XMP; draws the outline with no disk hit. Pixel-exact work falls back to the sidecar RLE mask." ;
+    rdfs:domain copia:Sam3Region ;
+    rdfs:range xsd:string .
+
+copia:regionBbox a owl:DatatypeProperty ;
+    rdfs:label "region bbox" ;
+    rdfs:comment "Bounding box 'x0,y0,x1,y1' in pixels — the cheap locator + coarse crop." ;
+    rdfs:domain copia:Sam3Region ;
+    rdfs:range xsd:string .
+
+copia:regionScore a owl:DatatypeProperty ;
+    rdfs:label "region score" ;
+    rdfs:comment "SAM3 detection/grounding confidence (0–1)." ;
+    rdfs:domain copia:Sam3Region ;
+    rdfs:range xsd:decimal .
 
 
 # =============================================================================
