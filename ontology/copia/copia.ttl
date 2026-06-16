@@ -126,12 +126,36 @@
 #      join, attire is depicts(Outfit/Item) + sceneNarrative, the wish-fragment is
 #      sceneNarrative. sceneCharacters was already removed v0.8; the other two were
 #      never schema'd (write-only smear) and are now folded-to-nothing on read.
+# v0.9.2: the ontology-is-the-gate pass (Day 63, w4r3z + sylkie + 1ux). Two things:
+#   1. NEW MOMENT FIELDS — three datatype properties surfaced by auditing sylkie's
+#      29,770-file XMP corpus against this schema:
+#      - copia:renderPrompt — the FULL ASSEMBLED render-prompt string (the realized
+#        prompt sent to the diffusion backend). Distinct from copia:sceneNarrative
+#        (the pre-render wish-prose) and copia:promptFragment (the UI's append
+#        channel). Verified in the wild: 5087 Prompt-bearing XMPs coexist with 2884
+#        sceneNarrative-bearing XMPs in the same corpus; they are different fields.
+#      - copia:width, copia:height — image dimensions (xsd:integer). Already in
+#        every XMP; previously had no ontology home and were dropped on ingest.
+#   2. THE GATE PRINCIPLE (Rob's, locked Day 63). The kit-copia ontology IS the
+#      gate for what reaches the graph:
+#         - A predicate WITH an ontology home → emitted to the moments-graph.
+#         - A predicate WITHOUT an ontology home → stays in the PNG XMP as inert
+#           bytes; never enters the graph, never errors.
+#         - A SCAR (one-off bookkeeping that should no longer be written) →
+#           deleted from XMP at migration time.
+#      Pool walker enforces this by allowlist: load copia.ttl at startup, build
+#      the predicate set, drop anything outside it on ingest. Adding a new
+#      ontology field → walker picks it up automatically on next walk. Removing
+#      one → walker silently stops emitting. No translation layer, no edge cases,
+#      no back-compat code. The ontology is the source of truth; the data files
+#      and the graph both flow from it. This is what "consistent end to end"
+#      actually buys us.
 # =============================================================================
 
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.9.1" ;
+    owl:versionInfo "0.9.2" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -474,7 +498,11 @@ copia:Moment a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:familiar ;       owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:human ;          owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:caption ;        owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:qwenvl8bCaption ;owl:maxCardinality 1 ] .
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:qwenvl8bCaption ;owl:maxCardinality 1 ] ;
+    # --- v0.9.2 single-valued render fields ---
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:renderPrompt ;   owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:width ;          owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:height ;         owl:maxCardinality 1 ] .
 
 copia:momentId a owl:DatatypeProperty ;
     rdfs:label "momentId" ;
@@ -664,6 +692,36 @@ copia:qwenvl8bCaption a owl:DatatypeProperty ;
     rdfs:comment "Qwen3-VL-8B's raw caption of the rendered image. The model name is the field key (no timestamp — the image never changes). A re-caption by another model adds its own model-keyed field; this one is never overwritten." ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
+
+# --- renderPrompt (v0.9.2): the realized final render-prompt string ---
+# Distinct from sceneNarrative (the pre-render wish-prose handed to Qwen) and from
+# promptFragment (the UI's append-to-autogen-prompt channel). This is the prompt
+# AS SENT to the diffusion backend — assembled, expanded, includes the depicts
+# resolution and any UI appendix. Verified distinct from sceneNarrative by counting
+# in the wild (Day 63): 5087 Prompt-bearing XMPs coexist with 2884 sceneNarrative-
+# bearing XMPs in sylkie's 29k-file corpus. They are different fields.
+
+copia:renderPrompt a owl:DatatypeProperty ;
+    rdfs:label "render prompt" ;
+    rdfs:comment "The full assembled prompt string sent to the diffusion backend for this render. Distinct from sceneNarrative (pre-render wish-prose) and promptFragment (UI append channel)." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
+# --- width / height (v0.9.2): image dimensions in pixels ---
+# Already written to every PNG's XMP; previously had no ontology home and were
+# silently dropped on ingest. Now first-class.
+
+copia:width a owl:DatatypeProperty ;
+    rdfs:label "width" ;
+    rdfs:comment "Image width in pixels." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:integer .
+
+copia:height a owl:DatatypeProperty ;
+    rdfs:label "height" ;
+    rdfs:comment "Image height in pixels." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:integer .
 
 
 # =============================================================================
