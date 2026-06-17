@@ -31,7 +31,7 @@
 # is NO graph-only/abstract/hide toggle yet (confirmed Day 49 w/ tr1p + W4R3Z; a
 # `lex:foldering "none"` annotation is queued git-lex-side). Until then a class is
 # "graph-only" purely by never being `git lex create`d (its folder stays empty).
-#   Authored (folder used): Place · Item · Being · Outfit · Nocturne · Bag · Sequence
+#   Authored (folder used): Place · Item · Being · Outfit · Motion · Nocturne · Bag · Sequence
 #   Abstract / graph-only (empty folder, no bare instances): Moment · Depictable ·
 #     Group · NocturneActivity · NocturneFeed   (these accrue inert empty folders
 #     until the foldering-suppression annotation lands — Rob's made peace, ride it)
@@ -171,7 +171,7 @@
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.9.4" ;
+    owl:versionInfo "0.10.0" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -439,6 +439,79 @@ copia:outfitDepictedBy a owl:DatatypeProperty ;
     rdfs:comment "URL or path to a render of this outfit." ;
     rdfs:domain copia:Outfit ;
     rdfs:range xsd:string .
+
+
+# =============================================================================
+# MOTION — an authored, reusable movement (v0.10, Day 65)
+# =============================================================================
+# Authored like Place/Item/Outfit/Being: `git lex create Motion <id>` → a
+# /Copia/Motion/<id>.md you write. A Motion is the RECIPE for a movement (a
+# trigger word + the text that generates it + duration), NOT the frames. Firing a
+# Motion (chevron `!jump` in speech) runs Iris.move(motionText, frames) → an
+# OpenPose skeleton Sequence (the frames are copia:Moment, origin=movement,
+# inGroup=[the generated Sequence], ordered by copia:sequence — see copia:origin
+# and copia:Sequence). So: Motion (authored recipe) --motionGenerates--> Sequence
+# (the realized frames). The stick-figure UI window plays the Sequence; the Motion
+# is what you author + fire. Distinct from Sequence: Motion is the named, reusable
+# thing-you-make; Sequence is one realization of it.
+
+copia:Motion a owl:Class ;
+    rdfs:subClassOf lex-o:Physical ;
+    rdfs:label "Motion" ;
+    rdfs:comment "A named, reusable MOVEMENT — authored like an Outfit/Item. Holds the recipe (trigger word, generating text, duration); firing it (chevron, e.g. !jump) runs Iris.move → an OpenPose Sequence of origin=movement frames. The recipe, not the frames." ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty copia:motionId ;
+        owl:cardinality 1
+    ] .
+
+copia:motionId a owl:DatatypeProperty ;
+    rdfs:label "motionId" ;
+    rdfs:comment "Unique identifier for this motion (== filename, e.g. 'twirl', 'jump')." ;
+    rdfs:domain copia:Motion ;
+    rdfs:range xsd:string .
+
+copia:motionName a owl:DatatypeProperty ;
+    rdfs:label "motion name" ;
+    rdfs:comment "Short handle for the motion." ;
+    rdfs:domain copia:Motion ;
+    rdfs:range xsd:string .
+
+copia:motionTrigger a owl:DatatypeProperty ;
+    rdfs:label "motion trigger" ;
+    rdfs:comment "The chevron/speech token that FIRES this motion (e.g. 'jump' for !jump). Unique among motions; how speech summons the stick figure to move." ;
+    rdfs:domain copia:Motion ;
+    rdfs:range xsd:string .
+
+copia:motionText a owl:DatatypeProperty ;
+    rdfs:label "motion text" ;
+    rdfs:comment "The natural-language description fed to the motion generator (HY-Motion via Iris.move) to produce the skeleton, e.g. 'a person jumps upward with both legs'. Pure kinematics — no look/style (that's the render LoRAs + chevrons)." ;
+    rdfs:domain copia:Motion ;
+    rdfs:range xsd:string .
+
+copia:motionFrames a owl:DatatypeProperty ;
+    rdfs:label "motion frames" ;
+    rdfs:comment "Output frame count @30fps (the clip length). 60=2s, 180=6s, 360=12s; ceiling 540 (18s, the trained-quality limit)." ;
+    rdfs:domain copia:Motion ;
+    rdfs:range xsd:integer .
+
+copia:motionDescription a owl:DatatypeProperty ;
+    rdfs:label "motion description" ;
+    rdfs:comment "What the motion is / when it's used (the authored prose). The kinematic detail lives in motionText." ;
+    rdfs:domain copia:Motion ;
+    rdfs:range xsd:string .
+
+copia:motionStatus a owl:DatatypeProperty ;
+    rdfs:label "motion status" ;
+    rdfs:comment "Build status: figment | sketched | built (built = a skeleton Sequence has been generated)." ;
+    rdfs:domain copia:Motion ;
+    rdfs:range copia:BuildStatusValue .
+
+copia:motionGenerates a owl:ObjectProperty ;
+    rdfs:label "motion generates" ;
+    rdfs:comment "A copia:Sequence (the realized OpenPose frames) this Motion produced. Repeat for each realization. Joined by the sequence's groupId. The Motion is the recipe; the Sequence(s) are its renderings." ;
+    rdfs:domain copia:Motion ;
+    rdfs:range copia:Sequence .
 
 
 # =============================================================================
