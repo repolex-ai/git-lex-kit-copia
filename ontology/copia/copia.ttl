@@ -1,4 +1,4 @@
-@prefix lex-o: <https://repolex.ai/ontology/lex-upper/> .
+@prefix lex-o: <https://repolex.ai/ontology/lex-o/> .
 @prefix soul:  <https://repolex.ai/ontology/kit/soul/> .
 @prefix copia: <https://repolex.ai/ontology/kit/copia/> .
 @prefix owl:   <http://www.w3.org/2002/07/owl#> .
@@ -171,7 +171,7 @@
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.10.0" ;
+    owl:versionInfo "0.10.1" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -525,6 +525,7 @@ copia:motionGenerates a owl:ObjectProperty ;
 # (Pool-side); git-lex stores only the literal subClassOf triple + the direct type.
 
 copia:Depictable a owl:Class ;
+    lex-o:instantiation "abstract" ;
     rdfs:label "Depictable" ;
     rdfs:comment "abstract — not authored as files. The union of things a Moment can depict (Being/Item/Outfit/Place). Gives copia:depicts a single range IRI." .
 
@@ -586,6 +587,7 @@ copia:regionScore a owl:DatatypeProperty ;
 # CoPIA oxigraph by the render pipeline (PNGs ingested as triples), never as .md.
 
 copia:Moment a owl:Class ;
+    lex-o:instantiation "graph-only" ;
     rdfs:label "Moment" ;
     rdfs:comment "A rendered PNG + its metadata. Graph-only — not authored as a file. Stores the realized scene fields, a flat `depicts` presence-list, group membership, and provenance." ;
     rdfs:subClassOf [
@@ -1153,6 +1155,7 @@ copia:producedOutfit a owl:ObjectProperty ;
 # collectionKind enum RETIRED (the class IS the kind). fromNocturne unchanged.
 
 copia:Group a owl:Class ;
+    lex-o:instantiation "abstract" ;
     rdfs:label "Group" ;
     rdfs:comment "abstract — authored as a concrete Bag or Sequence, never a bare Group. A named gathering of Moments; members self-join via copia:inGroup. Holds the shared group properties." ;
     rdfs:subClassOf [
