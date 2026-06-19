@@ -171,7 +171,7 @@
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.10.1" ;
+    owl:versionInfo "0.11.0" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -442,6 +442,94 @@ copia:outfitDepictedBy a owl:DatatypeProperty ;
 
 
 # =============================================================================
+# CAMERA VOCABULARY — the shot's optics, as named individuals (v0.11, Day 70)
+# =============================================================================
+# WHERE THE LENS IS. Four orthogonal camera axes, each its own field on a Moment
+# (one-field-per-steering-vector — never pack view+angle+distance into one string
+# again). Modeled as CLASSES with NAMED INDIVIDUALS (not owl:oneOf enums, not
+# soul-side .md files) for three reasons Rob settled (Day 70):
+#   1. SHIPS WITH THE KIT — a fresh CoPIA install has the full vocabulary with zero
+#      authoring. (Soul-side .md files would force every install to recreate them;
+#      camera angles are UNIVERSAL vocabulary, not soul-specific canon.)
+#   2. SPARQL-LISTABLE WITH NO CODE-FU — a UI dropdown of all angles is one clean
+#      hop: `SELECT ?a ?label WHERE { ?a a copia:CameraAngle ; rdfs:label ?label }`.
+#      (owl:oneOf would force the rdf:rest*/rdf:first list-walk + bare literals that
+#      can't carry a label or be pointed-at.)
+#   3. JOINABLE NODES — a Moment points AT the individual (copia:cameraAngle
+#      copia:low-angle), so retrieval groups every Moment by exact value, and the
+#      rdfs:label can carry the (tight!) prompt-form of the id.
+# These are NOT Depictable — a camera angle is HOW the frame is shot, not a thing
+# IN it (depicts stays the clean who/what-is-in-frame list). The Moment links via
+# dedicated maxCardinality-1 properties (one camera per shot). Labels are kept
+# DELIBERATELY TIGHT (id ≈ label) — no hard-coded steers ("with her" etc.); Qwen
+# knows what "low angle" means. Add detail later only if a render proves we need it.
+# Open-world: miss a value (e.g. a new framing)? Add one individual — done.
+
+copia:CameraAngle a owl:Class ;
+    rdfs:label "Camera Angle" ;
+    rdfs:comment "The camera's vertical position relative to the subject. Named-individual vocabulary (scale aligned to AdA Filmontology's Camera Angle / Vertical Positioning). One per shot." .
+
+copia:extreme-high-angle a copia:CameraAngle ; rdfs:label "extreme high angle" .
+copia:high-angle         a copia:CameraAngle ; rdfs:label "high angle" .
+copia:level              a copia:CameraAngle ; rdfs:label "eye level" .
+copia:low-angle          a copia:CameraAngle ; rdfs:label "low angle" .
+copia:extreme-low-angle  a copia:CameraAngle ; rdfs:label "extreme low angle" .
+
+copia:CameraDistance a owl:Class ;
+    rdfs:label "Camera Distance" ;
+    rdfs:comment "How much of the subject is in frame (shot size / dolly distance; aligned to AdA Filmontology's Field Size). One per shot." .
+
+copia:close-up a copia:CameraDistance ; rdfs:label "close-up" .
+copia:medium   a copia:CameraDistance ; rdfs:label "medium shot" .
+copia:wide     a copia:CameraDistance ; rdfs:label "wide shot" .
+
+copia:CameraLens a owl:Class ;
+    rdfs:label "Camera Lens" ;
+    rdfs:comment "The lens / focal length — sets perspective compression independent of distance (a tele at distance ≠ a wide cropped tight). One per shot." .
+
+copia:wide-angle-lens a copia:CameraLens ; rdfs:label "wide-angle lens" .
+copia:normal-lens     a copia:CameraLens ; rdfs:label "normal lens" .
+copia:telephoto-lens  a copia:CameraLens ; rdfs:label "telephoto lens" .
+copia:macro-lens      a copia:CameraLens ; rdfs:label "macro lens" .
+
+copia:CameraFraming a owl:Class ;
+    rdfs:label "Camera Framing" ;
+    rdfs:comment "How the subject is composed within the frame (placement / balance). One per shot." .
+
+copia:centered        a copia:CameraFraming ; rdfs:label "centered" .
+copia:rule-of-thirds  a copia:CameraFraming ; rdfs:label "rule of thirds" .
+copia:tight-crop      a copia:CameraFraming ; rdfs:label "tight crop" .
+copia:wide-frame      a copia:CameraFraming ; rdfs:label "wide frame" .
+
+
+# =============================================================================
+# SUBJECT VIEW — which aspect of the subject faces the camera (v0.11, Day 70)
+# =============================================================================
+# The SUBJECT cluster's facing axis — the twin of the CAMERA cluster above. Camera
+# angle = WHERE THE LENS IS; subjectView = WHICH WAY THE SUBJECT FACES. These are
+# INDEPENDENT degrees of freedom (a subject can face away while the camera is high,
+# etc.) — collapsing them into one is what made the azimuth sweep ambiguous (Day 70).
+# Stating BOTH disambiguates: "driving a convertible" + cameraAngle:extreme-high +
+# subjectView:top → a clean overhead. No camera standard models this (it's subject
+# behaviour, not lens placement), so it's ours — same named-individual shape as the
+# camera axes (ships with kit, SPARQL-listable, joinable node, tight labels).
+# Honest cardinals (front/back/side/quarters/top/bottom) — NOT a fake-precise degree
+# number; the render test showed Flux honors cardinals, not smooth azimuth.
+
+copia:SubjectView a owl:Class ;
+    rdfs:label "Subject View" ;
+    rdfs:comment "Which aspect of the subject faces the camera. The subject-facing axis (independent of cameraAngle, which is lens placement). One per shot." .
+
+copia:front-view         a copia:SubjectView ; rdfs:label "front view" .
+copia:front-quarter-view a copia:SubjectView ; rdfs:label "three-quarter front view" .
+copia:side-view          a copia:SubjectView ; rdfs:label "side view" .
+copia:back-quarter-view  a copia:SubjectView ; rdfs:label "three-quarter back view" .
+copia:back-view          a copia:SubjectView ; rdfs:label "back view" .
+copia:top-view           a copia:SubjectView ; rdfs:label "seen from the top" .
+copia:bottom-view        a copia:SubjectView ; rdfs:label "seen from below" .
+
+
+# =============================================================================
 # MOTION — an authored, reusable movement (v0.10, Day 65)
 # =============================================================================
 # Authored like Place/Item/Outfit/Being: `git lex create Motion <id>` → a
@@ -619,6 +707,12 @@ copia:Moment a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneObjects ;   owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneFraming ;   owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneCamera ;    owl:maxCardinality 1 ] ;
+    # --- v0.11 camera axes (one camera per shot) ---
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:cameraAngle ;    owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:cameraDistance ; owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:cameraLens ;     owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:cameraFraming ;  owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:subjectView ;    owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneEnergy ;    owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneAction ;    owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneMedium ;    owl:maxCardinality 1 ] ;
@@ -966,9 +1060,42 @@ copia:sceneFraming a owl:DatatypeProperty ;
 
 copia:sceneCamera a owl:DatatypeProperty ;
     rdfs:label "scene camera" ;
-    rdfs:comment "Camera angle/position. Per-render." ;
+    rdfs:comment "DEPRECATED (v0.11) — the legacy single packed string (view/angle/distance crammed into one). Superseded by the four orthogonal camera properties below (cameraAngle/cameraDistance/cameraLens/cameraFraming). Kept for back-compat reading of pre-v0.11 renders; do not write going forward." ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
+
+# --- the four camera axes (v0.11) — each links the Moment to ONE camera-vocab
+# individual (see CAMERA VOCABULARY above). maxCardinality 1: one camera per shot.
+copia:cameraAngle a owl:ObjectProperty ;
+    rdfs:label "camera angle" ;
+    rdfs:comment "The Moment's camera vertical position — one copia:CameraAngle individual. Per-render." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range copia:CameraAngle .
+
+copia:cameraDistance a owl:ObjectProperty ;
+    rdfs:label "camera distance" ;
+    rdfs:comment "The Moment's shot size — one copia:CameraDistance individual. Per-render." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range copia:CameraDistance .
+
+copia:cameraLens a owl:ObjectProperty ;
+    rdfs:label "camera lens" ;
+    rdfs:comment "The Moment's lens / focal length — one copia:CameraLens individual. Per-render." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range copia:CameraLens .
+
+copia:cameraFraming a owl:ObjectProperty ;
+    rdfs:label "camera framing" ;
+    rdfs:comment "The Moment's compositional framing — one copia:CameraFraming individual. Per-render." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range copia:CameraFraming .
+
+# --- the subject-facing axis (v0.11) — twin of cameraAngle, but for the SUBJECT.
+copia:subjectView a owl:ObjectProperty ;
+    rdfs:label "subject view" ;
+    rdfs:comment "Which aspect of the subject faces the camera — one copia:SubjectView individual. Independent of cameraAngle (lens placement). Per-render." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range copia:SubjectView .
 
 copia:sceneEnergy a owl:DatatypeProperty ;
     rdfs:label "scene energy" ;
