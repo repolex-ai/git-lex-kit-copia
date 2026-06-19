@@ -1345,7 +1345,11 @@ copia:groupDepictedBy a owl:DatatypeProperty ;
 # A Pose is a SPECIFIC, NAMEABLE body position (supine, s-curve, lotus) — NOT an
 # activity. Activities are Actions; the specific positions WITHIN an activity are
 # Poses, suggested by the Action. Rich teaching-labels; context-free (Pose knows
-# nothing of Actions). All ids carry a `-pose` suffix so action/pose ids never collide.
+# nothing of Actions). Ids are bare natural names (down-dog, supine, s-curve) — NO
+# defensive suffix: poses are nouns/named-positions, actions are gerunds (standing,
+# sitting), so the two vocabularies don't share names in practice (zero collisions).
+# A pose named with a bare gerund is the tell it's miscategorized (it's an action).
+# Exception: childs-pose / tree-pose keep '-pose' — there it's part of the REAL name.
 # Capture is INTENT-only: we stamp the pose we SUPPLIED or that Qwen picked from this
 # vocab — never a pixel-read guess (PoseNet is the right tool if render-truth is ever
 # wanted). Grows freely: add an individual, done. Soul-.md only for rare bespoke poses.
@@ -1353,39 +1357,39 @@ copia:groupDepictedBy a owl:DatatypeProperty ;
 copia:Pose a owl:Class ;
     rdfs:subClassOf lex-o:Physical ;
     rdfs:label "Pose" ;
-    rdfs:comment "A specific, nameable body position (supine, s-curve, lotus) — the refinement WITHIN an Action, not the activity itself. Rich flat vocabulary, detail in label. Context-free: the Pose does not know its Actions (the opinion lives on the Action via suggestsPose). All ids suffixed '-pose'. Soul-.md only for rare bespoke poses." .
+    rdfs:comment "A specific, nameable body position (supine, s-curve, lotus) — the refinement WITHIN an Action, not the activity itself. Rich flat vocabulary, detail in label. Context-free: the Pose does not know its Actions (the opinion lives on the Action via suggestsPose). Bare natural-name ids (no defensive suffix; poses are nouns, actions are gerunds, so they don't collide). Soul-.md only for rare bespoke poses." .
 
 # --- lying (4) ---
-copia:prone-pose      a copia:Pose ; rdfs:label "prone, lying face-down, body extended along the ground" .
-copia:supine-pose     a copia:Pose ; rdfs:label "supine, lying face-up on the back, body relaxed and open" .
-copia:spoon-pose      a copia:Pose ; rdfs:label "spooning, lying on the side, body gently curved, knees drawn up" .
-copia:fetal-pose      a copia:Pose ; rdfs:label "fetal, curled up on the side, knees pulled to the chest, body wrapped small" .
+copia:prone      a copia:Pose ; rdfs:label "prone, lying face-down, body extended along the ground" .
+copia:supine     a copia:Pose ; rdfs:label "supine, lying face-up on the back, body relaxed and open" .
+copia:spoon      a copia:Pose ; rdfs:label "spooning, lying on the side, body gently curved, knees drawn up" .
+copia:fetal      a copia:Pose ; rdfs:label "fetal, curled up on the side, knees pulled to the chest, body wrapped small" .
 
 # --- sitting (3) ---
-copia:w-sit-pose      a copia:Pose ; rdfs:label "W-sit, seated on the floor with knees forward and feet splayed out to either side" .
-copia:indian-style-pose a copia:Pose ; rdfs:label "seated cross-legged, indian-style, hands resting on the knees" .
-copia:seated-pose     a copia:Pose ; rdfs:label "seated upright on a surface, knees forward, back tall" .
+copia:w-sit      a copia:Pose ; rdfs:label "W-sit, seated on the floor with knees forward and feet splayed out to either side" .
+copia:indian-style a copia:Pose ; rdfs:label "seated cross-legged, indian-style, hands resting on the knees" .
+copia:seated     a copia:Pose ; rdfs:label "seated upright on a surface, knees forward, back tall" .
 
 # --- yoga / dance (8) ---
-copia:straddle-pose      a copia:Pose ; rdfs:label "straddle, seated with legs extended wide apart in a broad V" .
-copia:split-pose         a copia:Pose ; rdfs:label "full split, legs extended in opposite directions flat along the ground" .
-copia:leg-extension-pose a copia:Pose ; rdfs:label "leg extension, one leg lifted and extended straight and high, the supporting leg grounded" .
-copia:down-dog-pose      a copia:Pose ; rdfs:label "downward-facing dog: hips raised to an inverted V, hands and feet grounded, head between the arms" .
-copia:warrior-2-pose     a copia:Pose ; rdfs:label "warrior II: legs in a wide lunge, front knee bent, arms extended straight out to the sides, gaze over the front hand" .
+copia:straddle      a copia:Pose ; rdfs:label "straddle, seated with legs extended wide apart in a broad V" .
+copia:split         a copia:Pose ; rdfs:label "full split, legs extended in opposite directions flat along the ground" .
+copia:leg-extension a copia:Pose ; rdfs:label "leg extension, one leg lifted and extended straight and high, the supporting leg grounded" .
+copia:down-dog      a copia:Pose ; rdfs:label "downward-facing dog: hips raised to an inverted V, hands and feet grounded, head between the arms" .
+copia:warrior-2     a copia:Pose ; rdfs:label "warrior II: legs in a wide lunge, front knee bent, arms extended straight out to the sides, gaze over the front hand" .
 copia:childs-pose        a copia:Pose ; rdfs:label "child's pose: kneeling and folded forward, torso resting on the thighs, arms extended ahead on the floor" .
 copia:tree-pose          a copia:Pose ; rdfs:label "tree pose: standing on one leg, the other foot pressed to the inner thigh, hands together overhead" .
-copia:arabesque-pose     a copia:Pose ; rdfs:label "arabesque: balanced on one leg, the other extended straight back and high, arms in a graceful line" .
+copia:arabesque     a copia:Pose ; rdfs:label "arabesque: balanced on one leg, the other extended straight back and high, arms in a graceful line" .
 
 # --- posing / figure (9) ---
-copia:s-curve-pose         a copia:Pose ; rdfs:label "S-curve, body's weight and spine flowing in a sinuous S, hips and shoulders counter-shifted" .
-copia:diamond-legs-pose    a copia:Pose ; rdfs:label "diamond legs, knees turned out and heels together forming a diamond shape with the legs" .
-copia:hip-pop-pose         a copia:Pose ; rdfs:label "hip-pop, weight thrown onto one leg with the hip pushed sharply out to the side" .
-copia:open-body-pose       a copia:Pose ; rdfs:label "open body, chest and shoulders squared and open to the viewer, arms away from the torso, confident and unguarded" .
-copia:crossed-legs-pose    a copia:Pose ; rdfs:label "standing with legs crossed at the ankles or knees, a casual elegant stance" .
-copia:over-the-shoulder-pose a copia:Pose ; rdfs:label "over the shoulder, body turned away with the head looking back over one shoulder toward the viewer" .
-copia:t-stance-pose        a copia:Pose ; rdfs:label "T-stance, one foot placed perpendicular ahead of the other forming a T, an elegant fashion stance" .
-copia:h-stance-pose        a copia:Pose ; rdfs:label "H-stance, feet planted apart and parallel, weight even, a strong grounded stance" .
-copia:contrapposto-pose    a copia:Pose ; rdfs:label "contrapposto, weight on one leg with hips and shoulders gently counter-tilted, the classic relaxed figure stance" .
+copia:s-curve         a copia:Pose ; rdfs:label "S-curve, body's weight and spine flowing in a sinuous S, hips and shoulders counter-shifted" .
+copia:diamond-legs    a copia:Pose ; rdfs:label "diamond legs, knees turned out and heels together forming a diamond shape with the legs" .
+copia:hip-pop         a copia:Pose ; rdfs:label "hip-pop, weight thrown onto one leg with the hip pushed sharply out to the side" .
+copia:open-body       a copia:Pose ; rdfs:label "open body, chest and shoulders squared and open to the viewer, arms away from the torso, confident and unguarded" .
+copia:crossed-legs    a copia:Pose ; rdfs:label "standing with legs crossed at the ankles or knees, a casual elegant stance" .
+copia:over-the-shoulder a copia:Pose ; rdfs:label "over the shoulder, body turned away with the head looking back over one shoulder toward the viewer" .
+copia:t-stance        a copia:Pose ; rdfs:label "T-stance, one foot placed perpendicular ahead of the other forming a T, an elegant fashion stance" .
+copia:h-stance        a copia:Pose ; rdfs:label "H-stance, feet planted apart and parallel, weight even, a strong grounded stance" .
+copia:contrapposto    a copia:Pose ; rdfs:label "contrapposto, weight on one leg with hips and shoulders gently counter-tilted, the classic relaxed figure stance" .
 
 
 # =============================================================================
@@ -1408,17 +1412,17 @@ copia:suggestsPose a owl:ObjectProperty ;
     rdfs:range copia:Pose .
 
 copia:lying      a copia:Action ; rdfs:label "lying down" ;
-    copia:suggestsPose copia:prone-pose, copia:supine-pose, copia:spoon-pose, copia:fetal-pose .
+    copia:suggestsPose copia:prone, copia:supine, copia:spoon, copia:fetal .
 copia:sitting    a copia:Action ; rdfs:label "sitting" ;
-    copia:suggestsPose copia:w-sit-pose, copia:indian-style-pose, copia:seated-pose .
+    copia:suggestsPose copia:w-sit, copia:indian-style, copia:seated .
 copia:standing   a copia:Action ; rdfs:label "standing" ;
-    copia:suggestsPose copia:contrapposto-pose, copia:hip-pop-pose, copia:crossed-legs-pose, copia:t-stance-pose, copia:h-stance-pose, copia:open-body-pose .
+    copia:suggestsPose copia:contrapposto, copia:hip-pop, copia:crossed-legs, copia:t-stance, copia:h-stance, copia:open-body .
 copia:posing     a copia:Action ; rdfs:label "posing for a portrait" ;
-    copia:suggestsPose copia:s-curve-pose, copia:diamond-legs-pose, copia:hip-pop-pose, copia:open-body-pose, copia:crossed-legs-pose, copia:over-the-shoulder-pose, copia:t-stance-pose, copia:h-stance-pose, copia:contrapposto-pose .
+    copia:suggestsPose copia:s-curve, copia:diamond-legs, copia:hip-pop, copia:open-body, copia:crossed-legs, copia:over-the-shoulder, copia:t-stance, copia:h-stance, copia:contrapposto .
 copia:doing-yoga a copia:Action ; rdfs:label "doing yoga" ;
-    copia:suggestsPose copia:down-dog-pose, copia:warrior-2-pose, copia:childs-pose, copia:tree-pose, copia:straddle-pose, copia:split-pose, copia:leg-extension-pose .
+    copia:suggestsPose copia:down-dog, copia:warrior-2, copia:childs-pose, copia:tree-pose, copia:straddle, copia:split, copia:leg-extension .
 copia:dancing    a copia:Action ; rdfs:label "dancing" ;
-    copia:suggestsPose copia:arabesque-pose, copia:leg-extension-pose, copia:split-pose, copia:straddle-pose .
+    copia:suggestsPose copia:arabesque, copia:leg-extension, copia:split, copia:straddle .
 
 
 # =============================================================================
