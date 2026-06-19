@@ -758,6 +758,15 @@ copia:depicts a owl:ObjectProperty ;
     rdfs:range copia:Depictable ;
     copia:ordering "bag" .
 
+# --- lineage (a Moment self-reports the prior Moment(s) it came from) ---
+
+copia:source a owl:ObjectProperty ;
+    rdfs:label "source" ;
+    rdfs:comment "A prior Moment this one descends from — the lineage edge. Repeat for each (a Moment may draw on several). Records WHERE THIS CAME FROM, not its settings: settings flow from the source but in-turn steers (inline LoRA, chevrons, Qwen adjustments) overwrite them — the new copy wins on settings, the source link is recorded regardless. By origin: a CONVERSATIONAL Moment links to the previous conversational Moment (the continuity chain); a KEEPER Moment's source is always the active keeper. The pixels/data of a source are NOT copied here — the link is canon, the bytes are fetched on demand (i2i) via the Pool. Joined by the source's momentId (cid)." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range copia:Moment ;
+    copia:ordering "bag" .
+
 # --- group membership (a Moment self-reports which Group(s) it's in) ---
 
 copia:inGroup a owl:ObjectProperty ;
