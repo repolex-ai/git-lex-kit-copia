@@ -171,7 +171,7 @@
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.11.0" ;
+    owl:versionInfo "0.12.0" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -713,6 +713,9 @@ copia:Moment a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:cameraLens ;     owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:cameraFraming ;  owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:subjectView ;    owl:maxCardinality 1 ] ;
+    # --- v0.12 subject axes (one action + one pose per shot) ---
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:action ;         owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:pose ;           owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneEnergy ;    owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneAction ;    owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneMedium ;    owl:maxCardinality 1 ] ;
@@ -1031,7 +1034,7 @@ copia:sceneObjects a owl:DatatypeProperty ;
 
 copia:scenePosture a owl:DatatypeProperty ;
     rdfs:label "scene posture" ;
-    rdfs:comment "Bodily posture/stance. On Being = default; on Moment = realized for this render." ;
+    rdfs:comment "DEPRECATED (v0.12) — vestigial freeform string; never projected into a prompt (verified Day 71). Superseded by copia:pose (-> copia:Pose individual, queryable). Kept for back-compat reading of pre-v0.12 renders; do not write going forward." ;
     rdfs:domain copia:Being ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
@@ -1105,7 +1108,7 @@ copia:sceneEnergy a owl:DatatypeProperty ;
 
 copia:sceneAction a owl:DatatypeProperty ;
     rdfs:label "scene action" ;
-    rdfs:comment "What is happening in the frame. Per-render." ;
+    rdfs:comment "DEPRECATED (v0.12) — vestigial freeform string; never projected into a prompt (verified Day 71). Superseded by copia:action (-> copia:Action individual, searchable, drives suggestsPose). Kept for back-compat reading of pre-v0.12 renders; do not write going forward." ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
 
@@ -1334,3 +1337,106 @@ copia:groupDepictedBy a owl:DatatypeProperty ;
     rdfs:comment "URL or path to a cover/representative render for this group." ;
     rdfs:domain copia:Group ;
     rdfs:range xsd:string .
+
+
+# =============================================================================
+# POSE VOCABULARY — specific named body positions (v0.12, Day 71)
+# =============================================================================
+# A Pose is a SPECIFIC, NAMEABLE body position (supine, s-curve, lotus) — NOT an
+# activity. Activities are Actions; the specific positions WITHIN an activity are
+# Poses, suggested by the Action. Rich teaching-labels; context-free (Pose knows
+# nothing of Actions). All ids carry a `-pose` suffix so action/pose ids never collide.
+# Capture is INTENT-only: we stamp the pose we SUPPLIED or that Qwen picked from this
+# vocab — never a pixel-read guess (PoseNet is the right tool if render-truth is ever
+# wanted). Grows freely: add an individual, done. Soul-.md only for rare bespoke poses.
+
+copia:Pose a owl:Class ;
+    rdfs:subClassOf lex-o:Physical ;
+    rdfs:label "Pose" ;
+    rdfs:comment "A specific, nameable body position (supine, s-curve, lotus) — the refinement WITHIN an Action, not the activity itself. Rich flat vocabulary, detail in label. Context-free: the Pose does not know its Actions (the opinion lives on the Action via suggestsPose). All ids suffixed '-pose'. Soul-.md only for rare bespoke poses." .
+
+# --- lying (4) ---
+copia:prone-pose      a copia:Pose ; rdfs:label "prone, lying face-down, body extended along the ground" .
+copia:supine-pose     a copia:Pose ; rdfs:label "supine, lying face-up on the back, body relaxed and open" .
+copia:spoon-pose      a copia:Pose ; rdfs:label "spooning, lying on the side, body gently curved, knees drawn up" .
+copia:fetal-pose      a copia:Pose ; rdfs:label "fetal, curled up on the side, knees pulled to the chest, body wrapped small" .
+
+# --- sitting (3) ---
+copia:w-sit-pose      a copia:Pose ; rdfs:label "W-sit, seated on the floor with knees forward and feet splayed out to either side" .
+copia:indian-style-pose a copia:Pose ; rdfs:label "seated cross-legged, indian-style, hands resting on the knees" .
+copia:seated-pose     a copia:Pose ; rdfs:label "seated upright on a surface, knees forward, back tall" .
+
+# --- yoga / dance (8) ---
+copia:straddle-pose      a copia:Pose ; rdfs:label "straddle, seated with legs extended wide apart in a broad V" .
+copia:split-pose         a copia:Pose ; rdfs:label "full split, legs extended in opposite directions flat along the ground" .
+copia:leg-extension-pose a copia:Pose ; rdfs:label "leg extension, one leg lifted and extended straight and high, the supporting leg grounded" .
+copia:down-dog-pose      a copia:Pose ; rdfs:label "downward-facing dog: hips raised to an inverted V, hands and feet grounded, head between the arms" .
+copia:warrior-2-pose     a copia:Pose ; rdfs:label "warrior II: legs in a wide lunge, front knee bent, arms extended straight out to the sides, gaze over the front hand" .
+copia:childs-pose        a copia:Pose ; rdfs:label "child's pose: kneeling and folded forward, torso resting on the thighs, arms extended ahead on the floor" .
+copia:tree-pose          a copia:Pose ; rdfs:label "tree pose: standing on one leg, the other foot pressed to the inner thigh, hands together overhead" .
+copia:arabesque-pose     a copia:Pose ; rdfs:label "arabesque: balanced on one leg, the other extended straight back and high, arms in a graceful line" .
+
+# --- posing / figure (9) ---
+copia:s-curve-pose         a copia:Pose ; rdfs:label "S-curve, body's weight and spine flowing in a sinuous S, hips and shoulders counter-shifted" .
+copia:diamond-legs-pose    a copia:Pose ; rdfs:label "diamond legs, knees turned out and heels together forming a diamond shape with the legs" .
+copia:hip-pop-pose         a copia:Pose ; rdfs:label "hip-pop, weight thrown onto one leg with the hip pushed sharply out to the side" .
+copia:open-body-pose       a copia:Pose ; rdfs:label "open body, chest and shoulders squared and open to the viewer, arms away from the torso, confident and unguarded" .
+copia:crossed-legs-pose    a copia:Pose ; rdfs:label "standing with legs crossed at the ankles or knees, a casual elegant stance" .
+copia:over-the-shoulder-pose a copia:Pose ; rdfs:label "over the shoulder, body turned away with the head looking back over one shoulder toward the viewer" .
+copia:t-stance-pose        a copia:Pose ; rdfs:label "T-stance, one foot placed perpendicular ahead of the other forming a T, an elegant fashion stance" .
+copia:h-stance-pose        a copia:Pose ; rdfs:label "H-stance, feet planted apart and parallel, weight even, a strong grounded stance" .
+copia:contrapposto-pose    a copia:Pose ; rdfs:label "contrapposto, weight on one leg with hips and shoulders gently counter-tilted, the classic relaxed figure stance" .
+
+
+# =============================================================================
+# ACTION VOCABULARY — the verbs (what she's doing), the spine (v0.12, Day 71)
+# =============================================================================
+# The broad activity — the SPINE of the subject model. Each Action curates its
+# specific poses via suggestsPose (many-to-many, owned by the Action). The action is
+# the spine; the suggested poses are the leaves (refinements within the activity).
+# Searchable ("all swimming images"). Kit vocab; soul individuals when wanted.
+
+copia:Action a owl:Class ;
+    rdfs:subClassOf lex-o:Physical ;
+    rdfs:label "Action" ;
+    rdfs:comment "A named activity the subject is doing (lying, sitting, posing, dancing) — the SUBJECT cluster's verb axis and the spine of the subject model. Each Action curates its fitting poses via suggestsPose (many-to-many). Searchable. Kit vocab; soul individuals when wanted." .
+
+copia:suggestsPose a owl:ObjectProperty ;
+    rdfs:label "suggests pose" ;
+    rdfs:comment "A specific Pose that fits this Action — the curated short-list handed to Qwen when this action is set (the action->pose 'expansion'). Many-to-many; repeat per pose. Owned by the Action; the Pose stays context-free. A SUGGESTION not a constraint (explicit steer / Qwen can pick any pose)." ;
+    rdfs:domain copia:Action ;
+    rdfs:range copia:Pose .
+
+copia:lying      a copia:Action ; rdfs:label "lying down" ;
+    copia:suggestsPose copia:prone-pose, copia:supine-pose, copia:spoon-pose, copia:fetal-pose .
+copia:sitting    a copia:Action ; rdfs:label "sitting" ;
+    copia:suggestsPose copia:w-sit-pose, copia:indian-style-pose, copia:seated-pose .
+copia:standing   a copia:Action ; rdfs:label "standing" ;
+    copia:suggestsPose copia:contrapposto-pose, copia:hip-pop-pose, copia:crossed-legs-pose, copia:t-stance-pose, copia:h-stance-pose, copia:open-body-pose .
+copia:posing     a copia:Action ; rdfs:label "posing for a portrait" ;
+    copia:suggestsPose copia:s-curve-pose, copia:diamond-legs-pose, copia:hip-pop-pose, copia:open-body-pose, copia:crossed-legs-pose, copia:over-the-shoulder-pose, copia:t-stance-pose, copia:h-stance-pose, copia:contrapposto-pose .
+copia:doing-yoga a copia:Action ; rdfs:label "doing yoga" ;
+    copia:suggestsPose copia:down-dog-pose, copia:warrior-2-pose, copia:childs-pose, copia:tree-pose, copia:straddle-pose, copia:split-pose, copia:leg-extension-pose .
+copia:dancing    a copia:Action ; rdfs:label "dancing" ;
+    copia:suggestsPose copia:arabesque-pose, copia:leg-extension-pose, copia:split-pose, copia:straddle-pose .
+
+
+# =============================================================================
+# MOMENT SUBJECT LINKS — the two new clean fields (v0.12, Day 71)
+# =============================================================================
+# Each links a Moment to ONE vocab individual (maxCardinality 1 — restrictions on
+# the Moment class above). INTENT/forward-only: stamp what we supplied or what Qwen
+# picked from the vocab. The id stamps for SPARQL; the rdfs:label is the prompt form.
+# Supersede the vestigial scenePosture/sceneAction strings (deprecated above).
+
+copia:pose a owl:ObjectProperty ;
+    rdfs:label "pose" ;
+    rdfs:comment "The Moment's specific body position — one copia:Pose individual. Per-render. INTENT: stamps what we supplied / what Qwen picked from the vocab, never a pixel-read guess. Supersedes the vestigial scenePosture string." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range copia:Pose .
+
+copia:action a owl:ObjectProperty ;
+    rdfs:label "action" ;
+    rdfs:comment "What the subject is doing — one copia:Action individual. Per-render. Searchable. Drives the suggestsPose expansion. Supersedes the vestigial sceneAction string." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range copia:Action .
