@@ -171,7 +171,7 @@
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.12.0" ;
+    owl:versionInfo "0.12.1" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -229,6 +229,7 @@ copia:placeName a owl:DatatypeProperty ;
     rdfs:range xsd:string .
 
 copia:placeDescription a owl:DatatypeProperty ;
+    lex-o:okfType "Place" ;
     rdfs:label "place description" ;
     rdfs:comment "Canonical prose grounding — the human-readable anchor; scene* fields carry the structured defaults." ;
     rdfs:domain copia:Place ;
@@ -272,6 +273,7 @@ copia:depictedBy a owl:DatatypeProperty ;
 
 copia:Item a owl:Class ;
     rdfs:subClassOf lex-o:Physical ;
+    lex-o:okfType "Item" ;
     rdfs:label "Item" ;
     rdfs:comment "A thing. Its look is its description; affordance says how it appears in a scene (wearable/holdable/prop)." ;
     rdfs:subClassOf [
@@ -381,6 +383,7 @@ copia:wears a owl:ObjectProperty ;
     rdfs:range copia:Outfit .
 
 copia:beingDepictedBy a owl:DatatypeProperty ;
+    lex-o:okfType "Being" ;
     rdfs:label "being depicted by" ;
     rdfs:comment "URL or path to a render of this being." ;
     rdfs:domain copia:Being ;
@@ -396,6 +399,7 @@ copia:beingDepictedBy a owl:DatatypeProperty ;
 
 copia:Outfit a owl:Class ;
     rdfs:subClassOf lex-o:Physical ;
+    lex-o:okfType "Outfit" ;
     rdfs:label "Outfit" ;
     rdfs:comment "A named, reusable bundle of Items (a 'look'/'loadout'). A convenience join — summon the set as one. A single garment needs no Outfit; it's just an Item(wearable)." ;
     rdfs:subClassOf [
@@ -545,6 +549,7 @@ copia:bottom-view        a copia:SubjectView ; rdfs:label "seen from below" .
 
 copia:Motion a owl:Class ;
     rdfs:subClassOf lex-o:Physical ;
+    lex-o:okfType "Motion" ;
     rdfs:label "Motion" ;
     rdfs:comment "A named, reusable MOVEMENT — authored like an Outfit/Item. Holds the recipe (trigger word, generating text, duration); firing it (chevron, e.g. !jump) runs Iris.move → an OpenPose Sequence of origin=movement frames. The recipe, not the frames." ;
     rdfs:subClassOf [
@@ -1150,6 +1155,7 @@ copia:sceneNarrative a owl:DatatypeProperty ;
 # added only when the loop actually traverses them.
 
 copia:NocturneActivity a owl:Class ;
+    lex-o:okfType "Nocturne Activity" ;
     rdfs:label "Nocturne Activity" ;
     rdfs:comment "A kind of autonomous activity lUX can choose when she wakes (NocturneTime). What it is / how it runs lives in the document body; this carries only the id." ;
     rdfs:subClassOf [
@@ -1165,6 +1171,7 @@ copia:nocturneActivityId a owl:DatatypeProperty ;
     rdfs:range xsd:string .
 
 copia:NocturneFeed a owl:Class ;
+    lex-o:okfType "Nocturne Feed" ;
     rdfs:label "Nocturne Feed" ;
     rdfs:comment "A source of fresh outside material lUX can draw on when she wakes — a window to outside art/data. Why/how she reads it lives in the body; carries id + source." ;
     rdfs:subClassOf [
@@ -1198,6 +1205,7 @@ copia:feedSource a owl:DatatypeProperty ;
 # the body, only ids/links as fields.
 
 copia:Nocturne a owl:Class ;
+    lex-o:okfType "Nocturne" ;
     rdfs:label "Nocturne" ;
     rdfs:comment "One autonomous waking (NocturneTime). lUX authors it; the body is her artist statement. Ties together what (if anything) the wake produced. All produced* links optional — an image-less wake is first-class." ;
     rdfs:subClassOf [
@@ -1342,6 +1350,8 @@ copia:fromNocturne a owl:ObjectProperty ;
     rdfs:range copia:Nocturne .
 
 copia:groupDepictedBy a owl:DatatypeProperty ;
+    lex-o:okfType "Bag" ;
+    lex-o:okfType "Sequence" ;
     rdfs:label "group depicted by" ;
     rdfs:comment "URL or path to a cover/representative render for this group." ;
     rdfs:domain copia:Group ;
