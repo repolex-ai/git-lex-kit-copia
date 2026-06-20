@@ -171,7 +171,7 @@
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.12.1" ;
+    owl:versionInfo "0.13.0" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -531,6 +531,61 @@ copia:back-quarter-view  a copia:SubjectView ; rdfs:label "three-quarter back vi
 copia:back-view          a copia:SubjectView ; rdfs:label "back view" .
 copia:top-view           a copia:SubjectView ; rdfs:label "seen from the top" .
 copia:bottom-view        a copia:SubjectView ; rdfs:label "seen from below" .
+
+
+# =============================================================================
+# CAMERA FOCUS — what the shot is ABOUT (v0.13, Day 76)
+# =============================================================================
+# The focal SUBJECT of the frame — the one thing the composition is built around.
+# Distinct from the camera cluster (where the lens is / how big the shot is) and
+# from SubjectView (which way the subject faces): cameraFocus says WHAT MATTERS in
+# the frame, the feature the eye should land on. It's a STRONG-BIAS steer — it
+# projects as the prompt's LEAD clause ("focused intently on the face, the focal
+# point of the composition"), louder than the other camera axes, because Rob's
+# intent is "this is the important feature." Same named-individual shape as the
+# camera axes (ships with kit, SPARQL-listable, joinable node, tight labels).
+#
+# MULTI-VALUED (unlike the maxCardinality-1 camera axes): usually one focus, but a
+# shot can be built around two (face + hands). The UI defaults to a single pick but
+# allows several; the prompt names all of them in the lead clause. Labels are kept
+# TIGHT (id ≈ label, the prompt-form) — Qwen knows what "upper body" means; the
+# strong-bias EMPHASIS comes from the projection clause, NOT hard-coded into labels.
+# Open-world: a focus we missed? Add one individual — done. NOT Depictable (it's how
+# the frame is composed, not a thing in it — depicts stays the clean cast list).
+
+copia:CameraFocus a owl:Class ;
+    rdfs:label "Camera Focus" ;
+    rdfs:comment "The focal subject of the frame — what the composition is built around / what the eye should land on. A STRONG-BIAS steer projected as the prompt's lead clause. Multi-valued (usually one, but face+hands is valid). Named-individual vocabulary." .
+
+# --- anatomical foci (fine → coarse) ---
+copia:face        a copia:CameraFocus ; rdfs:label "face" .
+copia:eyes        a copia:CameraFocus ; rdfs:label "eyes" .
+copia:lips        a copia:CameraFocus ; rdfs:label "lips" .
+copia:hair        a copia:CameraFocus ; rdfs:label "hair" .
+copia:ears        a copia:CameraFocus ; rdfs:label "ears" .
+copia:neck        a copia:CameraFocus ; rdfs:label "neck" .
+copia:shoulders   a copia:CameraFocus ; rdfs:label "shoulders" .
+copia:hands       a copia:CameraFocus ; rdfs:label "hands" .
+copia:chest       a copia:CameraFocus ; rdfs:label "chest" .
+copia:torso       a copia:CameraFocus ; rdfs:label "torso" .
+copia:back        a copia:CameraFocus ; rdfs:label "back" .
+copia:waist       a copia:CameraFocus ; rdfs:label "waist" .
+copia:hips        a copia:CameraFocus ; rdfs:label "hips" .
+copia:legs        a copia:CameraFocus ; rdfs:label "legs" .
+copia:thighs      a copia:CameraFocus ; rdfs:label "thighs" .
+copia:feet        a copia:CameraFocus ; rdfs:label "feet" .
+# --- composite regions ---
+copia:upper-body  a copia:CameraFocus ; rdfs:label "upper body" .
+copia:lower-body  a copia:CameraFocus ; rdfs:label "lower body" .
+copia:full-figure a copia:CameraFocus ; rdfs:label "full figure" .
+copia:profile     a copia:CameraFocus ; rdfs:label "profile" .
+copia:silhouette  a copia:CameraFocus ; rdfs:label "silhouette" .
+# --- non-body foci ---
+copia:items       a copia:CameraFocus ; rdfs:label "the items in the scene" .
+copia:being       a copia:CameraFocus ; rdfs:label "the subject" .
+copia:group       a copia:CameraFocus ; rdfs:label "the group together" .
+copia:background  a copia:CameraFocus ; rdfs:label "the background" .
+copia:environment a copia:CameraFocus ; rdfs:label "the surrounding environment" .
 
 
 # =============================================================================
@@ -1113,6 +1168,18 @@ copia:subjectView a owl:ObjectProperty ;
     rdfs:comment "Which aspect of the subject faces the camera — one copia:SubjectView individual. Independent of cameraAngle (lens placement). Per-render." ;
     rdfs:domain copia:Moment ;
     rdfs:range copia:SubjectView .
+
+# --- camera FOCUS (v0.13) — what the shot is ABOUT. STRONG-BIAS, MULTI-VALUED.
+# NO maxCardinality restriction (unlike the camera axes) → the generator emits a
+# LIST: usually one focus, but face+hands is valid. Projects as the prompt's LEAD
+# clause (the strong-bias steer), not folded into the camera clause. ordering "bag"
+# (unordered set, like depicts) — the foci are a set, not a sequence.
+copia:cameraFocus a owl:ObjectProperty ;
+    rdfs:label "camera focus" ;
+    rdfs:comment "The focal subject(s) of the frame — what the composition is built around. One or more copia:CameraFocus individuals. A STRONG-BIAS steer: projected as the prompt's lead clause. Multi-valued (face+hands valid). Per-render." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range copia:CameraFocus ;
+    copia:ordering "bag" .
 
 copia:sceneEnergy a owl:DatatypeProperty ;
     rdfs:label "scene energy" ;
