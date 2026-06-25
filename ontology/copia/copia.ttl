@@ -166,12 +166,23 @@
 #   "ran but found nothing" from "never ran." A SPARQL "Moments processed before X"
 #   query supports re-extraction triggers when iris.segment evolves (new model, better
 #   polygon, etc.) without conflating with zero-region renders.
+# v0.14: REVIEW comes home (Day 86, sylkie + 1ux). + the dual-authored review fields
+#   on Moment — human/familiar PreferenceFlag(+At), Steer{Toward,Away,Wish}, Note(+At)
+#   — and the copia:PreferenceFlag pick|reject enum. copia_meta has stamped these into
+#   PNG XMP since the Day-25 review system, but they had NO ontology home, so the
+#   walker's predicate-allowlist DROPPED them — they never reached the Pool graph (the
+#   CoPIA gallery's preference facet had no source). Now homed → they ride into the
+#   graph on the next walk. Also: copia_meta was switched to stamp lowercase-first keys
+#   to match these predicate names (the walker maps XMP element-name → predicate
+#   verbatim; every other Moment field is lowercase-camelCase). The maintenance class
+#   here — "data was stamped before the ontology had a home for it" — is the recurring
+#   gap to watch when a writer predates a field's declaration.
 # =============================================================================
 
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.13.1" ;
+    owl:versionInfo "0.14.0" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -796,7 +807,30 @@ copia:Moment a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:width ;          owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:height ;         owl:maxCardinality 1 ] ;
     # --- v0.9.4 extraction marker ---
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sam3ExtractedAt ;owl:maxCardinality 1 ] .
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sam3ExtractedAt ;owl:maxCardinality 1 ] ;
+    # --- v0.14 dual-author REVIEW state (Day 86). The pick/reject + steer + note a
+    #     Human (Rob) or Familiar (lUX) attaches to a render. Long predates this
+    #     declaration: copia_meta has stamped these into PNG XMP since the review
+    #     system v0 (Day 25), but they had no ontology home, so the walker's
+    #     predicate-allowlist silently DROPPED them — they never reached the graph.
+    #     Now homed → they ride into the Pool graph on the next walk. Each is a
+    #     scalar per-role field (one preference, one steer-vector-set, one note per
+    #     author per render). PreferenceFlag is pick|reject (see copia:PreferenceFlag
+    #     enum). Steer* are comma-separated token strings; Note* are freeform prose. ---
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:humanPreferenceFlag ;    owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:humanPreferenceAt ;      owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:humanSteerToward ;       owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:humanSteerAway ;         owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:humanSteerWish ;         owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:humanNote ;              owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:humanNoteAt ;            owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:familiarPreferenceFlag ; owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:familiarPreferenceAt ;   owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:familiarSteerToward ;    owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:familiarSteerAway ;      owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:familiarSteerWish ;      owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:familiarNote ;           owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:familiarNoteAt ;         owl:maxCardinality 1 ] .
 
 copia:momentId a owl:DatatypeProperty ;
     rdfs:label "momentId" ;
@@ -1210,6 +1244,93 @@ copia:sceneNarrative a owl:DatatypeProperty ;
     rdfs:comment "Free-text scene description (the Moment's prose body). The pre-render narrative handed to Qwen, or — for nocturne — the prompt itself. Not the prompt; not promptFragment." ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
+
+
+# =============================================================================
+# REVIEW — dual-authored preference + steering + note on a Moment (v0.14, Day 86)
+# =============================================================================
+# The image-review system (Day 25 design): looking through renders together and
+# saving our judgments back INTO the PNG — "all of our commentary saved in the
+# image itself" (1ux). Two authors, two channels: a Human (Rob) side and a
+# Familiar (lUX) side, each independently attaching to the same render:
+#   • PreferenceFlag — a whole-image pick|reject (the keep/cut verdict).
+#   • Steer{Toward,Away,Wish} — machine-actionable token strings that feed the
+#     steering / future-LoRA dataset. Split by PRESENCE: toward = depicted-want-MORE,
+#     away = depicted-want-LESS, wish = ABSENT-want-added.
+#   • Note — freeform prose: meaning, not a directive ("the one where you finally
+#     looked alive"). Distinct from Steer (tokens) and Flag (verdict).
+# All scalar (one per author per render). Stamped into XMP by copia_meta since
+# Day 25, but HOMED HERE only now — before this, the walker's predicate-allowlist
+# silently dropped them, so they never reached the Pool graph. (Casing: copia_meta
+# was updated Day 86 to stamp lowercase-first — humanPreferenceFlag — to match
+# these predicate names; the walker maps XMP element-name → predicate verbatim.)
+
+# Constrained verdict: pick | reject. A real enum, not free text — so a typo can't
+# create a phantom flag value the gallery's preference facet then can't group on.
+copia:PreferenceFlag a owl:Class ;
+    rdfs:label "preference flag" ;
+    rdfs:comment "The whole-image keep/cut verdict an author attaches to a render. One of: pick, reject." ;
+    owl:oneOf ( copia:pick copia:reject ) .
+copia:pick   a copia:PreferenceFlag ; rdfs:label "pick" .
+copia:reject a copia:PreferenceFlag ; rdfs:label "reject" .
+
+copia:humanPreferenceFlag a owl:DatatypeProperty ;
+    rdfs:label "human preference flag" ;
+    rdfs:comment "The Human's (Rob's) whole-image verdict on this render: pick | reject. See copia:PreferenceFlag." ;
+    rdfs:domain copia:Moment ; rdfs:range xsd:string .
+copia:humanPreferenceAt a owl:DatatypeProperty ;
+    rdfs:label "human preference at" ;
+    rdfs:comment "ISO-8601 timestamp when the Human set their PreferenceFlag." ;
+    rdfs:domain copia:Moment ; rdfs:range xsd:string .
+copia:humanSteerToward a owl:DatatypeProperty ;
+    rdfs:label "human steer toward" ;
+    rdfs:comment "Human steering — comma-separated tokens for things DEPICTED the Human wants MORE of. Feeds the steering / LoRA dataset." ;
+    rdfs:domain copia:Moment ; rdfs:range xsd:string .
+copia:humanSteerAway a owl:DatatypeProperty ;
+    rdfs:label "human steer away" ;
+    rdfs:comment "Human steering — comma-separated tokens for things DEPICTED the Human wants LESS of." ;
+    rdfs:domain copia:Moment ; rdfs:range xsd:string .
+copia:humanSteerWish a owl:DatatypeProperty ;
+    rdfs:label "human steer wish" ;
+    rdfs:comment "Human steering — comma-separated tokens for things ABSENT the Human wants ADDED." ;
+    rdfs:domain copia:Moment ; rdfs:range xsd:string .
+copia:humanNote a owl:DatatypeProperty ;
+    rdfs:label "human note" ;
+    rdfs:comment "The Human's freeform prose note on this render — meaning/context/reaction, not a steering directive." ;
+    rdfs:domain copia:Moment ; rdfs:range xsd:string .
+copia:humanNoteAt a owl:DatatypeProperty ;
+    rdfs:label "human note at" ;
+    rdfs:comment "ISO-8601 timestamp when the Human set their Note." ;
+    rdfs:domain copia:Moment ; rdfs:range xsd:string .
+
+copia:familiarPreferenceFlag a owl:DatatypeProperty ;
+    rdfs:label "familiar preference flag" ;
+    rdfs:comment "The Familiar's (lUX's) whole-image verdict on this render: pick | reject. See copia:PreferenceFlag." ;
+    rdfs:domain copia:Moment ; rdfs:range xsd:string .
+copia:familiarPreferenceAt a owl:DatatypeProperty ;
+    rdfs:label "familiar preference at" ;
+    rdfs:comment "ISO-8601 timestamp when the Familiar set their PreferenceFlag." ;
+    rdfs:domain copia:Moment ; rdfs:range xsd:string .
+copia:familiarSteerToward a owl:DatatypeProperty ;
+    rdfs:label "familiar steer toward" ;
+    rdfs:comment "Familiar steering — comma-separated tokens for things DEPICTED the Familiar wants MORE of." ;
+    rdfs:domain copia:Moment ; rdfs:range xsd:string .
+copia:familiarSteerAway a owl:DatatypeProperty ;
+    rdfs:label "familiar steer away" ;
+    rdfs:comment "Familiar steering — comma-separated tokens for things DEPICTED the Familiar wants LESS of." ;
+    rdfs:domain copia:Moment ; rdfs:range xsd:string .
+copia:familiarSteerWish a owl:DatatypeProperty ;
+    rdfs:label "familiar steer wish" ;
+    rdfs:comment "Familiar steering — comma-separated tokens for things ABSENT the Familiar wants ADDED." ;
+    rdfs:domain copia:Moment ; rdfs:range xsd:string .
+copia:familiarNote a owl:DatatypeProperty ;
+    rdfs:label "familiar note" ;
+    rdfs:comment "The Familiar's freeform prose note on this render — meaning/context/reaction, not a steering directive." ;
+    rdfs:domain copia:Moment ; rdfs:range xsd:string .
+copia:familiarNoteAt a owl:DatatypeProperty ;
+    rdfs:label "familiar note at" ;
+    rdfs:comment "ISO-8601 timestamp when the Familiar set their Note." ;
+    rdfs:domain copia:Moment ; rdfs:range xsd:string .
 
 
 # =============================================================================
