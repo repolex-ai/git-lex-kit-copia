@@ -177,12 +177,31 @@
 #   verbatim; every other Moment field is lowercase-camelCase). The maintenance class
 #   here — "data was stamped before the ontology had a home for it" — is the recurring
 #   gap to watch when a writer predates a field's declaration.
+# v0.15: the direct-lane pass (Day 92, sylkie + 1ux). The PoolQueueItem spec
+#   (pool/docs/2026_06_28_POOLQUEUEITEM_SPEC.md) + the orchestrator-flip package
+#   contract surfaced two Moment provenance fields with no ontology home + one enum
+#   that needed widening:
+#   1. + copia:chevronString — the LITERAL >>...<< steer saved onto the Moment (the raw
+#      unparsed ask; resolved canon lives in depicts/scene-fields/promptFragment). The
+#      universal Stop hook (Day 91) puts the chevron INLINE in the conversation turn; Pool
+#      extracts+resolves it, stamps the literal here. No home before v0.15 → the v0.9.2
+#      walker allowlist DROPPED it; now homed.
+#   2. + copia:pixelSource — the img2img PIXEL-SEED edge (the image this render was painted
+#      FROM). DISTINCT from copia:source (conversational/keeper lineage). Maps to the
+#      package contract's source_image{role=pixel_seed}. A render can carry BOTH.
+#   3. copia:origin enum WIDENED (comment-only; range stays xsd:string): + direct (lUX's
+#      direct-render lane), + ui-request, + dream — to match the package-contract origin
+#      enum. Also pinned the origin-vs-kind axis split (origin = provenance on the OUTPUT
+#      Moment, CoPIA-owned; kind = the eye's verb on the INPUT request).
+#   The direct lane's DRAIN (CHECK migration + verbatim-prompt + img2img worker branches)
+#   is Pool-side (W4R3Z) and unbuilt; these are the OUTPUT-side homes so the resulting
+#   Moments aren't silently gated out of the graph when the lane lands.
 # =============================================================================
 
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.14.0" ;
+    owl:versionInfo "0.15.0" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -808,6 +827,9 @@ copia:Moment a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:height ;         owl:maxCardinality 1 ] ;
     # --- v0.9.4 extraction marker ---
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sam3ExtractedAt ;owl:maxCardinality 1 ] ;
+    # --- v0.15 direct-lane provenance (one chevron, one pixel-seed per render) ---
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:chevronString ;  owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:pixelSource ;    owl:maxCardinality 1 ] ;
     # --- v0.14 dual-author REVIEW state (Day 86). The pick/reject + steer + note a
     #     Human (Rob) or Familiar (lUX) attaches to a render. Long predates this
     #     declaration: copia_meta has stamped these into PNG XMP since the review
@@ -860,6 +882,37 @@ copia:source a owl:ObjectProperty ;
     rdfs:domain copia:Moment ;
     rdfs:range copia:Moment ;
     copia:ordering "bag" .
+
+# --- pixelSource (v0.15): the img2img pixel-seed edge ---
+# DISTINCT from copia:source (which is conversational-continuity / keeper LINEAGE —
+# "where this descends from"). pixelSource is the literal IMAGE this render was
+# painted FROM (img2img / i2i): a prior Pool Moment whose pixels were the latent
+# seed. Joined by the source Moment's momentId (cid). The bytes are fetched on
+# demand via the Pool (never copied here). One pixel-seed per render (the package
+# contract's `source_image{role=pixel_seed}` → this edge). Single render can have
+# BOTH a source (lineage) and a pixelSource (the i2i seed) — they answer different
+# questions. Single-valued.
+
+copia:pixelSource a owl:ObjectProperty ;
+    rdfs:label "pixel source" ;
+    rdfs:comment "The image this Moment was painted FROM via img2img (the pixel-seed). A prior Pool Moment whose pixels were the i2i latent seed. Joined by the source's momentId (cid); pixels fetched on demand via the Pool. Distinct from copia:source (lineage/continuity) — pixelSource is the literal visual seed. Maps to the package contract's source_image{role=pixel_seed}." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range copia:Moment .
+
+# --- chevronString (v0.15): the literal chevron that steered this render ---
+# The raw >>...<< steer text, extracted from the conversation turn (Pool-side, §5
+# of the PoolQueueItem spec) and saved onto the Moment as PROVENANCE — "this render
+# was steered by this chevron." NOT the resolved canon (that flows into depicts /
+# the scene fields / promptFragment); this is the unparsed literal, for audit + "show
+# me what I asked for." Has no ontology home before v0.15, so the walker's predicate
+# allowlist (v0.9.2 gate) DROPPED it — now homed, it rides into the graph on the next
+# walk. Single-valued (one steering chevron per render).
+
+copia:chevronString a owl:DatatypeProperty ;
+    rdfs:label "chevron string" ;
+    rdfs:comment "The literal chevron (>>...<<) that steered this render, saved verbatim as provenance. Extracted Pool-side from the conversation turn; the RESOLVED canon lives in depicts/scene fields/promptFragment, this is the raw unparsed ask. Single-valued." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
 
 # --- group membership (a Moment self-reports which Group(s) it's in) ---
 
@@ -940,7 +993,7 @@ copia:earthDay a owl:DatatypeProperty ;
 
 copia:origin a owl:DatatypeProperty ;
     rdfs:label "origin" ;
-    rdfs:comment "How the Moment came to be: conversational | wander | orbit | nocturne (rendered by CoPIA), movement (one frame of a generated MOTION — an OpenPose skeleton frame, or its posed-character render; the clip is a copia:Sequence the frame self-joins via inGroup, ordered by copia:sequence), or share (outside media a human handed in — pixels not painted here). Drives priority for rendered origins; share skips the render worklist entirely; movement frames are batch-rendered off a Sequence, not the conversational worklist." ;
+    rdfs:comment "How the Moment came to be: conversational | wander | orbit | nocturne | dream (rendered by CoPIA's autonomous loops), ui-request (a render the UI requested), direct (lUX's direct-render lane — exact prompt or verbatim sdapi, composer skipped; v0.15), movement (one frame of a generated MOTION — an OpenPose skeleton frame, or its posed-character render; the clip is a copia:Sequence the frame self-joins via inGroup, ordered by copia:sequence), or share (outside media a human handed in — pixels not painted here). Drives priority for rendered origins; share skips the render worklist entirely; movement frames are batch-rendered off a Sequence, not the conversational worklist. NOTE: origin is PROVENANCE on the OUTPUT Moment (CoPIA-owned); it is a DIFFERENT axis from the queue's `kind` (the VERB the eye runs — render_full/see_only/img2img/etc), which lives on the INPUT request and is not stamped here. See pool/docs/2026_06_28_POOLQUEUEITEM_SPEC.md." ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
 
