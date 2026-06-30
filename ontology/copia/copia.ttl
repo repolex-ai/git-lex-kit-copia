@@ -177,6 +177,24 @@
 #   verbatim; every other Moment field is lowercase-camelCase). The maintenance class
 #   here — "data was stamped before the ontology had a home for it" — is the recurring
 #   gap to watch when a writer predates a field's declaration.
+# v0.18: the stamping-contract reconciliation (Day 93, sylkie + 1ux + m3rc + trip).
+#   Two fixes surfaced by m3rc's eye-stamping-contract cross-check (openiris/docs/
+#   2026_06_30_EYE_STAMPING_CONTRACT.md) as the coordinated build kicked off:
+#   1. + copia:qwen35vl9bCaption — a home for the CURRENT rig captioner (Qwen3.5-VL-9B;
+#      the rig centralized to it Day 7). The eye's auto-sanitized slug today is
+#      `qwen359bmlx8bitCaption` — brittle (the mlx8bit quant suffix would silently change
+#      the key on a reconfig → latent silent-drop). 1ux's call: home a STABLE slug and
+#      have the eye map the model → it (one _MODEL_CAPTION_FIELD entry), decoupled from
+#      the config string. copia:caption stays the canonical latest-wins/embedding field.
+#   2. copia:sceneObjects Moment-side maxCardinality restriction REMOVED → multi-valued
+#      (Bag) on the Moment. The ttl marked it scalar but the eye emits a noun LIST (the
+#      SAM3 segment query-nouns); ontology↔producer mismatch (a silent under-write).
+#      It's DUAL-DOMAIN (Place + Moment): on Place it's an authored default; only the
+#      Moment-side cardinality was wrong. Since the restriction is declared per-CLASS
+#      (on the Moment block), removing it is Moment-only — Place is untouched. (NOT
+#      dropped from the graph: hasRegion subsumes only the Moment-side "what's in frame,"
+#      not the Place-side authored default — w4r3z's first lean, retracted on the
+#      dual-domain catch.) + copia:ordering "bag".
 # v0.17: the origin-enum-enforced pass (Day 93, sylkie + 1ux). Reconciles the Moment
 #   ontology to the new CoPIA Payload Spec (subtexture/docs/2026_06_30_COPIA_PAYLOAD_
 #   SPEC.md), whose origin/mode axes firmed up. Three changes:
@@ -259,7 +277,7 @@
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.17.0" ;
+    owl:versionInfo "0.18.0" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -896,7 +914,11 @@ copia:Moment a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneLighting ;  owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneMood ;      owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneStyle ;     owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneObjects ;   owl:maxCardinality 1 ] ;
+    # sceneObjects: NO maxCardinality restriction on the Moment side (v0.18) — the eye
+    # emits a noun LIST (the SAM3 segment query-nouns), so Moment-side it's multi-valued
+    # (a Bag, same shape as depicts/hasRegion/genLoras). Place-side keeps its authored
+    # scalar-ish default (no restriction declared there either — multi-capable, untouched).
+    # Cardinality is a (property, class) pair: this removal is Moment-only. ordering "bag".
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneFraming ;   owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneCamera ;    owl:maxCardinality 1 ] ;
     # --- v0.11 camera axes (one camera per shot) ---
@@ -923,6 +945,7 @@ copia:Moment a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:human ;          owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:caption ;        owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:qwenvl8bCaption ;owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:qwen35vl9bCaption ;owl:maxCardinality 1 ] ;
     # --- v0.9.2 single-valued render fields ---
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:renderPrompt ;   owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:width ;          owl:maxCardinality 1 ] ;
@@ -1243,6 +1266,21 @@ copia:qwenvl8bCaption a owl:DatatypeProperty ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
 
+# --- qwen35vl9bCaption (v0.18): Qwen3.5-VL-9B's raw caption (the current rig model) ---
+# The rig centralized to Qwen3.5-9B on Day 7. STABLE slug (1ux's call): the eye maps
+# the configured model → this hand-picked key via _MODEL_CAPTION_FIELD (eye.py), NOT
+# the auto-sanitized config string (which today yields `qwen359bmlx8bitCaption` — ugly
+# AND brittle: the `mlx8bit` quant suffix would silently change the slug on a quant/path
+# reconfig → a latent silent-drop). Decoupling the keyed field from the volatile config
+# string is the fix; `qwen35vl9bCaption` parallels qwenvl8bCaption's shape. Model-keyed
+# like all the others (no timestamp — image is immutable); copia:caption stays the
+# canonical latest-wins / embedding-source field.
+copia:qwen35vl9bCaption a owl:DatatypeProperty ;
+    rdfs:label "qwen-vl-9b caption" ;
+    rdfs:comment "Qwen3.5-VL-9B's raw caption of the rendered image (the current rig captioner). The model name is the field key — a STABLE hand-picked slug (the eye maps the configured model to it, decoupled from the auto-sanitized config string), so a quant/path reconfig of the same model doesn't silently change the key. copia:caption remains the canonical latest-wins caption." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:string .
+
 # --- renderPrompt (v0.9.2): the realized final render-prompt string ---
 # Distinct from sceneNarrative (the pre-render wish-prose handed to Qwen) and from
 # promptFragment (the UI's append-to-autogen-prompt channel). This is the prompt
@@ -1333,10 +1371,11 @@ copia:sceneStyle a owl:DatatypeProperty ;
 
 copia:sceneObjects a owl:DatatypeProperty ;
     rdfs:label "scene objects" ;
-    rdfs:comment "Notable ambient objects. Matches Moment field 'objects'." ;
+    rdfs:comment "Notable ambient objects. Matches Moment field 'objects'. Multi-valued on the Moment side (v0.18) — the eye emits a list of segment query-nouns; serializes as a Bag. On Place it's the authored default. (Cardinality is per-class: the Moment-side maxCardinality restriction was removed v0.18; Place untouched.)" ;
     rdfs:domain copia:Place ;
     rdfs:domain copia:Moment ;
-    rdfs:range xsd:string .
+    rdfs:range xsd:string ;
+    copia:ordering "bag" .
 
 # --- Per-character fields (3) — Being default ↔ Moment realized ---
 # WHO is no longer a scene field: `characters` is replaced by the depicts→Being
