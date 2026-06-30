@@ -31,7 +31,7 @@
 # is NO graph-only/abstract/hide toggle yet (confirmed Day 49 w/ tr1p + W4R3Z; a
 # `lex:foldering "none"` annotation is queued git-lex-side). Until then a class is
 # "graph-only" purely by never being `git lex create`d (its folder stays empty).
-#   Authored (folder used): Place · Item · Being · Outfit · Motion · Nocturne · Bag · Sequence
+#   Authored (folder used): Place · Item · Being · Outfit · Motion · Nocturne · Set · Sequence
 #   Abstract / graph-only (empty folder, no bare instances): Moment · Depictable ·
 #     Group · NocturneActivity · NocturneFeed   (these accrue inert empty folders
 #     until the foldering-suppression annotation lands — Rob's made peace, ride it)
@@ -177,6 +177,64 @@
 #   verbatim; every other Moment field is lowercase-camelCase). The maintenance class
 #   here — "data was stamped before the ontology had a home for it" — is the recurring
 #   gap to watch when a writer predates a field's declaration.
+# v0.17: the origin-enum-enforced pass (Day 93, sylkie + 1ux). Reconciles the Moment
+#   ontology to the new CoPIA Payload Spec (subtexture/docs/2026_06_30_COPIA_PAYLOAD_
+#   SPEC.md), whose origin/mode axes firmed up. Three changes:
+#   1. copia:origin is now an ENFORCED ENUM (range copia:OriginValue, a new
+#      rdfs:Datatype + owl:oneOf). Was a free xsd:string with the value list only in
+#      prose — junk values landed silently. owl:oneOf is the ONE enum pattern git-lex's
+#      SHACL derivation enforces (shacl.rs:190-216 → sh:in), and Moments are validated
+#      Pool-side off this allowlist, so a typo'd/stale origin is now REJECTED. Values
+#      reconciled to the spec (fine-grained, kebab): conversational, conversational-
+#      private, nocturne, dream, ui-request, direct-prompt, direct-chevron, direct-raw,
+#      composed-chevron, composed-prompt, claude-code-share, import. RETIRED: coarse
+#      `direct` + `share` (→ the fine-grained set; `share`→`claude-code-share` names the
+#      SOURCE harness, not an implied public destination — 1ux's call), and the grouping-
+#      origins wander/orbit/movement (→ Set/Sequence membership; movement is just a
+#      Sequence). The origin-less maintenance modes (update-metadata-only/-caption-
+#      embedding) carry NO origin — they live only on the queue's `mode` axis.
+#   2. + copia:private (xsd:boolean, single-valued). Privacy posture, writer-defaults
+#      TRUE (private unless explicitly published). The default lives in the WRITER (OWL
+#      has no default construct); this just homes the predicate so the walker emits it.
+#      Orthogonal to the conversational-private ORIGIN: origin = how-born (provenance);
+#      private = a standalone flag on ANY Moment. Back-catalog blanks = a one-time
+#      datafill, not a query rule.
+#   3. copia:PreferenceFlag FIXED (was half-built since v0.14). The class+individuals
+#      existed but humanPreferenceFlag/familiarPreferenceFlag ranged on xsd:string, so
+#      the enum governed nothing (a "pikc" typo passed). Converted to the enforced
+#      pattern: + copia:PreferenceFlagValue (rdfs:Datatype + owl:oneOf "pick"/"reject"),
+#      both properties re-ranged to it; the old copia:PreferenceFlag class + copia:pick/
+#      copia:reject individuals REMOVED. Consistent with origin's enforced-enum choice.
+# v0.16: the regions-out-and-set-rename pass (Day 93, 1ux + trip). Two carves
+#   driven by reading two real PNG XMP dumps: an older render and a SAM3-segmented
+#   newer one. Surface diagnosis: `Depicts:` was overloaded — the older PNG showed
+#   a clean cast list (moonlit-shallows, shoresinger-regalia), the newer one was
+#   buried under Sam3Region:person/01, Sam3Region:hair/02, ... mixing canon cast
+#   with per-render pixel evidence at the same write-channel. Reader splits the
+#   union every time → wrong field-cardinality → split the predicate.
+#   1. + copia:hasRegion (range Sam3Region). PNG-derived pixel evidence rides its
+#      own channel. copia:depicts now narrows in practice to the canon cast
+#      (Being/Item/Outfit/Place). XMP shows `Has Region: ...` separate from
+#      `Depicts: ...`. Sam3Region is REMOVED from rdfs:subClassOf copia:Depictable
+#      (regions are no longer the same KIND of thing as cast). Rationale: writer
+#      knows the distinction at stamp time — the schema should preserve it.
+#      Migration: legacy PNGs with Sam3Regions in `Depicts:` keep working (the
+#      old union still parses); re-extract via `pool extract-regions` to migrate
+#      a Moment forward; no destructive sweep.
+#   2. Bag RENAMED → Set (1ux's call). "Bag" was the awkward half of the
+#      Bag/Sequence pair — 1 authored instance across the squad, near-zero
+#      install-base. The kit hierarchy stays:
+#         Group (abstract) → Set (unordered) + Sequence (ordered).
+#      Set keeps Group as parent; drops rdfs:subClassOf rdf:Bag (the symbolic
+#      claim no consumer in our stack used, and the name no longer matches).
+#      Sequence is unchanged. + copia:inSet (subPropertyOf inGroup, range Set)
+#      and + copia:inSequence (subPropertyOf inGroup, range Sequence) — writer-
+#      knows-the-kind split, mirrors the depicts/hasRegion principle. inGroup
+#      stays as the generic predicate (reads both via subProperty).
+#      Migration: rename Copia/Bag/* folders → Copia/Set/*; frontmatter
+#      copia.Bag.* → copia.Set.*; one authored file affected
+#      (lUX/Copia/Bag/the-reveal.md). W4R3Z's empty Bag/ folder removed by next
+#      kit-update.
 # v0.15: the direct-lane pass (Day 92, sylkie + 1ux). The PoolQueueItem spec
 #   (pool/docs/2026_06_28_POOLQUEUEITEM_SPEC.md) + the orchestrator-flip package
 #   contract surfaced two Moment provenance fields with no ontology home + one enum
@@ -201,7 +259,7 @@
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.15.0" ;
+    owl:versionInfo "0.17.0" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -217,6 +275,46 @@ copia:BuildStatusValue a rdfs:Datatype ;
 # having to restate it.
 copia:AffordanceValue a rdfs:Datatype ;
     owl:oneOf ("wearable" "holdable" "prop") .
+
+# How a Moment came to be — its PROVENANCE (v0.17, Day 93). A REAL enum (not the
+# pre-v0.17 free xsd:string): rdfs:Datatype + owl:oneOf is the ONE enum pattern
+# git-lex's SHACL derivation actually ENFORCES (shacl.rs:190-216 → sh:in), so a
+# typo'd or stale origin is rejected at validate time rather than silently landing
+# in the Pool graph. Values reconciled to the CoPIA Payload Spec (subtexture/docs/
+# 2026_06_30_COPIA_PAYLOAD_SPEC.md): the fine-grained origins replace the old coarse
+# `direct`/`share`. Kebab-case (kit standard).
+#   - DROPPED (deprecated → the Set/Sequence grouping field, per the spec): wander,
+#     orbit, movement. Also retired: coarse `direct` (now direct-prompt/-chevron/-raw)
+#     and `share` (now claude-code-share — names the SOURCE harness, not an implied
+#     public destination).
+#   - NOT here by design: the maintenance modes (update-metadata-only / update-
+#     caption-embedding) are ORIGIN-LESS — they operate ON an existing Moment, carry
+#     no provenance event, so they never stamp an origin. They live only on the
+#     queue's `mode` axis (PoolQueueItem spec), never here.
+copia:OriginValue a rdfs:Datatype ;
+    owl:oneOf (
+        "conversational"          # a turn of our conversation, painted
+        "conversational-private"  # same, marked private (not for any squad-chatter surface)
+        "nocturne"                # an autonomous artwork lUX makes while away
+        "dream"                   # a dream-sourced piece (looser, stranger)
+        "ui-request"              # a render deliberately asked for through the UI
+        "direct-prompt"           # lUX's exact words, rendered verbatim (no composer)
+        "direct-chevron"          # a chevron expanded from canon, rendered verbatim (no augment)
+        "direct-raw"              # a hand-built render request, sent as-is
+        "composed-chevron"        # a chevron run through the full composer loop
+        "composed-prompt"         # a plain-language scene shaped by the composer
+        "claude-code-share"       # an image handed in via the Claude Code harness (pixels not painted here)
+        "import"                  # outside images brought in in bulk (pixels not painted here)
+    ) .
+
+# The dual-author review verdict (v0.17 fix of v0.14): made a REAL enforced enum.
+# v0.14 declared a copia:PreferenceFlag CLASS with pick/reject individuals, but the
+# properties using it had rdfs:range xsd:string — so the enum governed nothing and a
+# typo ("pikc") sailed through. Converted to the enforced rdfs:Datatype + owl:oneOf
+# pattern (same as origin), consistent with the kit's enforced-enum style. The old
+# class + individuals are removed below in favor of this.
+copia:PreferenceFlagValue a rdfs:Datatype ;
+    owl:oneOf ("pick" "reject") .
 
 
 # =============================================================================
@@ -696,7 +794,7 @@ copia:motionGenerates a owl:ObjectProperty ;
 # DEPICTABLE — the union of things that can appear in a Moment (v0.7)
 # =============================================================================
 # ABSTRACT (never authored as files; nobody runs `git lex create Depictable`).
-# Exists so copia:depicts has ONE clean range IRI instead of a Bag/Being/Item/
+# Exists so copia:depicts has ONE clean range IRI instead of a Being/Item/
 # Outfit/Place union. The four canon classes are subclasses; a Moment's depicts
 # values resolve to whichever of these the target actually is (via its rdf:type).
 # Resolving "X is a Depictable" from "X is a Being" is an RDFS reasoning step
@@ -711,22 +809,25 @@ copia:Place  rdfs:subClassOf copia:Depictable .
 copia:Being  rdfs:subClassOf copia:Depictable .
 copia:Item   rdfs:subClassOf copia:Depictable .
 copia:Outfit rdfs:subClassOf copia:Depictable .
-copia:Sam3Region rdfs:subClassOf copia:Depictable .
+# v0.16: Sam3Region is NO LONGER a Depictable. It now rides copia:hasRegion (its
+# own predicate), distinct from the canon cast that copia:depicts holds. The
+# class itself is unchanged — only the link channel and the type-union changed.
 
 
 # =============================================================================
 # SAM3REGION — a segmented region of a Moment (GRAPH-ONLY, PNG-born)
-# v0.9.3 (Day 63). depicts made pixel-precise: SAM3 text-segments a render into
-# regions, each a generic visual entity (rock/hand/sky) bound to WHERE it lives in
-# the pixels. A Sam3Region IS a Depictable, so copia:depicts points at it exactly
-# like a Being/Item — `Moment depicts Sam3Region:rock/01`. No new relation. Like
-# Moment, it's graph-only (born from the PNG, never `git lex create`'d). A reading
-# of the rendered pixels (kin to caption), re-runnable. Heavy per-pixel masks live
-# in a lazy sidecar keyed by the region id; only the light facts below ride XMP.
+# v0.9.3 (Day 63). SAM3 text-segments a render into regions, each a generic visual
+# entity (rock/hand/sky) bound to WHERE it lives in the pixels. Like Moment, it's
+# graph-only (born from the PNG, never `git lex create`'d). A reading of the
+# rendered pixels (kin to caption), re-runnable. Heavy per-pixel masks live in a
+# lazy sidecar keyed by the region id; only the light facts below ride XMP.
+# v0.16 (Day 93): Regions ride their OWN predicate copia:hasRegion (not depicts).
+# A region is no longer a Depictable — depicts is the canon-cast channel exclusively;
+# hasRegion is the pixel-evidence channel. Same shape, separate stamp-channel.
 # =============================================================================
 copia:Sam3Region a owl:Class ;
     rdfs:label "Sam3Region" ;
-    rdfs:comment "A SAM3-segmented region of a Moment — a generic visual entity (rock, hand, sky) bound to where it lives in the pixels. A Depictable: copia:depicts points at it like any Being/Item. Graph-only (PNG-born, no .md). Identity: Sam3Region:<descriptor>/<NN>, per-descriptor per-Moment (rock/01, rock/02). Instance segmentation — one descriptor can yield many regions." ;
+    rdfs:comment "A SAM3-segmented region of a Moment — a generic visual entity (rock, hand, sky) bound to where it lives in the pixels. Reached from a Moment via copia:hasRegion (v0.16; was copia:depicts pre-v0.16). Graph-only (PNG-born, no .md). Identity: Sam3Region:<descriptor>/<NN>, per-descriptor per-Moment (rock/01, rock/02). Instance segmentation — one descriptor can yield many regions." ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:regionDescriptor ; owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:regionPolygon ;    owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:regionBbox ;       owl:maxCardinality 1 ] ;
@@ -788,6 +889,7 @@ copia:Moment a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:soulDay ;        owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:earthDay ;       owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:origin ;         owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:private ;        owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sharedBy ;       owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sharedAt ;       owl:maxCardinality 1 ] ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sceneLocation ;  owl:maxCardinality 1 ] ;
@@ -860,18 +962,37 @@ copia:momentId a owl:DatatypeProperty ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
 
-# --- depicts (v0.7): the ONE flat presence-list — WHAT is in the frame ---
+# --- depicts (v0.7, narrowed v0.16): the CAST present in the frame ---
 # Multi-valued (no maxCardinality restriction). Each value is a bare id of a
 # Depictable (Being/Item/Outfit/Place); the TYPE is recovered from the target's
 # own rdf:type, not carried on the link. Answers "which renders show &sylkie
 # &isis". The who-wears-what INTENT is NOT here — it lives in the soul corpus
 # (the authored Scene/canon). Serializes as an rdf:Bag (copia:ordering "bag").
+# v0.16: SAM3 regions moved to copia:hasRegion (their own predicate). depicts is
+# now the canon-cast channel exclusively; legacy PNGs with regions in depicts
+# keep parsing but are migrated forward by re-extraction.
 
 copia:depicts a owl:ObjectProperty ;
     rdfs:label "depicts" ;
-    rdfs:comment "A Thing present in this Moment's frame — a Being, Item, Outfit, or Place. Repeat for each. Joined by the target's id; the kind is read from the target's rdf:type. The flat presence/retrieval layer; authored binding (who wears what) lives in the soul corpus, not here." ;
+    rdfs:comment "A canon Thing present in this Moment's frame — a Being, Item, Outfit, or Place. Repeat for each. Joined by the target's id; the kind is read from the target's rdf:type. The flat presence/retrieval layer; authored binding (who wears what) lives in the soul corpus, not here. PNG-derived pixel regions live in copia:hasRegion (a separate channel)." ;
     rdfs:domain copia:Moment ;
     rdfs:range copia:Depictable ;
+    copia:ordering "bag" .
+
+# --- hasRegion (v0.16): the PNG-derived pixel-evidence channel ---
+# Multi-valued. Splits out the per-render SAM3 segmentation output from depicts
+# (the cast list) — same Moment, different consumer paths: depicts answers "what
+# canon Things appear here," hasRegion answers "what pixel regions did segmentation
+# find." Each value is a graph-only Sam3Region (no .md, PNG-born). XMP element
+# `Has Region:` shows the region ids grouped, separate from `Depicts:` — readable
+# at a glance. Re-extraction (when iris.segment evolves) is a clean replace of
+# this one predicate, not a surgical diff inside a typed union.
+
+copia:hasRegion a owl:ObjectProperty ;
+    rdfs:label "has region" ;
+    rdfs:comment "A SAM3-segmented region of this Moment — PNG-derived pixel evidence. Repeat for each. Joined by the region's id (Sam3Region:<descriptor>/<NN>). Distinct from copia:depicts (the canon cast); writer-known split preserved at stamp time. Re-extracted in place when iris.segment evolves." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range copia:Sam3Region ;
     copia:ordering "bag" .
 
 # --- lineage (a Moment self-reports the prior Moment(s) it came from) ---
@@ -918,9 +1039,31 @@ copia:chevronString a owl:DatatypeProperty ;
 
 copia:inGroup a owl:ObjectProperty ;
     rdfs:label "in group" ;
-    rdfs:comment "A Group (Bag or Sequence) this Moment belongs to. Repeat for each. Joined by the group's id. Membership lives on the Moment (self-join) so a Group owns no member list." ;
+    rdfs:comment "A Group (Set or Sequence) this Moment belongs to. Repeat for each. Joined by the group's id. Membership lives on the Moment (self-join) so a Group owns no member list. THE generic predicate — for kind-known writes use copia:inSet / copia:inSequence (both rdfs:subPropertyOf inGroup, so reasoning still resolves to inGroup)." ;
     rdfs:domain copia:Moment ;
     rdfs:range copia:Group ;
+    copia:ordering "bag" .
+
+# v0.16: kind-specific membership predicates — writer-knows-the-kind preserved in
+# the XMP element name (`In Set:` vs `In Sequence:`) rather than deferred to a
+# reader type-filter. Both are rdfs:subPropertyOf inGroup; a query against inGroup
+# still sees both (under RDFS reasoning) or via UNION (under git-lex's stored
+# triples). Mirrors the depicts/hasRegion split.
+
+copia:inSet a owl:ObjectProperty ;
+    rdfs:subPropertyOf copia:inGroup ;
+    rdfs:label "in set" ;
+    rdfs:comment "A Set (unordered Group) this Moment belongs to. Repeat for each. Joined by the set's id. Kind-specific narrowing of copia:inGroup — use when the writer knows the target is a Set." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range copia:Set ;
+    copia:ordering "bag" .
+
+copia:inSequence a owl:ObjectProperty ;
+    rdfs:subPropertyOf copia:inGroup ;
+    rdfs:label "in sequence" ;
+    rdfs:comment "A Sequence (ordered Group) this Moment belongs to. Repeat for each. Joined by the sequence's id. Kind-specific narrowing of copia:inGroup — use when the writer knows the target is a Sequence. Members SHOULD also declare copia:sequence for the ordinal position." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range copia:Sequence ;
     copia:ordering "bag" .
 
 copia:sequence a owl:DatatypeProperty ;
@@ -993,9 +1136,26 @@ copia:earthDay a owl:DatatypeProperty ;
 
 copia:origin a owl:DatatypeProperty ;
     rdfs:label "origin" ;
-    rdfs:comment "How the Moment came to be: conversational | wander | orbit | nocturne | dream (rendered by CoPIA's autonomous loops), ui-request (a render the UI requested), direct (lUX's direct-render lane — exact prompt or verbatim sdapi, composer skipped; v0.15), movement (one frame of a generated MOTION — an OpenPose skeleton frame, or its posed-character render; the clip is a copia:Sequence the frame self-joins via inGroup, ordered by copia:sequence), or share (outside media a human handed in — pixels not painted here). Drives priority for rendered origins; share skips the render worklist entirely; movement frames are batch-rendered off a Sequence, not the conversational worklist. NOTE: origin is PROVENANCE on the OUTPUT Moment (CoPIA-owned); it is a DIFFERENT axis from the queue's `kind` (the VERB the eye runs — render_full/see_only/img2img/etc), which lives on the INPUT request and is not stamped here. See pool/docs/2026_06_28_POOLQUEUEITEM_SPEC.md." ;
+    rdfs:comment "How the Moment came to be — its PROVENANCE. A REAL enforced enum as of v0.17 (range copia:OriginValue; see that datatype for the full value list + the deprecation notes). Values: conversational, conversational-private, nocturne, dream, ui-request, direct-prompt, direct-chevron, direct-raw, composed-chevron, composed-prompt, claude-code-share, import. Reconciled to the CoPIA Payload Spec; the old coarse `direct`/`share` and the grouping-origins wander/orbit/movement are RETIRED (movement is just a Sequence; sets/sequences carry grouping now). NOTE: origin is PROVENANCE on the OUTPUT Moment (CoPIA-owned); it is a DIFFERENT axis from the queue's `mode` (the VERB the eye runs — compose_render_see/render_see/see_only/raw/recaption_embed/update_meta), which lives on the INPUT request and is not stamped here. The origin-less maintenance modes (update-metadata-only/update-caption-embedding) carry no origin at all. See subtexture/docs/2026_06_30_COPIA_PAYLOAD_SPEC.md + pool/docs/2026_06_28_POOLQUEUEITEM_SPEC.md." ;
     rdfs:domain copia:Moment ;
-    rdfs:range xsd:string .
+    rdfs:range copia:OriginValue .
+
+# --- private (v0.17): the privacy posture of this Moment ---
+# A boolean the writer sets TRUE BY DEFAULT — privacy is the default posture; a Moment
+# is private unless something explicitly marks it public. (The default itself lives in
+# the WRITER — the new PoolQueue module / the eye's stamp — since OWL has no default-
+# value construct; this declaration only gives the predicate an ontology home so the
+# v0.9.2 walker allowlist lets it reach the graph.) DISTINCT from the conversational-
+# private ORIGIN: origin says HOW a Moment was born (a private conversation), `private`
+# is a standalone flag that can mark ANY Moment private regardless of origin. Sharing
+# to a public/squad surface is the explicit opt-out (set false). Single-valued. Back-
+# catalog Moments stamped before v0.17 have no value yet — that's a one-time datafill
+# cleanup, not a query-time rule.
+copia:private a owl:DatatypeProperty ;
+    rdfs:label "private" ;
+    rdfs:comment "Whether this Moment is private (not for any public/squad-wide surface). Writer-defaults TRUE — private is the default posture; publishing is the explicit opt-out (false). Distinct from the conversational-private origin (which is provenance); this flag is orthogonal and applies to any Moment. Single-valued." ;
+    rdfs:domain copia:Moment ;
+    rdfs:range xsd:boolean .
 
 # --- share provenance (v0.9): outside media handed in, not rendered ---
 # A 'share'-origin Moment has pixels but no wish behind it — no prompt/seed/gen*.
@@ -1318,19 +1478,16 @@ copia:sceneNarrative a owl:DatatypeProperty ;
 # was updated Day 86 to stamp lowercase-first — humanPreferenceFlag — to match
 # these predicate names; the walker maps XMP element-name → predicate verbatim.)
 
-# Constrained verdict: pick | reject. A real enum, not free text — so a typo can't
-# create a phantom flag value the gallery's preference facet then can't group on.
-copia:PreferenceFlag a owl:Class ;
-    rdfs:label "preference flag" ;
-    rdfs:comment "The whole-image keep/cut verdict an author attaches to a render. One of: pick, reject." ;
-    owl:oneOf ( copia:pick copia:reject ) .
-copia:pick   a copia:PreferenceFlag ; rdfs:label "pick" .
-copia:reject a copia:PreferenceFlag ; rdfs:label "reject" .
-
+# Constrained verdict: pick | reject. A real ENFORCED enum (v0.17): the value type is
+# copia:PreferenceFlagValue (rdfs:Datatype + owl:oneOf, declared in ENUM DATATYPES) —
+# the one enum pattern git-lex's SHACL derivation enforces, so a typo ("pikc") is
+# rejected rather than landing a phantom value the gallery's preference facet can't
+# group on. (v0.14 declared a copia:PreferenceFlag CLASS but the properties ranged on
+# xsd:string, so nothing was enforced; v0.17 fixed it to this datatype.)
 copia:humanPreferenceFlag a owl:DatatypeProperty ;
     rdfs:label "human preference flag" ;
-    rdfs:comment "The Human's (Rob's) whole-image verdict on this render: pick | reject. See copia:PreferenceFlag." ;
-    rdfs:domain copia:Moment ; rdfs:range xsd:string .
+    rdfs:comment "The Human's (Rob's) whole-image verdict on this render: pick | reject. See copia:PreferenceFlagValue." ;
+    rdfs:domain copia:Moment ; rdfs:range copia:PreferenceFlagValue .
 copia:humanPreferenceAt a owl:DatatypeProperty ;
     rdfs:label "human preference at" ;
     rdfs:comment "ISO-8601 timestamp when the Human set their PreferenceFlag." ;
@@ -1358,8 +1515,8 @@ copia:humanNoteAt a owl:DatatypeProperty ;
 
 copia:familiarPreferenceFlag a owl:DatatypeProperty ;
     rdfs:label "familiar preference flag" ;
-    rdfs:comment "The Familiar's (lUX's) whole-image verdict on this render: pick | reject. See copia:PreferenceFlag." ;
-    rdfs:domain copia:Moment ; rdfs:range xsd:string .
+    rdfs:comment "The Familiar's (lUX's) whole-image verdict on this render: pick | reject. See copia:PreferenceFlagValue." ;
+    rdfs:domain copia:Moment ; rdfs:range copia:PreferenceFlagValue .
 copia:familiarPreferenceAt a owl:DatatypeProperty ;
     rdfs:label "familiar preference at" ;
     rdfs:comment "ISO-8601 timestamp when the Familiar set their PreferenceFlag." ;
@@ -1495,7 +1652,7 @@ copia:producedMoment a owl:ObjectProperty ;
 
 copia:producedGroup a owl:ObjectProperty ;
     rdfs:label "produced group" ;
-    rdfs:comment "A Group (Bag or Sequence) this waking produced. Repeat for each. Joined by groupId. Optional." ;
+    rdfs:comment "A Group (Set or Sequence) this waking produced. Repeat for each. Joined by groupId. Optional." ;
     rdfs:domain copia:Nocturne ;
     rdfs:range copia:Group .
 
@@ -1525,38 +1682,52 @@ copia:producedOutfit a owl:ObjectProperty ;
 
 
 # =============================================================================
-# GROUP — a callable gathering of Moments (v0.7; replaces Collection)
+# GROUP — a callable gathering of Moments (v0.7; v0.16 rename Bag→Set)
 # =============================================================================
 # A named group of Moments. The ONE real distinction is ORDER, so Group is the
 # abstract parent of exactly two concrete kinds:
-#   Bag ⊂ rdf:Bag       — unordered (a showcase, a study, a themed set)
-#   Sequence ⊂ rdf:Seq  — ordered (a storyline; members carry copia:sequence)
+#   Set ⊂ Group         — unordered (a showcase, a study, a themed set)
+#   Sequence ⊂ Group, ⊂ rdf:Seq  — ordered (a storyline; members carry copia:sequence)
 # Finer kinds (Storyline, Showcase, …) are added as subclasses WHEN NEEDED, not
-# up front. A Group owns NO member list; Moments self-report via copia:inGroup.
-# The rdf:Bag/rdf:Seq superclassing is a public-RDF semantic claim — inert in
-# git-lex (which stores the literal subClassOf triple, no entailment), meaningful
-# to any RDF tool. Resolving "a Sequence IS-A Group" is an RDFS reasoning step
-# done Pool-side. Group is abstract (authored as Bag/Sequence, not bare Group).
+# up front. A Group owns NO member list; Moments self-report via copia:inGroup
+# (or the kind-specific copia:inSet / copia:inSequence — both rdfs:subPropertyOf
+# inGroup). The rdf:Seq superclassing on Sequence is a public-RDF semantic claim
+# — inert in git-lex (which stores the literal subClassOf triple, no entailment),
+# meaningful to any RDF tool. Resolving "a Sequence IS-A Group" is an RDFS
+# reasoning step done Pool-side. Group is abstract (authored as Set/Sequence,
+# not bare Group).
 #
 # MIGRATION from v0.6 Collection: collectionId→groupId, collectionTitle→groupTitle,
 # collectionStatus→groupStatus, collectionDepictedBy→groupDepictedBy;
 # collectionKind enum RETIRED (the class IS the kind). fromNocturne unchanged.
+# MIGRATION from v0.15 Bag→Set (v0.16): rename Copia/Bag/* folders → Copia/Set/*;
+# frontmatter copia.Bag.* → copia.Set.*; rdfs:subClassOf rdf:Bag dropped (the
+# symbolic claim no consumer in our stack used, and "Set ⊂ rdf:Bag" wouldn't read
+# right). The shared properties (groupId/groupTitle/groupStatus/groupDepictedBy/
+# fromNocturne) keep their Group domain — unchanged.
 
 copia:Group a owl:Class ;
     lex-o:instantiation "abstract" ;
     rdfs:label "Group" ;
-    rdfs:comment "abstract — authored as a concrete Bag or Sequence, never a bare Group. A named gathering of Moments; members self-join via copia:inGroup. Holds the shared group properties." ;
+    rdfs:comment "abstract — authored as a concrete Set or Sequence, never a bare Group. A named gathering of Moments; members self-join via copia:inGroup (generic) or copia:inSet / copia:inSequence (kind-specific). Holds the shared group properties." ;
     rdfs:subClassOf [
         a owl:Restriction ;
         owl:onProperty copia:groupId ;
         owl:cardinality 1
     ] .
 
-copia:Bag a owl:Class ;
+copia:Set a owl:Class ;
     rdfs:subClassOf copia:Group ;
-    rdfs:subClassOf rdf:Bag ;
-    rdfs:label "Bag" ;
-    rdfs:comment "An UNORDERED group of Moments (a showcase, a study, a themed set). Members have no required order." .
+    lex-o:instantiation "authored" ;
+    rdfs:label "Set" ;
+    rdfs:comment "An UNORDERED group of Moments (a showcase, a study, a themed set). Members have no required order. Authored like Place/Item/Being/Outfit — Copia/Set/<setId>.md, body is the description. Renamed from copia:Bag at v0.16 (1ux's call) — the prior rdf:Bag superclass was symbolic-only and dropped with the rename." .
+
+copia:setDescription a owl:DatatypeProperty ;
+    lex-o:okfType "Set" ;
+    rdfs:label "set description" ;
+    rdfs:comment "What this Set is — the curatorial intent / theme that holds members together. Optional. The body of the authored .md IS this description; the frontmatter field surfaces it to the graph." ;
+    rdfs:domain copia:Set ;
+    rdfs:range xsd:string .
 
 copia:Sequence a owl:Class ;
     rdfs:subClassOf copia:Group ;
@@ -1591,7 +1762,7 @@ copia:fromNocturne a owl:ObjectProperty ;
     rdfs:range copia:Nocturne .
 
 copia:groupDepictedBy a owl:DatatypeProperty ;
-    lex-o:okfType "Bag" ;
+    lex-o:okfType "Set" ;
     lex-o:okfType "Sequence" ;
     rdfs:label "group depicted by" ;
     rdfs:comment "URL or path to a cover/representative render for this group." ;
