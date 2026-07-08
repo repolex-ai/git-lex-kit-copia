@@ -274,6 +274,7 @@
 #   Moments aren't silently gated out of the graph when the lane lands.
 # =============================================================================
 
+# loop-test marker (Day 100): harmless comment to verify the source→kit→.lex/ loop. Safe to remove.
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
