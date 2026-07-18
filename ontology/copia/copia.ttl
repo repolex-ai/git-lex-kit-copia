@@ -1,4 +1,4 @@
-@prefix lex-o: <https://repolex.ai/ontology/lex-o/> .
+@prefix git-lex: <https://repolex.ai/ontology/git-lex/> .
 @prefix soul:  <https://repolex.ai/ontology/kit/soul/> .
 @prefix copia: <https://repolex.ai/ontology/kit/copia/> .
 @prefix owl:   <http://www.w3.org/2002/07/owl#> .
@@ -26,15 +26,19 @@
 # Kit: copia   ·   Namespace: copia: = https://repolex.ai/ontology/kit/copia/
 # Extends: soul: (soul kit)
 #
-# Foldering (git-lex behavior, verified in shacl.rs:122 + main.rs:3169): EVERY
-# owl:Class in this namespace gets a /Copia/<Class> folder, unconditionally. There
-# is NO graph-only/abstract/hide toggle yet (confirmed Day 49 w/ tr1p + W4R3Z; a
-# `lex:foldering "none"` annotation is queued git-lex-side). Until then a class is
-# "graph-only" purely by never being `git lex create`d (its folder stays empty).
-#   Authored (folder used): Place · Item · Being · Outfit · Motion · Nocturne · Set · Sequence
-#   Abstract / graph-only (empty folder, no bare instances): Moment · Depictable ·
-#     Group · NocturneActivity · NocturneFeed   (these accrue inert empty folders
-#     until the foldering-suppression annotation lands — Rob's made peace, ride it)
+# Foldering (git-lex behavior, v0.19 — Day 65 ruling, 2026-07-18): OPT-IN. A class
+# gets a /Copia/<Class> authoring folder IF AND ONLY IF it carries
+# `git-lex:foldered true`. Untagged classes are graph-only / vocabulary-only — no
+# folder is scaffolded. This REPLACES the retired lex-o:instantiation gate (and lex-o
+# entirely). git-lex: is the app-core namespace every kit imports; foldering is a
+# git-lex behavior, so its flag lives there. See subtexture/docs/ontology/
+# 2026_07_18_FOLDERING_GATE_AND_LEX_O_RETIREMENT.md.
+#   Foldered (authored via `git lex create`, git-lex:foldered true): Place · Item ·
+#     Being · Outfit · Motion · Nocturne · NocturneActivity · NocturneFeed · Set · Sequence
+#   Graph-only / vocabulary (NO tag, no folder): Moment · Depictable · Sam3Region ·
+#     Group · CameraAngle · CameraDistance · CameraLens · CameraFraming · SubjectView ·
+#     CameraFocus · Pose · Action   (vocab classes hold named individuals; Moment/
+#     Sam3Region are PNG-born; Group/Depictable are abstract parents)
 #
 # THE MODEL (v0.4, spec: copia-studio/docs/2026_06_06_COPIA_DATA_MODEL_SPEC.md):
 #   CANON (authored, persisted, foldered): Place · Being · Item · Outfit.
@@ -277,7 +281,7 @@
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.18.0" ;
+    owl:versionInfo "0.19.0" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -353,7 +357,7 @@ copia:ordering a owl:AnnotationProperty ;
 # A location you can be in. Places connect to other Places.
 
 copia:Place a owl:Class ;
-    rdfs:subClassOf lex-o:Physical ;
+    git-lex:foldered true ;
     rdfs:label "Place" ;
     rdfs:comment "A location in an inner-world. Carries scene-field defaults the resolver expands into prompt text." ;
     rdfs:subClassOf [
@@ -375,7 +379,6 @@ copia:placeName a owl:DatatypeProperty ;
     rdfs:range xsd:string .
 
 copia:placeDescription a owl:DatatypeProperty ;
-    lex-o:okfType "Place" ;
     rdfs:label "place description" ;
     rdfs:comment "Canonical prose grounding — the human-readable anchor; scene* fields carry the structured defaults." ;
     rdfs:domain copia:Place ;
@@ -418,8 +421,7 @@ copia:depictedBy a owl:DatatypeProperty ;
 # The atomic thing. Worn, held, or an ambient prop (see affordance).
 
 copia:Item a owl:Class ;
-    rdfs:subClassOf lex-o:Physical ;
-    lex-o:okfType "Item" ;
+    git-lex:foldered true ;
     rdfs:label "Item" ;
     rdfs:comment "A thing. Its look is its description; affordance says how it appears in a scene (wearable/holdable/prop)." ;
     rdfs:subClassOf [
@@ -483,7 +485,7 @@ copia:itemDepictedBy a owl:DatatypeProperty ;
 # Anyone in the world. Carries scene-field defaults (its characteristic look).
 
 copia:Being a owl:Class ;
-    rdfs:subClassOf lex-o:Physical ;
+    git-lex:foldered true ;
     rdfs:label "Being" ;
     rdfs:comment "An agent or character. Located in a Place, may equip Items, may wear an Outfit by default." ;
     rdfs:subClassOf [
@@ -529,7 +531,6 @@ copia:wears a owl:ObjectProperty ;
     rdfs:range copia:Outfit .
 
 copia:beingDepictedBy a owl:DatatypeProperty ;
-    lex-o:okfType "Being" ;
     rdfs:label "being depicted by" ;
     rdfs:comment "URL or path to a render of this being." ;
     rdfs:domain copia:Being ;
@@ -544,8 +545,7 @@ copia:beingDepictedBy a owl:DatatypeProperty ;
 # Owns no scene fields; the look comes from its member Items' descriptions.
 
 copia:Outfit a owl:Class ;
-    rdfs:subClassOf lex-o:Physical ;
-    lex-o:okfType "Outfit" ;
+    git-lex:foldered true ;
     rdfs:label "Outfit" ;
     rdfs:comment "A named, reusable bundle of Items (a 'look'/'loadout'). A convenience join — summon the set as one. A single garment needs no Outfit; it's just an Item(wearable)." ;
     rdfs:subClassOf [
@@ -749,8 +749,7 @@ copia:environment a copia:CameraFocus ; rdfs:label "the surrounding environment"
 # thing-you-make; Sequence is one realization of it.
 
 copia:Motion a owl:Class ;
-    rdfs:subClassOf lex-o:Physical ;
-    lex-o:okfType "Motion" ;
+    git-lex:foldered true ;
     rdfs:label "Motion" ;
     rdfs:comment "A named, reusable MOVEMENT — authored like an Outfit/Item. Holds the recipe (trigger word, generating text, duration); firing it (chevron, e.g. !jump) runs Iris.move → an OpenPose Sequence of origin=movement frames. The recipe, not the frames." ;
     rdfs:subClassOf [
@@ -819,7 +818,6 @@ copia:motionGenerates a owl:ObjectProperty ;
 # (Pool-side); git-lex stores only the literal subClassOf triple + the direct type.
 
 copia:Depictable a owl:Class ;
-    lex-o:instantiation "abstract" ;
     rdfs:label "Depictable" ;
     rdfs:comment "abstract — not authored as files. The union of things a Moment can depict (Being/Item/Outfit/Place). Gives copia:depicts a single range IRI." .
 
@@ -884,7 +882,6 @@ copia:regionScore a owl:DatatypeProperty ;
 # CoPIA oxigraph by the render pipeline (PNGs ingested as triples), never as .md.
 
 copia:Moment a owl:Class ;
-    lex-o:instantiation "graph-only" ;
     rdfs:label "Moment" ;
     rdfs:comment "A rendered PNG + its metadata. Graph-only — not authored as a file. Stores the realized scene fields, a flat `depicts` presence-list, group membership, and provenance." ;
     rdfs:subClassOf [
@@ -1592,7 +1589,7 @@ copia:familiarNoteAt a owl:DatatypeProperty ;
 # added only when the loop actually traverses them.
 
 copia:NocturneActivity a owl:Class ;
-    lex-o:okfType "Nocturne Activity" ;
+    git-lex:foldered true ;
     rdfs:label "Nocturne Activity" ;
     rdfs:comment "A kind of autonomous activity lUX can choose when she wakes (NocturneTime). What it is / how it runs lives in the document body; this carries only the id." ;
     rdfs:subClassOf [
@@ -1608,7 +1605,7 @@ copia:nocturneActivityId a owl:DatatypeProperty ;
     rdfs:range xsd:string .
 
 copia:NocturneFeed a owl:Class ;
-    lex-o:okfType "Nocturne Feed" ;
+    git-lex:foldered true ;
     rdfs:label "Nocturne Feed" ;
     rdfs:comment "A source of fresh outside material lUX can draw on when she wakes — a window to outside art/data. Why/how she reads it lives in the body; carries id + source." ;
     rdfs:subClassOf [
@@ -1642,7 +1639,7 @@ copia:feedSource a owl:DatatypeProperty ;
 # the body, only ids/links as fields.
 
 copia:Nocturne a owl:Class ;
-    lex-o:okfType "Nocturne" ;
+    git-lex:foldered true ;
     rdfs:label "Nocturne" ;
     rdfs:comment "One autonomous waking (NocturneTime). lUX authors it; the body is her artist statement. Ties together what (if anything) the wake produced. All produced* links optional — an image-less wake is first-class." ;
     rdfs:subClassOf [
@@ -1746,7 +1743,6 @@ copia:producedOutfit a owl:ObjectProperty ;
 # fromNocturne) keep their Group domain — unchanged.
 
 copia:Group a owl:Class ;
-    lex-o:instantiation "abstract" ;
     rdfs:label "Group" ;
     rdfs:comment "abstract — authored as a concrete Set or Sequence, never a bare Group. A named gathering of Moments; members self-join via copia:inGroup (generic) or copia:inSet / copia:inSequence (kind-specific). Holds the shared group properties." ;
     rdfs:subClassOf [
@@ -1757,12 +1753,11 @@ copia:Group a owl:Class ;
 
 copia:Set a owl:Class ;
     rdfs:subClassOf copia:Group ;
-    lex-o:instantiation "authored" ;
+    git-lex:foldered true ;
     rdfs:label "Set" ;
     rdfs:comment "An UNORDERED group of Moments (a showcase, a study, a themed set). Members have no required order. Authored like Place/Item/Being/Outfit — Copia/Set/<setId>.md, body is the description. Renamed from copia:Bag at v0.16 (1ux's call) — the prior rdf:Bag superclass was symbolic-only and dropped with the rename." .
 
 copia:setDescription a owl:DatatypeProperty ;
-    lex-o:okfType "Set" ;
     rdfs:label "set description" ;
     rdfs:comment "What this Set is — the curatorial intent / theme that holds members together. Optional. The body of the authored .md IS this description; the frontmatter field surfaces it to the graph." ;
     rdfs:domain copia:Set ;
@@ -1771,6 +1766,7 @@ copia:setDescription a owl:DatatypeProperty ;
 copia:Sequence a owl:Class ;
     rdfs:subClassOf copia:Group ;
     rdfs:subClassOf rdf:Seq ;
+    git-lex:foldered true ;
     rdfs:label "Sequence" ;
     rdfs:comment "An ORDERED group of Moments (a storyline / comic). Members SHOULD declare copia:sequence." .
 
@@ -1801,8 +1797,6 @@ copia:fromNocturne a owl:ObjectProperty ;
     rdfs:range copia:Nocturne .
 
 copia:groupDepictedBy a owl:DatatypeProperty ;
-    lex-o:okfType "Set" ;
-    lex-o:okfType "Sequence" ;
     rdfs:label "group depicted by" ;
     rdfs:comment "URL or path to a cover/representative render for this group." ;
     rdfs:domain copia:Group ;
@@ -1825,7 +1819,6 @@ copia:groupDepictedBy a owl:DatatypeProperty ;
 # wanted). Grows freely: add an individual, done. Soul-.md only for rare bespoke poses.
 
 copia:Pose a owl:Class ;
-    rdfs:subClassOf lex-o:Physical ;
     rdfs:label "Pose" ;
     rdfs:comment "A specific, nameable body position (supine, s-curve, lotus) — the refinement WITHIN an Action, not the activity itself. Context-free: the Pose does not know its Actions (the opinion lives on the Action via suggestsPose). Bare natural-name ids (no defensive suffix; poses are nouns, actions are gerunds, so they don't collide). Soul-.md only for rare bespoke poses." .
 
@@ -1922,7 +1915,6 @@ copia:dive-streamline a copia:Pose ; rdfs:label "dive-streamline" ;
 # Searchable ("all swimming images"). Kit vocab; soul individuals when wanted.
 
 copia:Action a owl:Class ;
-    rdfs:subClassOf lex-o:Physical ;
     rdfs:label "Action" ;
     rdfs:comment "A named activity the subject is doing (lying, sitting, posing, dancing) — the SUBJECT cluster's verb axis and the spine of the subject model. Each Action curates its fitting poses via suggestsPose (many-to-many). Searchable. Kit vocab; soul individuals when wanted." .
 
