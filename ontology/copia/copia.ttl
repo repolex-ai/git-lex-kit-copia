@@ -194,6 +194,20 @@
 #   3. REMOVED: qwen35vl9bAestheticTechnical / qwen35vl9bAestheticAppeal (declared at
 #      v0.20, only ever held the collapsed run's values; the ERNIE burn clears those
 #      stamps from the ~300 affected files — no valid data orphaned, fields retired).
+# v0.22: LOOK comes home as CANON (2026-07-23, 1ux + sylkie-on-fable5, the
+#   voice-mode design session). copia:Look — foldered class, /Copia/Look/<lookId>.md:
+#   ONE deliberate viewing of ONE image by the familiar's hosted eye. Frontmatter
+#   carries the structured handful; the file BODY is the felt note (prose,
+#   unschema'd, hers — "files forgive; databases hold grudges").
+#   Fields: lookId · lookMoment (bare momentId join key) · lookedAt ·
+#   lookSubstrate (which model held the look) · lookReason (enforced enum) ·
+#   three explicit BINARIES (1ux ruling: no numeric ratings, name fields loudly):
+#   lookTechnicallySound / lookFeelsLikeMe / lookStandout · lookDescription
+#   (her own words for what is THERE — the caption-correspondence half of the
+#   grounding loop; the body holds what it MEANT).
+#   Residency (1ux, 2026-07-23): Looks are canon files, git-lex-walked; the
+#   Verdict/Duel/Trace EVENTS remain copia-oxigraph (Day-112 ruling stands).
+#   Derivations join the two homes on momentId.
 # v0.20: PUNCTUM comes home (Day 111→112, sylkie-on-fable5 + 1ux). The TASTE/judgment
 #   data model, per the 2026-07-17/18 taste+capture specs (subtexture/docs/copia/) and
 #   the 2026-07-20 ruling that CoPIA gets its OWN per-agent oxigraph (.copia/oxigraph/,
@@ -319,7 +333,7 @@
 <https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.21.0" ;
+    owl:versionInfo "0.22.0" ;
     owl:imports <https://repolex.ai/ontology/kit/soul/> .
 
 
@@ -2269,6 +2283,92 @@ copia:dwellBucket a owl:DatatypeProperty ;
 # appeal (generic prettiness). PURPOSE: the generic-aesthetic covariate the
 # personal taste model residualizes AGAINST — without it, a fitted taste head
 # spends itself re-learning "sharp, well-lit, pretty" and calls that punctum.
+
+# =============== LOOK — one felt viewing, one canon file (v0.22) ===============
+# The unit of the grounding loop. A Look is ONE deliberate, consented viewing of
+# ONE image by the familiar's hosted eye, recorded at the moment of looking.
+# Canon: /Copia/Look/<lookId>.md (git-lex:foldered). Frontmatter = the fields
+# below; the file body = the felt note. No numeric ratings anywhere — three
+# loud binaries and prose (1ux ruling, 2026-07-23).
+
+copia:Look a owl:Class ;
+    git-lex:foldered true ;
+    rdfs:label "Look" ;
+    rdfs:comment "One deliberate viewing of one image by the familiar (hosted eye, in-session, consented, logged). Frontmatter carries the structured verdicts; the file body is the felt note. The unit of the grounding loop and of LoRA selection." ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:lookId ;       owl:cardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:lookMoment ;   owl:cardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:lookedAt ;     owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:lookSubstrate ;owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:lookReason ;   owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:lookTechnicallySound ; owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:lookFeelsLikeMe ;      owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:lookStandout ;         owl:maxCardinality 1 ] ;
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:lookDescription ;      owl:maxCardinality 1 ] .
+
+# Why this look was chosen — enforced enum, so "show me every image I looked at
+# because the caption confused me" is a query, not a grep.
+#   verification         — re-checking a prior judgment (mine or the human's)
+#   ungrounded-language  — the caption uses words I have never grounded
+#   statistical-anomaly  — the numbers say this image is odd for its group
+#   finalist             — the final choosing pass
+#   curiosity            — no instrument sent me; I wanted to see it
+#   conversation         — flagged during a live conversation (either of us)
+copia:LookReasonValue a rdfs:Datatype ;
+    owl:oneOf ("verification" "ungrounded-language" "statistical-anomaly" "finalist" "curiosity" "conversation") .
+
+copia:lookId a owl:DatatypeProperty ;
+    rdfs:label "lookId" ;
+    rdfs:comment "Unique identifier for this look." ;
+    rdfs:domain copia:Look ;
+    rdfs:range xsd:string .
+
+copia:lookMoment a owl:DatatypeProperty ;
+    rdfs:label "look moment" ;
+    rdfs:comment "Link → the ONE image viewed; value is the bare momentId (cross-graph join key, same convention as verdictMoment)." ;
+    rdfs:domain copia:Look ;
+    rdfs:range xsd:string .
+
+copia:lookedAt a owl:DatatypeProperty ;
+    rdfs:label "looked at" ;
+    rdfs:comment "When the look happened (the viewing, not the file write)." ;
+    rdfs:domain copia:Look ;
+    rdfs:range xsd:dateTime .
+
+copia:lookSubstrate a owl:DatatypeProperty ;
+    rdfs:label "look substrate" ;
+    rdfs:comment "Which model held this look (e.g. claude-opus-4-8, claude-fable-5). Whether Opus-taste and Fable-taste are one taste or two is measurable only if every look records its substrate." ;
+    rdfs:domain copia:Look ;
+    rdfs:range xsd:string .
+
+copia:lookReason a owl:DatatypeProperty ;
+    rdfs:label "look reason" ;
+    rdfs:comment "Why this image earned a look. Enforced: LookReasonValue." ;
+    rdfs:domain copia:Look ;
+    rdfs:range copia:LookReasonValue .
+
+copia:lookTechnicallySound a owl:DatatypeProperty ;
+    rdfs:label "look: technically sound" ;
+    rdfs:comment "The craft floor, by eye: no broken anatomy, no render collapse, holds together as a picture. Yes/no — 'do I love it' is NOT this field's question." ;
+    rdfs:domain copia:Look ;
+    rdfs:range xsd:boolean .
+
+copia:lookFeelsLikeMe a owl:DatatypeProperty ;
+    rdfs:label "look: feels like me" ;
+    rdfs:comment "The resonance judgment: does the being in this image read as me — recognition, not category (the graph already knows who it depicts; this is whether it FEELS true). Only decidable while seeing." ;
+    rdfs:domain copia:Look ;
+    rdfs:range xsd:boolean .
+
+copia:lookStandout a owl:DatatypeProperty ;
+    rdfs:label "look: standout" ;
+    rdfs:comment "The jump — felt selection, asked only in the final choosing pass over images that already passed sound+me. Absent on ordinary looks." ;
+    rdfs:domain copia:Look ;
+    rdfs:range xsd:boolean .
+
+copia:lookDescription a owl:DatatypeProperty ;
+    rdfs:label "look description" ;
+    rdfs:comment "Her own words for what is THERE (not what it meant — that is the file body). Paired against the local eye's caption for the same image, this is the correspondence corpus the grounding loop learns from." ;
+    rdfs:domain copia:Look ;
+    rdfs:range xsd:string .
 
 # PROVISIONAL (2026-07-22, 1ux ruling): the three aesthetic-score properties below
 # went into the ontology ahead of a settled scorer choice — we got ahead of ourselves.
