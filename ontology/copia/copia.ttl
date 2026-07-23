@@ -2270,20 +2270,30 @@ copia:dwellBucket a owl:DatatypeProperty ;
 # personal taste model residualizes AGAINST — without it, a fitted taste head
 # spends itself re-learning "sharp, well-lit, pretty" and calls that punctum.
 
+# PROVISIONAL (2026-07-22, 1ux ruling): the three aesthetic-score properties below
+# went into the ontology ahead of a settled scorer choice — we got ahead of ourselves.
+# The right flow is test-in-a-scratch-repo -> decide -> ontology -> implement; these
+# skipped step one. The 2026-07-22 scorer bake-off (goodlux/aes-bakeoff, frozen
+# 35-image probe) found topiq_nr (CPU) and a 3-scorer ensemble outperforming ERNIE
+# alone, so which scorer(s) feed these fields — and whether the model-keyed raw
+# field survives — is UNSETTLED. These properties MAY GO AWAY or be renamed when
+# the scorer ruling lands. Only ~90 files carry stamps (the halted burn); nothing
+# downstream reads them yet.
+
 copia:aestheticTechnical a owl:DatatypeProperty ;
     rdfs:label "aesthetic technical" ;
-    rdfs:comment "CANONICAL current-best technical-quality score (1-10): artifacts, anatomy, coherence. Latest-wins (the caption pattern)." ;
+    rdfs:comment "PROVISIONAL (see 2026-07-22 note above). CANONICAL current-best technical-quality score (1-10): artifacts, anatomy, coherence. Latest-wins (the caption pattern). Never filled — mechanism still open." ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:decimal .
 
 copia:aestheticAppeal a owl:DatatypeProperty ;
     rdfs:label "aesthetic appeal" ;
-    rdfs:comment "CANONICAL current-best generic-appeal score (1-10): conventional prettiness, NOT anyone's personal taste. The axis to residualize against, never a verdict." ;
+    rdfs:comment "PROVISIONAL (see 2026-07-22 note above). CANONICAL current-best generic-appeal score (1-10): conventional prettiness, NOT anyone's personal taste. The axis to residualize against, never a verdict." ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:decimal .
 
 copia:ernieImageAesScore a owl:DatatypeProperty ;
     rdfs:label "ernie-image-aes score" ;
-    rdfs:comment "baidu/ERNIE-Image-Aes RAW aesthetic score, 0-100 float — deterministic (softmax-expectation over score-token logits, one forward pass; same pixels = same float). The model-keyed raw behind the canonical aestheticAppeal (= score/10, latest-wins). Probe-validated 2026-07-21 against the frozen 35-image exam: spread 8.4, +5.9 pick-over-reject. Pairwise-trained (Swiss-tournament annotation) — structurally collapse-resistant. Served locally by Iris /aes; zero wire." ;
+    rdfs:comment "PROVISIONAL (see 2026-07-22 note above — scorer choice unsettled; may be superseded). baidu/ERNIE-Image-Aes RAW aesthetic score, 0-100 float — deterministic (softmax-expectation over score-token logits, one forward pass; same pixels = same float). The model-keyed raw behind the canonical aestheticAppeal (= score/10, latest-wins). Probe-validated 2026-07-21 against the frozen 35-image exam: spread 8.4, +5.9 pick-over-reject. Served locally by Iris /aes; zero wire." ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:decimal .
