@@ -1,6 +1,6 @@
 @prefix git-lex: <https://repolex.ai/ontology/git-lex/> .
-@prefix soul:  <https://repolex.ai/ontology/kit/soul/> .
-@prefix copia: <https://repolex.ai/ontology/kit/copia/> .
+@prefix soul:  <https://repolex.ai/ontology/soul/> .
+@prefix copia: <https://repolex.ai/ontology/copia/> .
 @prefix owl:   <http://www.w3.org/2002/07/owl#> .
 @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
@@ -23,7 +23,7 @@
 #   Join: thisNode.<relation> == thatNode.<class>Id. (Link templates say
 #   '# IRI' but the stored value is the BARE id, e.g. "tide-lantern", not a URL.)
 #
-# Kit: copia   ·   Namespace: copia: = https://repolex.ai/ontology/kit/copia/
+# Kit: copia   ·   Namespace: copia: = https://repolex.ai/ontology/copia/
 # Extends: soul: (soul kit)
 #
 # Foldering (git-lex behavior, v0.19 — Day 65 ruling, 2026-07-18): OPT-IN. A class
@@ -340,11 +340,11 @@
 #   Moments aren't silently gated out of the graph when the lane lands.
 # =============================================================================
 
-<https://repolex.ai/ontology/kit/copia> a owl:Ontology ;
+<https://repolex.ai/ontology/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
     owl:versionInfo "0.23.0" ;
-    owl:imports <https://repolex.ai/ontology/kit/soul/> .
+    owl:imports <https://repolex.ai/ontology/soul/> .
 
 
 # =============================================================================
