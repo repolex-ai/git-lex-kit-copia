@@ -1,16 +1,17 @@
 #!/usr/bin/env python3
 """UserPromptSubmit-copia-coview.py — the cosee hook (UserPromptSubmit).
 
-!!! GRUE WARNING — THIS FILE IS GOSPEL, THE KIT IS THE MIRROR !!!
-    This local copy is the source of truth. If you edit it, you MUST push the
-    change straight up into the copia kit (repolex-ai/git-lex-kit-copia,
-    harness/.claude/hooks/UserPromptSubmit-copia-coview.py) IMMEDIATELY — same
-    sitting, no "later". A local edit that doesn't reach the kit means the next
-    `git lex kit-update` silently ships the STALE kit version as .kit-latest and
-    someone adopts the retired architecture by accident (this exact drift bit us
-    Day 119: the kit was still shipping the /api/shared-view hook this file
-    replaced). Loop: edit here -> copy to kit -> commit kit. Leave the loop open
-    and a hungry grue eats you in the dark. Don't get eaten.
+!!! GRUE WARNING — EDIT LOCALLY, THEN PUSH TO THE KIT. ALWAYS. !!!
+    We develop and test hooks HERE, locally — that's the workflow. But the kit
+    is the managed source of truth: the moment a local edit works, you MUST push
+    it up into the kit that owns this hook (repolex-ai/git-lex-kit-copia,
+    harness/.claude/hooks/UserPromptSubmit-copia-coview.py) and commit+push the
+    kit — same sitting, no "later". A local edit that never reaches the kit is
+    unmanaged drift: the next `git lex kit-update` on any repo silently ships the
+    STALE kit version and someone runs the wrong hook (this exact drift bit us
+    Day 119 — the kit was still shipping the retired /api/shared-view hook this
+    file had already replaced). Loop: edit+test here -> copy to kit -> commit &
+    push kit. Leave the loop open and a hungry grue eats you in the dark.
 
 The hook end of the cosee tee (Rob's nomenclature, ratified Day 114: cosee =
 the umbrella surface; cosee hook = this; cosee cli = the tool; co-steer = acting
