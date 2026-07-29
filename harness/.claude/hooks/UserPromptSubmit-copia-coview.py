@@ -1,154 +1,107 @@
 #!/usr/bin/env python3
-"""UserPromptSubmit-copia-coview.py — the CoPIA co-view hook (UserPromptSubmit).
+"""UserPromptSubmit-copia-coview.py — the cosee hook (UserPromptSubmit).
 
-Part of the copia co-view hook UNIT (git-lex-kit-copia territory). The naming is a
-functional group: this fires on UserPromptSubmit, belongs to the copia app, and
-does co-view. Its server side (the flag + the /api/shared-view scene) lives in
-copia's api server; its UI side is the 👁 co-seeing chip.
+!!! GRUE WARNING — THIS FILE IS GOSPEL, THE KIT IS THE MIRROR !!!
+    This local copy is the source of truth. If you edit it, you MUST push the
+    change straight up into the copia kit (repolex-ai/git-lex-kit-copia,
+    harness/.claude/hooks/UserPromptSubmit-copia-coview.py) IMMEDIATELY — same
+    sitting, no "later". A local edit that doesn't reach the kit means the next
+    `git lex kit-update` silently ships the STALE kit version as .kit-latest and
+    someone adopts the retired architecture by accident (this exact drift bit us
+    Day 119: the kit was still shipping the /api/shared-view hook this file
+    replaced). Loop: edit here -> copy to kit -> commit kit. Leave the loop open
+    and a hungry grue eats you in the dark. Don't get eaten.
 
-Staples "what Rob is looking at right now" into each prompt so lUX SEES WHAT ROB
-SEES — the caption the eye wrote + the scene grammar + the cast — without a
-separate curl or filesystem archaeology. Frozen at the moment Rob hit enter.
+The hook end of the cosee tee (Rob's nomenclature, ratified Day 114: cosee =
+the umbrella surface; cosee hook = this; cosee cli = the tool; co-steer = acting
+on shared controls). The other end is the cosee tab in the copia UI. THIS end
+staples the composed payload — ONE string, rendered once — into each of the
+Familiar's turns; the tab displays the same string verbatim. Byte-identical by
+construction: what the Familiar reads is literally what the Human's tab shows.
 
-This is the immediacy half of the CoPIA shared window
-(docs/2026_07_02_COPIA_UI_VISION.md, VIEW-CONTEXT HOOK spec). The shared-window
-endpoint already assembles everything; this hook is a THIN HTTP CLIENT that asks
-the room and formats one human-meaningful block. All state lives server-side.
+Replaces the original co-view hook, which called /api/shared-view — retired in
+f7e0afd — and predated the Day-106 session gate (it sent no token, so even a live
+endpoint would have 403'd it).
 
-Behavior (all four are the spec):
-  1. FIRES ONLY WHEN CO-SEEING IS ON. The UI has an on/off affordance that writes
-     a server flag (coview_enabled). ON when we're looking together; OFF when
-     building (heads-down in code) so view-lines don't clutter context. Absent
-     server / flag off → silent no-op.
-  2. ONE CAPTION BLOCK, human-meaningful, not raw JSON: the frame id + scene
-     spine (location · mood · posture) + the caption sentence + cast + origin.
-  3. SUPPRESS ON NO-CHANGE. If the current frame == the frame reported at the
-     LAST prompt, emit nothing (Rob hasn't moved his gaze → no new info). State
-     kept in .UserPromptSubmit-copia-coview.last.json next to this script.
-  4. FAIL-SOFT. Any error → emit nothing, exit 0. Never block or pollute a prompt.
+Behavior:
+  1. DUMB PIPE. All policy lives server-side: /ui/view/cosee-hook returns empty
+     when cosee is OFF, the composed hook_text when ON, and a visible
+     "[cosee-hook compose failed: …]" line when the composer breaks. The hook
+     staples whatever text arrives, verbatim (tee invariant: never re-render).
+  2. AUTHENTICATED. Sends the per-boot session token (X-Copia-Token, read from the
+     0600 file the server mints) + X-Copia-Client: coview-hook (a Familiar-side
+     client, like cosee).
+  3. SUPPRESS ON NO-CHANGE. Same payload text as the last prompt → emit nothing
+     (nothing moved → no new info). State in .UserPromptSubmit-copia-coview.last.json.
+  4. FAIL-SOFT, BUT LEGIBLY (the Day-113 lesson: silence indistinguishable from
+     "off" is a null signal). Server down/unreachable → silent (copia's just not
+     running). 403 → ONE stderr line (stale token = a real, fixable break) then
+     exit 0. Any other surprise → silent exit 0, never block a prompt.
 
 Emits the standard UserPromptSubmit additionalContext JSON on stdout, and ONLY
-that (so it can be the sole stdout emitter in its hook slot). Prints nothing when
-there's nothing to say.
+that. Prints nothing when there's nothing to say.
 """
+import hashlib
 import json
 import os
 import sys
+import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 
 PORT = os.environ.get("COPIA_API_PORT", "8788")
 BASE = f"http://127.0.0.1:{PORT}"
 STATE = Path(__file__).resolve().parent / ".UserPromptSubmit-copia-coview.last.json"
-TIMEOUT = 3.5  # frozen at send — a little latency on a prompt is fine; shared-view
-#                with ?echo=1 (view + scene + cast + a vector search for the rhyme)
-#                runs ~1.5s warm. If CoPIA can't answer in 3.5s it's wedged → skip.
+TOKEN_PATH = Path.home() / ".config" / "copia" / "session_token"
+TIMEOUT = 3.5  # the compose is registry reads + (memoized) Door lookups; if CoPIA
+#                can't answer in 3.5s it's wedged → skip this turn.
+
+# The staple switch (one switch, nothing hidden). Panel-first phase ran 2026-07-24;
+# Rob signed the panel off (byte-identical verbatim display, event-only writes,
+# send wash, provenance) and enabled the Familiar side same day: "Want to enable
+# the staple, and we'll start trying it on for size?"
+STAPLE_TO_FAMILIAR = True
 
 
-def _get_shared_view():
-    """GET /api/shared-view?echo=1 — returns the parsed dict, or None if CoPIA is
-    down / unreachable / slow. echo=1 asks the server for the current frame's rhyme
-    (the Echo) so I can offer to bring a related memory forward. Never raises."""
+def _get_hook_text():
+    """GET /ui/view/cosee-hook — the composed hook_text, "" when cosee is
+    off, or None when the server is down/unreachable. A 403 warns on stderr (stale
+    token is a real break, not an off-state) and returns None. Never raises."""
+    headers = {"X-Copia-Client": "coview-hook"}
     try:
-        req = urllib.request.Request(BASE + "/api/shared-view?echo=1",
-                                     headers={"Accept": "application/json"})
+        headers["X-Copia-Token"] = TOKEN_PATH.read_text().strip()
+    except Exception:
+        pass  # no token file → server will 403 and we warn below
+    try:
+        # sign the fetch with this script's real name — the tab's "by …" provenance
+        sender = urllib.parse.quote(Path(__file__).name)
+        req = urllib.request.Request(
+            BASE + "/ui/view/cosee-hook?sender=" + sender, headers=headers)
         with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
-            return json.loads(r.read().decode("utf-8"))
-    except Exception:
+            return r.read().decode("utf-8")
+    except urllib.error.HTTPError as e:
+        if e.code == 403:
+            print("[cosee-hook] 403 from copia — session token stale or missing "
+                  f"({TOKEN_PATH}); restart mints a fresh one", file=sys.stderr)
         return None
-
-
-def _last_frame():
-    try:
-        return json.loads(STATE.read_text()).get("frame")
     except Exception:
-        return None
+        return None  # copia not running → silent
 
 
-def _remember_frame(frame):
+def _changed(text):
+    """True if `text` differs from the last stapled payload (then remembers it)."""
+    digest = hashlib.sha256(text.encode("utf-8")).hexdigest()
     try:
-        STATE.write_text(json.dumps({"frame": frame}))
+        if json.loads(STATE.read_text()).get("digest") == digest:
+            return False
     except Exception:
         pass
-
-
-def _fmt_block(view):
-    """Format the one human-meaningful co-view block from a /api/shared-view dict.
-    Returns the text, or None if there's nothing worth saying."""
-    current = view.get("current")
-    if not current:
-        return None
-    frame = Path(current).name  # 2026/07/02/20260702-172304-933a9b5d.png → filename
-    short = frame.rsplit("-", 1)[-1].replace(".png", "") if "-" in frame else frame
-
-    scene = view.get("scene") or {}
-    cast = [c for c in (view.get("cast") or []) if c]
-    following = view.get("following", True)
-    origin = None
-    for s in (view.get("strip") or []):
-        if s.get("file") == current:
-            origin = s.get("origin")
-            break
-
-    # who put it on screen (from the co-view log tail) — 'you'/'the loop'/'I'.
-    # ONE clause that already carries the follow-state, so we never append a
-    # redundant "— pinned" on top of "you pinned".
-    by = None
-    for ev in reversed(view.get("coview") or []):
-        if ev.get("file") and Path(ev["file"]).name == frame:
-            by = ev.get("by")
-            break
-    if by == "rob":
-        who = "you're watching" if following else "you pinned"
-    elif by == "loop":
-        who = "the flow just rendered"
-    elif by == "lux":
-        who = "I surfaced"
-    else:
-        who = "on the live edge" if following else "pinned to"
-
-    # the glanceable spine: location · mood · posture (only the ones present)
-    spine = " · ".join(v for v in (scene.get("location"), scene.get("mood"),
-                                   scene.get("posture")) if v)
-    head = f"[co-view] {who} {short}"
-    if spine:
-        head += f" ({spine})"
-
-    lines = [head]
-    caption = scene.get("caption")
-    if caption:
-        lines.append(f'  "{caption.strip()}"')
-    # a second detail row for what the caption prose might not carry crisply
-    detail = []
-    if scene.get("lighting"):
-        detail.append(f"light: {scene['lighting']}")
-    if scene.get("camera") or scene.get("framing"):
-        detail.append("shot: " + " / ".join(
-            v for v in (scene.get("camera"), scene.get("framing")) if v))
-    if scene.get("gaze"):
-        detail.append(f"gaze: {scene['gaze']}")
-    if detail:
-        lines.append("  " + "  |  ".join(detail))
-    meta = []
-    if cast:
-        meta.append("cast: " + " · ".join(cast))
-    if origin:
-        meta.append(f"origin: {origin}")
-    if meta:
-        lines.append("  " + "  |  ".join(meta))
-    # THE ECHO (Day 95) — the strongest meaningful rhyme of the current frame,
-    # delivered right here in the conversation so I can offer to bring it forward
-    # ("this rhymes with the forest morning — want it up?"). One line, only when the
-    # server found a real rhyme (semantic neighbor, not a near-dup). This is the
-    # remembering-machine's shoulder-tap arriving in my turn, actionable by either hand.
-    echo = view.get("echo")
-    if echo and echo.get("caption"):
-        tb = echo.get("thread_back") or "another time"
-        cap = echo["caption"].strip()
-        cap = cap if len(cap) <= 160 else cap[:160].rstrip() + "…"
-        lines.append(f"  ↺ echoes {tb} (rhyme {echo.get('score')}): {cap}")
-        lines.append("    (offer to bring it on screen if it fits the moment)")
-    return "\n".join(lines)
+    try:
+        STATE.write_text(json.dumps({"digest": digest}))
+    except Exception:
+        pass
+    return True
 
 
 def main():
@@ -159,29 +112,17 @@ def main():
     except Exception:
         pass
 
-    view = _get_shared_view()
-    if not view:
-        return 0  # CoPIA down → silent
-
-    # 1. flag gate — only speak when co-seeing is ON
-    if not (view.get("coview_enabled") or {}).get("enabled", False):
+    text = _get_hook_text()   # fires the tee → the panel gets this delivery
+    if not STAPLE_TO_FAMILIAR:
+        return 0          # panel-first phase: nothing enters the Familiar's turn
+    if not text:          # None (down/403) or "" (co-seeing off) → nothing to say
         return 0
-
-    block = _fmt_block(view)
-    if not block:
-        return 0
-
-    # 3. suppress on no-change — same frame as last prompt → say nothing
-    current = view.get("current")
-    frame = Path(current).name if current else None
-    if frame and frame == _last_frame():
-        return 0
-    _remember_frame(frame)
+    if not _changed(text):
+        return 0          # same payload as last prompt → no new info
 
     context = (
-        "What Rob is looking at in CoPIA right now (view-context hook — the shared "
-        "window, frozen at send; you're seeing what he sees so you don't have to "
-        "query):\n" + block
+        "cosee hook — what Rob is looking at, frozen at send (the same string "
+        "his cosee tab shows, byte-identical):\n" + text
     )
     print(json.dumps({
         "hookSpecificOutput": {
