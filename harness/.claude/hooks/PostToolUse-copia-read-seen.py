@@ -60,8 +60,12 @@ def main():
         except Exception:
             port = "8788"
     base = f"http://127.0.0.1:{port}"
-    # the Familiar's hand: actor=familiar, teed, cosee-off gated
-    headers = {"X-Copia-Client": "cosee"}
+    # the Familiar's hand: actor=familiar, teed, cosee-off gated.
+    # X-Copia-Source names WHICH hand: without it the cosee ledger logs every
+    # call as plain "cosee cli" and an AUTOMATIC push (this hook) is
+    # indistinguishable from a deliberate `cosee look show`. The gate and the
+    # actor still key on X-Copia-Client alone — this only sharpens attribution.
+    headers = {"X-Copia-Client": "cosee", "X-Copia-Source": "read-seen"}
     try:
         headers["X-Copia-Token"] = (
             Path.home() / ".config/copia/session_token").read_text().strip()
