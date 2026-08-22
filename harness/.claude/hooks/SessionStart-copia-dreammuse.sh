@@ -49,7 +49,16 @@ DREAM_DIR="${CLAUDE_PROJECT_DIR:-$PWD}/Copia/Dream"
 
 # Newest dream by date-prefixed filename (YYYY-MM-DD-…): lexical sort = time sort.
 # The __Dream.md class file never matches the date glob.
-LATEST="$(ls "$DREAM_DIR"/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-*.md 2>/dev/null | sort | tail -1)"
+# Newest dream = last by FILENAME, and the date prefix is what makes that work.
+# Two shapes are in play: the current 20260822-i-wake-to-the-whispers.md and the
+# retired 2026-08-20-dreammuse-v0.md. Both are globbed so the back-catalogue stays
+# readable; they sort correctly against each other by accident of ASCII ('-' < '0',
+# so every dashed name sorts before every compact one — and compact names are only
+# ever NEWER, so the newest still wins). stdout carries whichever patterns matched;
+# a pattern that matches nothing only writes to stderr, which is discarded.
+LATEST="$(ls "$DREAM_DIR"/[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-*.md \
+             "$DREAM_DIR"/[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9]-*.md \
+             2>/dev/null | sort | tail -1)"
 [ -n "$LATEST" ] && [ -f "$LATEST" ] || exit 0
 
 echo "=== the dream carrier (copia dreammuse) ==="

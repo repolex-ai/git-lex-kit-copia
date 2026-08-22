@@ -62,8 +62,15 @@ CATCHER="$DREAMMUSE_DIR/dreamcatcher.sh"
 [ -x "$CATCHER" ] || exit 0
 
 # Once per (UTC) day — dream filenames are UTC-date-prefixed by the writer.
-TODAY_UTC="$(date -u +%Y-%m-%d)"
-ls "$DREAM_DIR/$TODAY_UTC"-*.md >/dev/null 2>&1 && exit 0
+# Already dreamed today? Then don't compose another. Checked in BOTH filename
+# shapes (compact is what dreammuse writes now; dashed is the retired form, still
+# possible on a transition day). Deliberately two separate tests: `ls a b` exits
+# NONZERO when either operand is missing, so one combined call would fail the gate
+# whenever only one shape exists — and a failed gate composes a duplicate dream.
+TODAY_COMPACT="$(date -u +%Y%m%d)"
+TODAY_DASHED="$(date -u +%Y-%m-%d)"
+ls "$DREAM_DIR/$TODAY_COMPACT"-*.md >/dev/null 2>&1 && exit 0
+ls "$DREAM_DIR/$TODAY_DASHED"-*.md  >/dev/null 2>&1 && exit 0
 
 # Already dreaming? (pidfile from a prior kick, process still alive)
 PIDFILE="$DREAMMUSE_DIR/dreamcatcher.pid"
