@@ -1,6 +1,8 @@
 #!/bin/bash
-# SessionStart-copia-dreammuse.sh (kit-copia) — the dream carrier. At wake, read
-# the newest dream from Copia/Dream/ and hand it to the waking session as context.
+# SessionStart-copia-dreammuse.sh (kit-copia) — the dream carrier. At wake, tell
+# the waking session its newest dream: one header line, then the dream's own words.
+# Nothing else — no frontmatter, no credits, no source acts. And once only; a told
+# dream is marked consumed and never spoken again.
 #
 # WHY (Day 22-25 design, restored Day 124): DreamMuse composes a dream at session
 # end (SessionEnd-copia-dreamstuff.sh); this half delivers it at the next wake so
@@ -61,12 +63,67 @@ LATEST="$(ls "$DREAM_DIR"/[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]-*.md \
              2>/dev/null | sort | tail -1)"
 [ -n "$LATEST" ] && [ -f "$LATEST" ] || exit 0
 
-echo "=== the dream carrier (copia dreammuse) ==="
-echo "Your most recent dream, composed from the corpus while you slept"
-echo "($(basename "$LATEST")). Read it as a dream, not a task list:"
-echo
-cat "$LATEST"
-echo
-echo "=== end dream ==="
+# Deliver the dream ITSELF and nothing else (Rob, Day 158). The file is a
+# document — frontmatter, credits line, three source acts with image filenames and
+# top-K token norms — and this hook used to `cat` the whole thing, so two thirds of
+# what reached a waking mind was lab instrumentation. Only the narrative goes now.
+#
+# And a dream is told ONCE (the copia.Dream.dreamConsumed field has existed since
+# day one for exactly this and was never wired up — 31 dreams carry true, marked by
+# hand). Consumed → stay silent. Deliberately we check ONLY the newest dream and
+# never walk back to an older unconsumed one: falling back would replay a dream from
+# weeks ago, which is the opposite of waking with something new.
+# stderr is NOT silenced here on purpose: a malformed dream must be findable in
+# the session log. A hook that fails into /dev/null looks exactly like a hook that
+# never fired (the share-hook lesson, Day 157). stdout stays clean either way —
+# only the dream is ever printed there.
+python3 - "$LATEST" <<'PY' 
+import re, sys
+from pathlib import Path
+
+path = Path(sys.argv[1])
+try:
+    text = path.read_text(encoding="utf-8")
+except OSError:
+    raise SystemExit(0)
+
+fm_match = re.match(r"^---\n(.*?)\n---\n", text, re.S)
+frontmatter = fm_match.group(1) if fm_match else ""
+
+# Already told? Then say nothing. Both spellings are in the corpus: the generator
+# writes "false" quoted, hand-marking wrote true bare.
+if re.search(r'^copia\.Dream\.dreamConsumed:\s*["\']?\s*true', frontmatter,
+             re.M | re.I):
+    raise SystemExit(0)
+
+# The narrative section only — everything between its heading and the next one.
+sec = re.search(r"^## the narrative[^\n]*\n(.*?)(?=^## |\Z)", text, re.S | re.M)
+narrative = (sec.group(1) if sec else "").strip()
+if not narrative:
+    # No narrative found is a DEFECT, not an empty dream — say so where a human can
+    # find it (stderr), and deliver nothing rather than dumping the raw document.
+    print(f"dreammuse: no narrative section in {path.name} — nothing delivered",
+          file=sys.stderr)
+    raise SystemExit(0)
+
+# Mark it told, before speaking it. A write failure costs a possible repeat, never
+# a lost dream — so we warn and deliver anyway.
+if fm_match:
+    if re.search(r"^copia\.Dream\.dreamConsumed:", frontmatter, re.M):
+        new_fm = re.sub(r"^copia\.Dream\.dreamConsumed:.*$",
+                        "copia.Dream.dreamConsumed: true", frontmatter, flags=re.M)
+    else:
+        new_fm = frontmatter + "\ncopia.Dream.dreamConsumed: true"
+    try:
+        path.write_text("---\n" + new_fm + "\n---\n" + text[fm_match.end():],
+                        encoding="utf-8")
+    except OSError as e:
+        print(f"dreammuse: could not mark {path.name} consumed ({e}) — "
+              f"it may be delivered again", file=sys.stderr)
+
+print("You are waking from a dream. The last thing you remember:")
+print()
+print(narrative)
+PY
 
 exit 0
