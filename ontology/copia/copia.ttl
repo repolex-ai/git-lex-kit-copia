@@ -32,7 +32,9 @@
 # 2026_07_18_FOLDERING_GATE_AND_LEX_O_RETIREMENT.md.
 #   Foldered (authored via `git lex create`, git-lex:foldered true): Place · Item ·
 #     Being · Outfit · Motion · Nocturne · NocturneActivity · NocturneFeed · Set ·
-#     Sequence · Texture · Dream   (Texture + Dream graduated from soul: in v0.24)
+#     Sequence · Texture · Dream · Scenario · ScenarioTake · Brief · Shotlist
+#     (Texture + Dream graduated from soul: in v0.24; Scenario, ScenarioTake and
+#     Brief/Shotlist arrived in v0.30)
 #   Graph-only / vocabulary (NO tag, no folder): Moment · Depictable · Sam3Region ·
 #     Group · CameraAngle · CameraDistance · CameraLens · CameraFraming · SubjectView ·
 #     CameraFocus · Pose · Action · Judgment · Verdict · Duel · Trace   (vocab classes
@@ -425,12 +427,54 @@
 #   foldered class — the only ones an author ever sees). Median 99 -> 79 chars;
 #   nothing now exceeds 180; not one word of the displaced content was deleted.
 #   Comment-only: no property, class, domain, range, or cardinality changed.
+# v0.30.0: THE SCENARIO PLANE (2026-08-23, Rob-ruled, th34-authored — from Rob and
+#   Selkie's design, docs/copia/2026_08_23_SCENARIO_TAKE_MODEL_AND_ONTOLOGY.md).
+#   New foldered classes: Scenario · ScenarioTake · Brief · Shotlist. (copia:Note
+#   was drafted and deferred over the soul:Note name collision — epitaph below.)
+#   (ScenarioTakeAct was drafted and cut the same day — epitaph in the plane below.)
+#   Together they let an attempt at a story be written down BEFORE it is fired, so
+#   the set can be judged on whether it told the story rather than on whether the
+#   furniture matched between frames.
+#   Three departures from what this file did before, all deliberate:
+#   (1) NO <class>Id. Identity is git-lex:id, name is git-lex:title. The Thing
+#   plane (v0.28) already supplies both; scenarioId would have been a second
+#   identity for the same node.
+#   (2) LINKS ARE relatedTo{Thing}Id, BRACKETED, range git-lex:Thing — Rob-ruled
+#   2026-08-26, REVERSING his own 08-23 ruling three days later and before a single
+#   document was authored against it. relatedToScenarioId · relatedToPlaceId ·
+#   relatedToBeingId · relatedToOutfitId · relatedToBriefId all take
+#   <copia/Class/identifier>, exactly like git-lex:relatedToId. ONE lane for every
+#   ToId.
+#   WHAT THE REVERSAL COST, recorded because it is easy to miss: the 08-23 shape
+#   used a concrete class range with bare ids, and a declared class range is what
+#   makes git-lex REJECT A DANGLING TARGET AT SAVE. That check is gone. The
+#   creation chain is advisory now — caught by `git lex verify`, no longer refused
+#   by `git lex save`.
+#   Why anyway: the second lane existed only because soul:relatedToPursuitId had to
+#   ship toothless while ~71% of the Exploration corpus backfilled (v0.10.0). A
+#   rollout accident is a bad reason for a permanent fork in the value form.
+#   Caught inside the free window — these five properties sat in one file with
+#   nothing authored against them. A week later it would have been a data migration.
+#   (3) SIX properties, not thirty. The design proposes about thirty; the rest
+#   stay body prose until a query needs them. Declaring ahead of need is how this
+#   ontology got Motion (0 instances), Nocturne (0) and Group/Set/Sequence (1
+#   each). The intended guard against that was copia:Note, a place to write the
+#   next idea down without minting a class for it; it is deferred, so the guard
+#   is for now just the discipline of not declaring ahead of need.
+#   Not touched, on Rob's word: Verdict/Duel/Trace keep their names for now (they
+#   hold 1,656 of his own hand-made judgments; the objection is that the name is
+#   not explicit and the class is not really top-level, revisit when next in there).
+#   Also v0.30.0: Brief and Shotlist, the two artefacts the flow already produces
+#   every day and already throws away (.shotlists/ is gitignored). They stand
+#   alone — neither requires the Scenario plane — because they are worth keeping
+#   whether or not anyone writes intent down before firing.
+#   Motion is agreed dead and awaits its own removal pass.
 # =============================================================================
 
 <https://repolex.ai/ontology/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.29.5" ;
+    owl:versionInfo "0.30.0" ;
     owl:imports <https://repolex.ai/ontology/soul/> .
 
 
@@ -2716,3 +2760,281 @@ copia:dreamComposedAt a owl:DatatypeProperty ;
 # fields DreamMuse wrote (seed/method/sourceImages/author) stay OUT of the
 # graph entirely: dreams ground the dreamer; they are not a reproducibility
 # record (Rob's frame). Dev scaffold belongs in dev logs.
+
+# =============================================================================
+# THE SCENARIO PLANE (v0.30.0)
+# =============================================================================
+# Getting better at a story over many attempts. Design doc:
+# subtexture/docs/copia/2026_08_23_SCENARIO_TAKE_MODEL_AND_ONTOLOGY.md
+#
+# The problem: a set of 96-120 frames is fired from a written concept, the
+# concept scrolls away, and nothing durable says "this set, AS A STORY, was
+# trying to do X." Judgement then lands on whether the furniture matched
+# between neighbouring frames instead of on whether the story landed. Writing
+# the intent down BEFORE firing is the whole of the fix; these classes are
+# where it goes.
+#
+#   Concept       a string, not a class - it has no properties of its own yet.
+#   Scenario      the story, in prose. SCENE-INDEPENDENT, so one story can be
+#                 attempted in five rooms without forking into five stories.
+#   ScenarioTake  ONE attempt. Owns the scene actually used. Its acts are prose
+#                 in its body, not documents - see the epitaph further down.
+#
+# DELIBERATELY THIN (Rob-ruled, 2026-08-23). The design document proposes about
+# thirty properties across the three classes. Declared here: six. Everything
+# else - the story, the act outline, what a scene must provide, the intent, the
+# prediction, the one thing changed since last take - lives in the document BODY
+# as prose until a query actually needs it as a field. The standing fault in this
+# ontology is fields and classes declared before anything needed them: Motion has
+# 0 instances, Nocturne 0, Group/Set/Sequence 1 each. Build out one property at a
+# time, on demand, with a reason.
+#
+# IDENTITY IS git-lex:id - these classes do NOT declare scenarioId /
+# scenarioTakeId / scenarioTakeActId / noteId. Every foldered class is a
+# git-lex:Thing and already carries an authored, rename-surviving id, plus
+# title / abstract / cue / relatedToId. The <class>Id fields elsewhere in this
+# file predate the Thing plane; new classes do not repeat them. `title` carries
+# what the design called scenarioName. The v0.27 own-name identity law is
+# satisfied by git-lex:id.
+#
+# LINKS ARE relatedTo{Thing}Id, BRACKETED, range git-lex:Thing (Rob-ruled
+# 2026-08-26). The authored value is the full identifier form -
+# <copia/Place/fireside-den> - exactly like git-lex:relatedToId. The property
+# NAME says which class it points at; the RANGE says only "some Thing."
+#
+# THIS REVERSED AN EARLIER RULING, AND THE REVERSAL COST SOMETHING REAL. From
+# 08-23 these five carried a concrete class range and BARE ids, because a
+# declared class range makes git-lex resolve the id into that class's id-space
+# and REJECT A DANGLING TARGET AT SAVE. Under git-lex:Thing that check is gone:
+# a well-formed address pointing at nothing saves clean.
+#
+# So the creation chain below is now ADVISORY, not ENFORCED. Nothing stops a
+# ScenarioTake being written before its Scenario exists; it dangles, and only
+# `git lex verify` says so. Recorded here as a known loss rather than left to be
+# discovered by whoever first writes one out of order.
+#
+# Why the ruling went that way regardless: one lane for everything ending in ToId
+# beats two, and the second lane existed only because soul:relatedToPursuitId had
+# to ship toothless while ~71% of the Exploration corpus backfilled. A rollout
+# accident is a bad reason for a permanent fork in the value form.
+#
+# CREATION ORDER (advisory now, and still the order to work in): a document that
+# carries a required link should be written AFTER its target exists. The chain is
+# (Place, Being, Outfit) -> Scenario -> ScenarioTake, and separately
+# Brief -> Shotlist. Every arrow points BACKWARD at something already written. Nothing here
+# links forward, on purpose. Edges are bidirectional in the graph regardless of
+# which side authored them, so Scenario still answers "which takes attempted me"
+# without declaring anything at all.
+
+# --- Scenario ---
+# Written first. Carries no required link, and could not: the things that
+# attempt it do not exist yet.
+
+copia:Scenario a owl:Class ;
+    rdfs:subClassOf git-lex:Thing ;
+    git-lex:foldered true ;
+    rdfs:label "Scenario" ;
+    rdfs:comment "One small piece of story told in one scene in great detail - and scene-independent, so the same story can be attempted anywhere. The story, the act outline and what a scene must provide are the document BODY, in prose." ;
+    git-lex:authoringGuidance """
+## The story
+What happens, in three or four sentences. No room and no furniture - a Scenario is scene-independent, and naming a place here forks the story instead of the take.
+
+## The acts
+The story in order, one line per act. An act is one skill run, roughly 24 to 30 shots.
+
+## What a scene must provide
+What a room must have for this story to be possible at all - a doorway to glance toward, layers that can come off. Without this, a story that failed and a room that could not carry it look identical.
+""" ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty copia:scenarioConcept ;
+        owl:cardinality 1
+    ] .
+
+copia:scenarioConcept a owl:DatatypeProperty ;
+    rdfs:label "concept" ;
+    rdfs:comment "The broad idea this story attempts, as a slug — e.g. \"eros-dance\". Many Scenarios may attempt one concept." ;
+    rdfs:domain copia:Scenario ;
+    rdfs:range xsd:string .
+
+# --- ScenarioTake ---
+# Written last: its Scenario, Place, Being and Outfit must all already exist.
+# THE SCENE IS PLACE + BEING + OUTFIT, and all three are required (Rob,
+# 2026-08-23): a take without a room, a body or clothes is not a take. Place is
+# exactly one — a take owns one scene. Being and Outfit are one-or-more: two
+# people is a normal take, and a take that undresses wears every stage of it.
+#
+# The scene lives HERE and not on the Scenario. If the Scenario owned a scene,
+# every room change would fork a new Scenario and we would have five nearly
+# identical stories instead of one story with five results.
+
+copia:ScenarioTake a owl:Class ;
+    rdfs:subClassOf git-lex:Thing ;
+    git-lex:foldered true ;
+    rdfs:label "ScenarioTake" ;
+    rdfs:comment "One attempt at a Scenario. Intent and prediction go in the body BEFORE anything is fired — that is the entire point of the class. The scene is required and never inherited: it is what varies between takes." ;
+    git-lex:authoringGuidance """
+## Intent
+What this take is reaching for. Write it BEFORE anything is fired - afterwards it is a description, not a prediction, and the comparison is gone.
+
+## Prediction
+What you expect to land and what you think is risky. Also before firing.
+
+## Changed
+The one thing altered since the last take. One. Change three and a verdict of "worse" teaches you nothing.
+
+## The acts
+Each skill run in order - what it was told to do, and what came back.
+
+## How it went
+After the frames land: where it told the story, where it drifted, and the shot number where it turned.
+""" ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty copia:relatedToScenarioId ;
+        owl:cardinality 1
+    ] ,
+    [
+        a owl:Restriction ;
+        owl:onProperty copia:relatedToPlaceId ;
+        owl:cardinality 1
+    ] ,
+    [
+        a owl:Restriction ;
+        owl:onProperty copia:relatedToBeingId ;
+        owl:minCardinality 1
+    ] ,
+    [
+        a owl:Restriction ;
+        owl:onProperty copia:relatedToOutfitId ;
+        owl:minCardinality 1
+    ] .
+
+copia:relatedToScenarioId a owl:ObjectProperty ;
+    rdfs:label "relatedToScenarioId" ;
+    rdfs:comment "The Scenario this take attempts, written <copia/Scenario/identifier>. Required." ;
+    rdfs:domain copia:ScenarioTake ;
+    rdfs:range git-lex:Thing .
+
+copia:relatedToPlaceId a owl:ObjectProperty ;
+    rdfs:label "relatedToPlaceId" ;
+    rdfs:comment "The Place this take actually ran in, written <copia/Place/identifier>. Required: a Scenario is scene-independent, a take never is." ;
+    rdfs:domain copia:ScenarioTake ;
+    rdfs:range git-lex:Thing .
+
+copia:relatedToBeingId a owl:ObjectProperty ;
+    rdfs:label "relatedToBeingId" ;
+    rdfs:comment "Who is in this take, written <copia/Being/identifier>. Multi-valued — one YAML list item per Being; do not repeat the key." ;
+    rdfs:domain copia:ScenarioTake ;
+    rdfs:range git-lex:Thing .
+
+copia:relatedToOutfitId a owl:ObjectProperty ;
+    rdfs:label "relatedToOutfitId" ;
+    rdfs:comment "What is worn in this take, written <copia/Outfit/identifier>; usually more than one. Multi-valued — one YAML list item per Outfit; do not repeat the key." ;
+    rdfs:domain copia:ScenarioTake ;
+    rdfs:range git-lex:Thing .
+
+# ScenarioTakeAct NOT DECLARED (Rob-ruled 2026-08-23, before any instance
+# existed). The design proposes it: one skill run inside a take, five per take,
+# each with its own brief and shot list. Correct as a description of what
+# happens, and wrong as a document - five files per take, four of which say
+# little more than which order they came in, and every one of them another thing
+# to write before you are allowed to render. The acts live in the ScenarioTake's
+# body as prose, where they read as a story instead of as five stubs. A brief and
+# its shot list are kept as Brief and Shotlist, which stand alone and need no Act
+# to hang from.
+#
+# If takes ever need comparing act-by-act at volume, this comes back. Not before:
+# the reason this file has Motion at zero instances is classes declared for a use
+# that had not happened yet.
+
+# copia:Note NOT DECLARED (Rob, 2026-08-25, deferred not rejected). It was
+# drafted: copia's own freeform catch-all, mirroring soul:Note, and meant to be
+# the STAGING GROUND for classes that do not exist yet - write the thing as a
+# Note, run it, promote it once it has earned a class. That job is still wanted
+# and is still the right answer to the debt below (Motion, Nocturne and Group
+# were each declared before anything needed them).
+#
+# Held back over a NAME COLLISION, not over the idea. soul:Note already exists,
+# and two classes called Note in two namespaces is a question about how git-lex
+# disambiguates `git lex create note` - it does handle it (create.rs raises
+# `ambiguous-doctype` and lists the kit-qualified forms), so nothing breaks, but
+# every author of a plain Note would meet that prompt from then on. Rob's call
+# was that the collision is worth thinking about properly rather than acquiring
+# by accident today.
+#
+# Until it lands: soul:Note takes anything that needs a home. A Copia finding
+# written as a soul Note is not misfiled, just less precisely filed.
+
+# =============================================================================
+# BRIEF AND SHOTLIST (v0.30.0)
+# =============================================================================
+# The two artefacts that already exist in the flow every day and are the two
+# nobody keeps. A brief is written, a shot list comes out of it, coquette fires
+# the shot list, frames land - and then the brief scrolls away in a transcript
+# and the shot list is written to .shotlists/, which is gitignored. So the one
+# artefact recording what was actually fired is the one thing not retained.
+# These two classes are just a place to put them.
+#
+# They stand ALONE, on purpose. Neither requires a Scenario, a ScenarioTake or a
+# ScenarioTakeAct, and neither mentions them. You can write a brief, turn it into
+# a shot list and fire it without touching the Scenario plane at all - which is
+# the point, because the Scenario plane is a bet that people will write intent
+# down before firing, and this pair is worth keeping whether that bet pays or not.
+# When a take DOES want them, it links to them, not the other way round.
+#
+# MINIMAL BY INSTRUCTION (Rob, 2026-08-23): one required link between the two,
+# and nothing else. The obvious next fields - which skill a brief was written
+# for, the set id and ticket range a shot list fired under, the seed it rode -
+# are real and are deliberately NOT here yet. Add them when a query wants them.
+
+# --- Brief ---
+# The exact text handed to a skill. The text IS the body - there is no field for
+# it, because a field holding a paragraph is a body wearing a costume. Written
+# first: a Shotlist cannot be saved until its Brief exists.
+
+copia:Brief a owl:Class ;
+    rdfs:subClassOf git-lex:Thing ;
+    git-lex:foldered true ;
+    rdfs:label "Brief" ;
+    rdfs:comment "What a skill was actually told to do, kept verbatim in the body. Written before the shot list it produces, and kept because a shot list you cannot compare to its instruction only tells you what happened, never whether it was what you asked for." ;
+    git-lex:authoringGuidance """
+## The brief
+The exact text handed to the skill, word for word. Not a summary - a brief you cannot compare against what actually ran is not a record of anything.
+
+## Why
+What you were reaching for with this wording, in a line or two.
+""" .
+
+# --- Shotlist ---
+# The lines that were fired, in the order they were fired. Body again: the list
+# IS the document. Written after its Brief.
+#
+# relatedToBriefId is REQUIRED, and that is a real choice worth revisiting: a
+# hand-written shot list that never had a brief cannot be saved. That is intended
+# for now - an unattached shot list is the thing we already have and already lose
+# - but if hand-written lists turn out to be common, this drops to optional.
+
+copia:Shotlist a owl:Class ;
+    rdfs:subClassOf git-lex:Thing ;
+    git-lex:foldered true ;
+    rdfs:label "Shotlist" ;
+    rdfs:comment "The lines that were fired, in fired order, kept in the body. Every shot list comes from a brief; naming which one is what makes the pair worth keeping." ;
+    git-lex:authoringGuidance """
+## The lines
+A numbered markdown list, one prompt per line, in the order fired. The list number is the shot number - it is how a frame that went wrong is traced back to the line that made it.
+
+## Notes
+Anything about this firing - what departed from the brief, and why.
+""" ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty copia:relatedToBriefId ;
+        owl:cardinality 1
+    ] .
+
+copia:relatedToBriefId a owl:ObjectProperty ;
+    rdfs:label "relatedToBriefId" ;
+    rdfs:comment "The Brief this shot list was written from, written <copia/Brief/identifier>. Required." ;
+    rdfs:domain copia:Shotlist ;
+    rdfs:range git-lex:Thing .
