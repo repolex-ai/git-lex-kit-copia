@@ -30,11 +30,17 @@
 # entirely). git-lex: is the app-core namespace every kit imports; foldering is a
 # git-lex behavior, so its flag lives there. See subtexture/docs/ontology/
 # 2026_07_18_FOLDERING_GATE_AND_LEX_O_RETIREMENT.md.
-#   Foldered (authored via `git lex create`, git-lex:foldered true): Place · Item ·
-#     Being · Outfit · Motion · Nocturne · NocturneActivity · NocturneFeed · Set ·
-#     Sequence · Texture · Dream · Scenario · ScenarioTake · Brief · Shotlist
+#   Foldered (authored via `git lex create`, git-lex:foldered true) — 17: Place ·
+#     Item · Being · Outfit · Motion · Nocturne · NocturneActivity · NocturneFeed ·
+#     Set · Sequence · Texture · Dream · FamiliarLookNote · Scenario · ScenarioTake ·
+#     Brief · Shotlist
 #     (Texture + Dream graduated from soul: in v0.24; Scenario, ScenarioTake and
 #     Brief/Shotlist arrived in v0.30)
+#     THIS LIST IS HAND-MAINTAINED AND HAS DRIFTED ONCE: FamiliarLookNote carried
+#     the tag and 3,866 instances while missing from here (found by th34, fixed
+#     2026-08-26). The count is stated so drift is visible — it must match
+#     kit-update's "Folders: N/N match ontology" line. To re-derive instead of
+#     trusting it, kit-base's reference/check-kit-ontology.py reads the tag itself.
 #   Graph-only / vocabulary (NO tag, no folder): Moment · Depictable · Sam3Region ·
 #     Group · CameraAngle · CameraDistance · CameraLens · CameraFraming · SubjectView ·
 #     CameraFocus · Pose · Action · Judgment · Verdict · Duel · Trace   (vocab classes
