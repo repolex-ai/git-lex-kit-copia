@@ -7,7 +7,8 @@ into a copia repo that no longer held the code, and every paste failed
 silently for weeks. This version depends on nothing but python3 and the Door.
 
 What it does: when a human pastes or drops an image into a Claude Code
-session, enqueue it to the Pool Door as origin='claude-code-share',
+session, enqueue it through Pylai — Horae's door, :1217, which took over
+enqueue from Pool's Door on 2026-08-28 — as origin='claude-code-share',
 mode='see_only' — the eye SEEs it, captions it, homes it as a Moment. The
 wire shape mirrors copia.lib.poolqueue.producers.claude_code_share() exactly;
 the Door is the validating authority (no client-side SHACL here, by design —
@@ -52,7 +53,9 @@ import urllib.request
 from datetime import datetime, timezone
 from pathlib import Path
 
-POOL_SERVE_URL = os.environ.get("POOL_SERVE_URL", "http://127.0.0.1:8424")
+# Pylai, Horae's enqueue door (took over from Pool's :8424 on 2026-08-28).
+# The env var keeps its historical name so existing overrides keep working.
+POOL_SERVE_URL = os.environ.get("POOL_SERVE_URL", "http://127.0.0.1:1217")
 
 
 # ── finding the image-bearing turn ────────────────────────────────────────────
@@ -152,7 +155,7 @@ def _soul_id(project_dir: str) -> str:
 
 
 def _enqueue(body: dict, soul_id: str, *, timeout: int = 30) -> int:
-    url = (POOL_SERVE_URL.rstrip("/") + "/queue/enqueue?"
+    url = (POOL_SERVE_URL.rstrip("/") + "/pylai/enqueue?"
            + urllib.parse.urlencode({"soul": soul_id}))
     req = urllib.request.Request(
         url, data=json.dumps(body).encode(), method="POST",

@@ -6,8 +6,8 @@
 # convention): STDLIB-ONLY python3, no copia checkout, no venv. v1 of this hook
 # (kit-pool's UserPromptSubmit-pool-share.sh, retired) cd'd into a copia repo that
 # moved out from under it and failed silently for weeks — this shape can't rot that
-# way. The helper reads the transcript for base64 image turns and POSTs each to the
-# Pool Door (:8424) as origin='claude-code-share', mode='see_only'; the eye does
+# way. The helper reads the transcript for base64 image turns and POSTs each to
+# Pylai, Horae's door (:1217), as origin='claude-code-share', mode='see_only'; the eye does
 # the rest. Which soul's queue: derived from the repo's genesis sha (env
 # POOL_SOUL_ID / POOL_SERVE_URL override).
 #
