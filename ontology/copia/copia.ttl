@@ -520,7 +520,7 @@
 <https://repolex.ai/ontology/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.32.1" ;
+    owl:versionInfo "0.32.2" ;
     owl:imports <https://repolex.ai/ontology/soul/> .
 
 
@@ -2970,37 +2970,30 @@ After the frames land: where it told the story, where it drifted, and the shot n
     # constraint; every value must still be angle-bracket notation that resolves
     # to a real Thing (Rob: "still need to be angle bracket notation actually
     # pointing to something"). Silence permits any Thing, never a broken link.
-    # PARKED 2026-08-28, 0.32.1 — the qualified restrictions below are CORRECT
-    # SHACL and are temporarily commented out. Four property shapes on one
-    # sh:path is legal; the TEMPLATE emitter writes one frontmatter line per
-    # shape, so the scaffold came out with the key repeated 5x on ScenarioTake
-    # and 2x on Shotlist — and a repeated key is a FATAL save error, so every
-    # soul with copia installed went write-dead on kit-update. Restore these
-    # the moment the generator dedupes emitted keys by NAME.
-    # rdfs:subClassOf [
-    # a owl:Restriction ;
-    # owl:onProperty git-lex:relatedToId ;
-    # owl:onClass copia:Scenario ;
-    # owl:qualifiedCardinality 1
-    # ] ,
-    # [
-    # a owl:Restriction ;
-    # owl:onProperty git-lex:relatedToId ;
-    # owl:onClass copia:Place ;
-    # owl:qualifiedCardinality 1
-    # ] ,
-    # [
-    # a owl:Restriction ;
-    # owl:onProperty git-lex:relatedToId ;
-    # owl:onClass copia:Being ;
-    # owl:minQualifiedCardinality 1
-    # ] ,
-    # [
-    # a owl:Restriction ;
-    # owl:onProperty git-lex:relatedToId ;
-    # owl:onClass copia:Outfit ;
-    # owl:minQualifiedCardinality 1
-    # ]
+    rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty git-lex:relatedToId ;
+    owl:onClass copia:Scenario ;
+    owl:qualifiedCardinality 1
+    ] ,
+    [
+    a owl:Restriction ;
+    owl:onProperty git-lex:relatedToId ;
+    owl:onClass copia:Place ;
+    owl:qualifiedCardinality 1
+    ] ,
+    [
+    a owl:Restriction ;
+    owl:onProperty git-lex:relatedToId ;
+    owl:onClass copia:Being ;
+    owl:minQualifiedCardinality 1
+    ] ,
+    [
+    a owl:Restriction ;
+    owl:onProperty git-lex:relatedToId ;
+    owl:onClass copia:Outfit ;
+    owl:minQualifiedCardinality 1
+    ]
     .
 # ScenarioTakeAct NOT DECLARED (Rob-ruled 2026-08-23, before any instance
 # existed). The design proposes it: one skill run inside a take, five per take,
@@ -3099,17 +3092,10 @@ A numbered markdown list, one prompt per line, in the order fired. The list numb
 ## Notes
 Anything about this firing - what departed from the brief, and why.
 """ ;
-    # PARKED 2026-08-28, 0.32.1 — the qualified restrictions below are CORRECT
-    # SHACL and are temporarily commented out. Four property shapes on one
-    # sh:path is legal; the TEMPLATE emitter writes one frontmatter line per
-    # shape, so the scaffold came out with the key repeated 5x on ScenarioTake
-    # and 2x on Shotlist — and a repeated key is a FATAL save error, so every
-    # soul with copia installed went write-dead on kit-update. Restore these
-    # the moment the generator dedupes emitted keys by NAME.
-    # rdfs:subClassOf [
-    # a owl:Restriction ;
-    # owl:onProperty git-lex:relatedToId ;
-    # owl:onClass copia:Brief ;
-    # owl:qualifiedCardinality 1
-    # ]
+    rdfs:subClassOf [
+    a owl:Restriction ;
+    owl:onProperty git-lex:relatedToId ;
+    owl:onClass copia:Brief ;
+    owl:qualifiedCardinality 1
+    ]
     .
