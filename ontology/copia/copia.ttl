@@ -5,10 +5,50 @@
 @prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
 @prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
 
 # =============================================================================
 # COPIA KIT ONTOLOGY
 # =============================================================================
+#
+# v0.32.0 (2026-08-28) — Outfit gets authoringGuidance. Ruled by Rob, reported
+# by Selkie, who hit the gap from the inside: she needed to record that an
+# outfit is worn by a Being, found nothing in Outfit that meant "worn by", and
+# invented `copia.Outfit.wornByBeingId`. Four documents carried it. `git lex
+# save` warned on every one and stored the value as ungoverned data — preserved,
+# but unaskable: "which outfits does sylkie wear" had four answers on disk and
+# none in the graph.
+#
+# WHAT CHANGED: one authoringGuidance block on copia:Outfit, with a "Who wears
+# it" section that names relatedToId and says the value is optional. That is the
+# whole fix, and it is the only part that prevents a repeat — Selkie's own
+# reading, and she is right: she would never have invented the key if the
+# guidance had told her where the Being goes.
+#
+# WHAT I DELIBERATELY DID NOT DO, and these are the durable half:
+#
+#   NOT declared copia:wornByBeingId. Rob's ruling: relatedToId is the only
+#   relation in metadata, type expressed in shapes rather than in property
+#   names. Same direction as TR1P deleting the six relatedTo{Class}Id twins.
+#   Nothing to remove here either — the key was never declared, so Selkie
+#   deleting it from four documents WAS the whole removal.
+#
+#   NOT made the Being reference required. Measured before deciding: 76 Outfits
+#   in lUX, 7 name a Being. A requirement would break 69 documents and, worse,
+#   would pressure whoever repairs them into naming a plausible wearer to turn a
+#   gate green — inventing a wrong reference that RESOLVES, and so never flags
+#   again. An outfit is a garment; it exists whether or not anyone is in it.
+#   Optional, and the guidance says so out loud rather than leaving it implied.
+#
+#   NOT added a restriction of any kind. There is no cardinality worth
+#   declaring for a relation 9 documents in 10 correctly omit.
+#
+# The register note, because it will come up again: authoringGuidance is for the
+# BODY, and "who wears it" is a metadata fact. It is here anyway, as a section
+# that says NOT IN THE BODY and points at the key — because guidance is
+# delivered by `git lex create` at the exact moment someone is about to invent a
+# key, and that moment is the only place this could have been caught.
+#
 # Optional add-on for soul. The agent's curated outward face + the data model
 # for the CoPIA rendering loop. Soul stays sealed and AI-only; copia is the
 # soul-adapter, the surface the generative loop reads via SPARQL.
@@ -480,7 +520,7 @@
 <https://repolex.ai/ontology/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.30.0" ;
+    owl:versionInfo "0.32.0" ;
     owl:imports <https://repolex.ai/ontology/soul/> .
 
 
@@ -762,6 +802,16 @@ copia:Outfit a owl:Class ;
     git-lex:foldered true ;
     rdfs:label "Outfit" ;
     rdfs:comment "A named, reusable bundle of Items (a 'look'/'loadout'). A convenience join — summon the set as one. A single garment needs no Outfit; it's just an Item(wearable)." ;
+    git-lex:authoringGuidance """
+## The look
+What this outfit IS — silhouette, fabric, how it moves and what it does when she does. Enough that someone who has never seen it can picture it.
+
+## Who wears it
+Not in the body. The Being goes in relatedToId, in angle brackets: <copia/Being/sylkie>. Optional, and usually absent — an outfit exists whether or not anyone is in it. Do not invent a key for this.
+
+## When it belongs
+The hour, weather or mood this look is for, if it has one. A garment that only makes sense at the waterline should say so.
+""" ;
     rdfs:subClassOf [
         a owl:Restriction ;
         owl:onProperty copia:outfitId ;
@@ -1051,6 +1101,7 @@ copia:Outfit rdfs:subClassOf copia:Depictable .
 # hasRegion is the pixel-evidence channel. Same shape, separate stamp-channel.
 # =============================================================================
 copia:Sam3Region a owl:Class ;
+    rdfs:subClassOf git-lex:Thing ;
     rdfs:label "Sam3Region" ;
     rdfs:comment "A SAM3-segmented region of a Moment — a generic visual entity (rock, hand, sky) bound to where it lives in the pixels. Reached from a Moment via copia:hasRegionId (v0.16; was copia:depictsId pre-v0.16). Graph-only (PNG-born, no .md). Identity: Sam3Region:<descriptor>/<NN>, per-descriptor per-Moment (rock/01, rock/02). Instance segmentation — one descriptor can yield many regions." ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:regionDescriptor ; owl:maxCardinality 1 ] ;
@@ -1091,6 +1142,7 @@ copia:regionScore a owl:DatatypeProperty ;
 # CoPIA oxigraph by the render pipeline (PNGs ingested as triples), never as .md.
 
 copia:Moment a owl:Class ;
+    rdfs:subClassOf git-lex:Thing ;
     rdfs:label "Moment" ;
     rdfs:comment "A rendered PNG + its metadata. Graph-only — not authored as a file. Stores the realized scene fields, a flat `depicts` presence-list, group membership, and provenance." ;
     rdfs:subClassOf [
@@ -1964,6 +2016,7 @@ copia:producedOutfitId a owl:ObjectProperty ;
 # groupDepictedBy/fromNocturneId remain Group-domained.
 
 copia:Group a owl:Class ;
+    rdfs:subClassOf git-lex:Thing ;
     rdfs:label "Group" ;
     rdfs:comment "abstract — authored as a concrete Set or Sequence, never a bare Group. A named gathering of Moments; members self-join via copia:inGroupId (generic) or copia:inSetId / copia:inSequenceId (kind-specific). Holds the shared non-identity group properties; identity is own-name per concrete class (setId / sequenceId), because a foldered class's identity property derives from ITS name, never inherited (v0.27, the identity law)." .
 
@@ -2056,6 +2109,7 @@ copia:groupDepictedBy a owl:DatatypeProperty ;
 # wanted). Grows freely: add an individual, done. Soul-.md only for rare bespoke poses.
 
 copia:Pose a owl:Class ;
+    rdfs:subClassOf git-lex:Thing ;
     rdfs:label "Pose" ;
     rdfs:comment "A specific, nameable body position (supine, s-curve, lotus) — the refinement WITHIN an Action, not the activity itself. Context-free: the Pose does not know its Actions (the opinion lives on the Action via suggestsPose). Bare natural-name ids (no defensive suffix; poses are nouns, actions are gerunds, so they don't collide). Soul-.md only for rare bespoke poses." .
 
@@ -2152,6 +2206,7 @@ copia:dive-streamline a copia:Pose ; rdfs:label "dive-streamline" ;
 # Searchable ("all swimming images"). Kit vocab; soul individuals when wanted.
 
 copia:Action a owl:Class ;
+    rdfs:subClassOf git-lex:Thing ;
     rdfs:label "Action" ;
     rdfs:comment "A named activity the subject is doing (lying, sitting, posing, dancing) — the SUBJECT cluster's verb axis and the spine of the subject model. Each Action curates its fitting poses via suggestsPose (many-to-many). Searchable. Kit vocab; soul individuals when wanted." .
 
@@ -2225,6 +2280,7 @@ copia:action a owl:ObjectProperty ;
 # They feed different estimators; the schema keeps them honest.
 
 copia:Judgment a owl:Class ;
+    rdfs:subClassOf git-lex:Thing ;
     rdfs:label "Judgment" ;
     rdfs:comment "ABSTRACT parent of Verdict/Duel/Trace — one recorded act of judging, by one actor, on one axis. Graph-only, event-born in the copia oxigraph. Never instantiated bare: every event is one of the three shapes." ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:judgmentId ;     owl:cardinality 1 ] ;
@@ -2239,6 +2295,7 @@ copia:Judgment a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:judgmentRunId ;  owl:maxCardinality 1 ] .
 
 copia:Verdict a owl:Class ;
+    rdfs:subClassOf git-lex:Thing ;
     rdfs:subClassOf copia:Judgment ;
     rdfs:label "Verdict" ;
     rdfs:comment "An ABSOLUTE judgment on ONE Moment: pick/reject (verdictFlag, the existing PreferenceFlag enum) and/or a calibration rating. rejectReason carries the failure taxonomy (free string until the vocabulary firms). Supersedes the XMP human/familiarPreferenceFlag write-path as the canonical pick store; the XMP fields remain as legacy reads until ingested." ;
@@ -2248,6 +2305,7 @@ copia:Verdict a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:rejectReason ;   owl:maxCardinality 1 ] .
 
 copia:Duel a owl:Class ;
+    rdfs:subClassOf git-lex:Thing ;
     rdfs:subClassOf copia:Judgment ;
     rdfs:label "Duel" ;
     rdfs:comment "A RELATIVE judgment over a SHOWN SET of Moments — the set is part of the datum (a choice is only meaningful against what was offered). One class covers all relative shapes via duelKind: ab (chosenMoment), choice-k (chosenMoment from k shown), bws (bestMoment + worstMoment), sheet-rank (rankedMoment, ordered). shownMoment lists EVERY Moment offered, including the chosen/best/worst ones. duelTie true = judged too close to call (no chosenMoment). Derivation expands each Duel to pairwise constraints (BT/PL/MaxDiff)." ;
@@ -2258,6 +2316,7 @@ copia:Duel a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:duelTie ;        owl:maxCardinality 1 ] .
 
 copia:Trace a owl:Class ;
+    rdfs:subClassOf git-lex:Thing ;
     rdfs:subClassOf copia:Judgment ;
     rdfs:label "Trace" ;
     rdfs:comment "An IMPLICIT signal: visit/dwell/revisit/pin on one Moment. High-volume, zero-effort, intent-ambiguous — shapes the sampling PRIOR only, never the likelihood. Coarse dwellBucket, not milliseconds (no surveillance-grade tracking). Autonomous-loop shows are nobody's preference and are never recorded as Traces." ;
@@ -2880,6 +2939,12 @@ copia:ScenarioTake a owl:Class ;
     rdfs:label "ScenarioTake" ;
     rdfs:comment "One attempt at a Scenario. Intent and prediction go in the body BEFORE anything is fired — that is the entire point of the class. The scene is required and never inherited: it is what varies between takes." ;
     git-lex:authoringGuidance """
+## References (required — a take will not save without them)
+Name the Scenario, the Place, the Being(s) and the Outfit(s) this take uses in
+`relatedToId`, in angle-bracket form: <copia/Place/greenhouse>. One reference per
+list item. The exact counts are printed beside the key in the document itself.
+There is no relatedToPlaceId any more; every reference goes in the one list.
+
 ## Intent
 What this take is reaching for. Write it BEFORE anything is fired - afterwards it is a description, not a prediction, and the comparison is gone.
 
@@ -2895,50 +2960,40 @@ Each skill run in order - what it was told to do, and what came back.
 ## How it went
 After the frames land: where it told the story, where it drifted, and the shot number where it turned.
 """ ;
+    # v0.30 (Rob-ruled 2026-08-27): the typed relatedTo<Class>Id twins retire. Each
+    # was rdfs:range git-lex:Thing. They DID enforce required-ness (sh:minCount 1)
+    # but never the TYPE their names promised — the half nobody would have got
+    # wrong, enforced; the half they advertised, never checked. (selkie verified
+    # this in copia-shapes.ttl; my first write-up said "zero enforcement" and that
+    # was wrong.) These get BOTH from one declaration: OWL 2 qualified
+    # cardinality on the ONE reference property. No restriction here = no CLASS
+    # constraint; every value must still be angle-bracket notation that resolves
+    # to a real Thing (Rob: "still need to be angle bracket notation actually
+    # pointing to something"). Silence permits any Thing, never a broken link.
     rdfs:subClassOf [
         a owl:Restriction ;
-        owl:onProperty copia:relatedToScenarioId ;
-        owl:cardinality 1
+        owl:onProperty git-lex:relatedToId ;
+        owl:onClass copia:Scenario ;
+        owl:qualifiedCardinality 1
     ] ,
     [
         a owl:Restriction ;
-        owl:onProperty copia:relatedToPlaceId ;
-        owl:cardinality 1
+        owl:onProperty git-lex:relatedToId ;
+        owl:onClass copia:Place ;
+        owl:qualifiedCardinality 1
     ] ,
     [
         a owl:Restriction ;
-        owl:onProperty copia:relatedToBeingId ;
-        owl:minCardinality 1
+        owl:onProperty git-lex:relatedToId ;
+        owl:onClass copia:Being ;
+        owl:minQualifiedCardinality 1
     ] ,
     [
         a owl:Restriction ;
-        owl:onProperty copia:relatedToOutfitId ;
-        owl:minCardinality 1
+        owl:onProperty git-lex:relatedToId ;
+        owl:onClass copia:Outfit ;
+        owl:minQualifiedCardinality 1
     ] .
-
-copia:relatedToScenarioId a owl:ObjectProperty ;
-    rdfs:label "relatedToScenarioId" ;
-    rdfs:comment "The Scenario this take attempts, written <copia/Scenario/identifier>. Required." ;
-    rdfs:domain copia:ScenarioTake ;
-    rdfs:range git-lex:Thing .
-
-copia:relatedToPlaceId a owl:ObjectProperty ;
-    rdfs:label "relatedToPlaceId" ;
-    rdfs:comment "The Place this take actually ran in, written <copia/Place/identifier>. Required: a Scenario is scene-independent, a take never is." ;
-    rdfs:domain copia:ScenarioTake ;
-    rdfs:range git-lex:Thing .
-
-copia:relatedToBeingId a owl:ObjectProperty ;
-    rdfs:label "relatedToBeingId" ;
-    rdfs:comment "Who is in this take, written <copia/Being/identifier>. Multi-valued — one YAML list item per Being; do not repeat the key." ;
-    rdfs:domain copia:ScenarioTake ;
-    rdfs:range git-lex:Thing .
-
-copia:relatedToOutfitId a owl:ObjectProperty ;
-    rdfs:label "relatedToOutfitId" ;
-    rdfs:comment "What is worn in this take, written <copia/Outfit/identifier>; usually more than one. Multi-valued — one YAML list item per Outfit; do not repeat the key." ;
-    rdfs:domain copia:ScenarioTake ;
-    rdfs:range git-lex:Thing .
 
 # ScenarioTakeAct NOT DECLARED (Rob-ruled 2026-08-23, before any instance
 # existed). The design proposes it: one skill run inside a take, five per take,
@@ -3027,6 +3082,10 @@ copia:Shotlist a owl:Class ;
     rdfs:label "Shotlist" ;
     rdfs:comment "The lines that were fired, in fired order, kept in the body. Every shot list comes from a brief; naming which one is what makes the pair worth keeping." ;
     git-lex:authoringGuidance """
+## References (required — a shot list will not save without one)
+Name the Brief this list was fired from in `relatedToId`, angle-bracket form:
+<copia/Brief/identifier>. There is no relatedToBriefId any more.
+
 ## The lines
 A numbered markdown list, one prompt per line, in the order fired. The list number is the shot number - it is how a frame that went wrong is traced back to the line that made it.
 
@@ -3035,12 +3094,8 @@ Anything about this firing - what departed from the brief, and why.
 """ ;
     rdfs:subClassOf [
         a owl:Restriction ;
-        owl:onProperty copia:relatedToBriefId ;
-        owl:cardinality 1
+        owl:onProperty git-lex:relatedToId ;
+        owl:onClass copia:Brief ;
+        owl:qualifiedCardinality 1
     ] .
 
-copia:relatedToBriefId a owl:ObjectProperty ;
-    rdfs:label "relatedToBriefId" ;
-    rdfs:comment "The Brief this shot list was written from, written <copia/Brief/identifier>. Required." ;
-    rdfs:domain copia:Shotlist ;
-    rdfs:range git-lex:Thing .
