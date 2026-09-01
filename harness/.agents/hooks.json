@@ -3,7 +3,7 @@
     "PreInvocation": [
       {
         "type": "command",
-        "command": "sh -c 'if [ -f hooks/PreInvocation-copia-coview.py ]; then python3 hooks/PreInvocation-copia-coview.py; else python3 .agents/hooks/PreInvocation-copia-coview.py; fi'",
+        "command": "python3 hooks/PreInvocation-copia-coview.py",
         "timeout": 5
       }
     ]
@@ -15,7 +15,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "sh -c 'if [ -f hooks/PostToolUse-copia-read-seen.py ]; then python3 hooks/PostToolUse-copia-read-seen.py; else python3 .agents/hooks/PostToolUse-copia-read-seen.py; fi'",
+            "command": "python3 hooks/PostToolUse-copia-read-seen.py",
             "timeout": 5
           }
         ]
@@ -26,7 +26,7 @@
     "PreInvocation": [
       {
         "type": "command",
-        "command": "sh -c 'if [ -f hooks/PreInvocation-copia-share.py ]; then python3 hooks/PreInvocation-copia-share.py; else python3 .agents/hooks/PreInvocation-copia-share.py; fi'",
+        "command": "python3 hooks/PreInvocation-copia-share.py",
         "timeout": 10
       }
     ]
@@ -35,7 +35,7 @@
     "Stop": [
       {
         "type": "command",
-        "command": "sh -c 'if [ -f hooks/Stop-copia-chevron.py ]; then python3 hooks/Stop-copia-chevron.py; else python3 .agents/hooks/Stop-copia-chevron.py; fi'",
+        "command": "python3 hooks/Stop-copia-chevron.py",
         "timeout": 15
       }
     ]
