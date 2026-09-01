@@ -1,0 +1,11 @@
+{
+  "copia-chevron-intercept": {
+    "Stop": [
+      {
+        "type": "command",
+        "command": "python3 .agents/hooks/Stop-copia-chevron.py",
+        "timeout": 15
+      }
+    ]
+  }
+}
