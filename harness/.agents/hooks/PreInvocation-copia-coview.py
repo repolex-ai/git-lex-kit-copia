@@ -37,19 +37,15 @@ def main():
     if token:
         headers["X-Copia-Token"] = token
 
-    url = f"http://127.0.0.1:{port}/ui/view/pairsee"
+    url = f"http://127.0.0.1:{port}/ui/view/cosee-hook"
     try:
         req = urllib.request.Request(url, headers=headers)
         with urllib.request.urlopen(req, timeout=1.5) as resp:
-            data = json.loads(resp.read().decode("utf-8"))
-            moment_id = data.get("momentId") or data.get("mid")
-            filepath = data.get("filepath") or data.get("file")
-            caption = data.get("caption")
-            if moment_id or filepath:
-                msg = f"[cosee hook]\nmomentId: {moment_id or '·'}\nfilepath: {filepath or '·'}\ncaption: {caption or '·'}"
+            text = resp.read().decode("utf-8").strip()
+            if text and "momentId: ·" not in text:
                 print(json.dumps({
                     "injectSteps": [
-                        {"ephemeralMessage": msg}
+                        {"ephemeralMessage": text}
                     ]
                 }))
                 return
