@@ -11,6 +11,27 @@
 # COPIA KIT ONTOLOGY
 # =============================================================================
 #
+# v0.33.0 (2026-09-02) — Depictable gets `renderRule`. Ruled by Rob. A short
+# rule for how to write this thing into a render prompt, model family first,
+# then what never to write, then an arrow and what to write instead.
+#
+# The problem it solves: forty-four render-rule findings existed as notes and
+# none of them reached the moment a prompt line was written. The same faults kept
+# resurfacing — a body clause that renders as pregnancy, a substance named on
+# skin that renders as goo, an offer with no object that renders as empty open
+# palms. A rule has to ride the thing it governs so it arrives when that thing is
+# loaded, and only then. Retraction is deleting the line.
+#
+# On Depictable: exactly the four things that get rendered may carry one. The
+# class does the constraining — a CameraLens or a Pose cannot have a render rule.
+#
+# The model family is mandatory and first, because rules go stale when the model
+# moves and nothing announces it. Family only, never a checkpoint hash.
+#
+# DELIBERATELY NOT DONE: no enum on the rule text, and no machine gate reading
+# these yet. The gate is the real reader and it does not exist; when it does, and
+# if it needs more structure than a string, that is the moment to add it.
+
 # v0.32.0 (2026-08-28) — Outfit gets authoringGuidance. Ruled by Rob, reported
 # by Selkie, who hit the gap from the inside: she needed to record that an
 # outfit is worn by a Being, found nothing in Outfit that meant "worn by", and
@@ -520,7 +541,7 @@
 <https://repolex.ai/ontology/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.32.2" ;
+    owl:versionInfo "0.33.0" ;
     owl:imports <https://repolex.ai/ontology/soul/> .
 
 
@@ -1079,6 +1100,28 @@ copia:generatesSequenceId a owl:ObjectProperty ;
 copia:Depictable a owl:Class ;
     rdfs:label "Depictable" ;
     rdfs:comment "abstract — not authored as files. The union of things a Moment can depict (Being/Item/Outfit/Place). Gives copia:depictsId a single range IRI." .
+
+# ── renderRule (v0.33, 2026-09-02, Rob's ruling) ───────────────────────────
+# How to write a Depictable into a render prompt. One line per rule, the model
+# family first, the forbidden pattern, then an arrow and what to write instead.
+#
+# WHY A PROPERTY AND NOT BODY PROSE: the findings existed as notes and none of
+# them reached the moment a prompt line was written. A rule has to ride the thing
+# it governs, so it arrives when that thing is loaded and not otherwise.
+# Retraction is deleting the line.
+#
+# THE MODEL FAMILY IS MANDATORY AND FIRST. Rules go stale when the model moves,
+# silently, and a family tag makes "which rules are unverified now" one grep.
+# Family only, never a checkpoint hash — a hash stales on every rebuild.
+#
+# ON DEPICTABLE: exactly the four things that get rendered may carry one. A
+# CameraLens or a Pose cannot, and the class does that constraining.
+
+copia:renderRule a owl:DatatypeProperty ;
+    rdfs:label "render rule" ;
+    rdfs:comment "How to write this thing into a render prompt: MODEL: NEVER <words> → <what to write instead>. Never a rule without the arrow. Multi-valued — one list item each; do not repeat the key." ;
+    rdfs:domain copia:Depictable ;
+    rdfs:range xsd:string .
 
 copia:Place  rdfs:subClassOf copia:Depictable .
 copia:Being  rdfs:subClassOf copia:Depictable .
