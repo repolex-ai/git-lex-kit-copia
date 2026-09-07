@@ -1,13 +1,4 @@
 {
-  "copia-coview": {
-    "PreInvocation": [
-      {
-        "type": "command",
-        "command": "python3 hooks/PreInvocation-copia-coview.py",
-        "timeout": 5
-      }
-    ]
-  },
   "copia-read-seen": {
     "PostToolUse": [
       {
