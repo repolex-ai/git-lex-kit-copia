@@ -11,10 +11,20 @@
 # COPIA KIT ONTOLOGY
 # =============================================================================
 #
-# v0.34.0 (2026-09-08) — PUNCTUM, THE REVIEW FIELDS, AND NOCTURNE REMOVED. Decided
-# by goodlux, 2026-09-08: the first two were more machinery than the project needs,
-# built for a taste model that was never made, through a UI that was never usable;
-# the third is a concept the last six months invalidated.
+# v0.34.0 (2026-09-08) — PUNCTUM, THE REVIEW FIELDS, NOCTURNE AND MOTION REMOVED.
+# Decided by goodlux, 2026-09-08: the first two were more machinery than the
+# project needs, built for a taste model that was never made, through a UI that
+# was never usable; the third is a concept the last six months invalidated; the
+# fourth was declared a year ahead of any need and never got one document.
+#
+# Gone, part four — Motion: the class and its seven properties (motionId,
+# motionName, motionTrigger, motionText, motionFrames, motionDescription,
+# generatesSequenceId). Zero documents in any repo, ever, and no code in src/ read
+# it. NOT a dead idea, only a premature declaration — the shape it will come back
+# as, when something needs it: a shot has BEATS in order; a Pose sits on some of
+# those beats; a Motion is the span between two posed beats, what the body does
+# to get from one to the next. Declare that when the first thing renders it, not
+# before. Copia/Motion drops out of the scaffold on the next kit-update.
 #
 # Gone, part three — the NocturneTime layer: the classes Nocturne, NocturneActivity
 # and NocturneFeed, their 15 properties (nocturneId, wokeSoulDay, wokeOn,
@@ -129,11 +139,11 @@
 # entirely). git-lex: is the app-core namespace every kit imports; foldering is a
 # git-lex behavior, so its flag lives there. See subtexture/docs/ontology/
 # 2026_07_18_FOLDERING_GATE_AND_LEX_O_RETIREMENT.md.
-#   Foldered (authored via `git lex create`, git-lex:foldered true) — 14: Place ·
-#     Item · Being · Outfit · Motion · Set · Sequence · Texture · Dream ·
+#   Foldered (authored via `git lex create`, git-lex:foldered true) — 13: Place ·
+#     Item · Being · Outfit · Set · Sequence · Texture · Dream ·
 #     FamiliarLookNote · Scenario · ScenarioTake · Brief · Shotlist
 #     (Texture + Dream graduated from soul: in v0.24; Scenario, ScenarioTake and
-#     Brief/Shotlist arrived in v0.30; Nocturne · NocturneActivity · NocturneFeed
+#     Brief/Shotlist arrived in v0.30; Motion · Nocturne · NocturneActivity · NocturneFeed
 #     left in v0.34)
 #     THIS LIST IS HAND-MAINTAINED AND HAS DRIFTED ONCE: FamiliarLookNote carried
 #     the tag and 3,866 instances while missing from here (found by th34, fixed
@@ -1006,80 +1016,6 @@ copia:being       a copia:CameraFocus ; rdfs:label "the subject" .
 copia:group       a copia:CameraFocus ; rdfs:label "the group together" .
 copia:background  a copia:CameraFocus ; rdfs:label "the background" .
 copia:environment a copia:CameraFocus ; rdfs:label "the surrounding environment" .
-
-
-# =============================================================================
-# MOTION — an authored, reusable movement (v0.10, Day 65)
-# =============================================================================
-# Authored like Place/Item/Outfit/Being: `git lex create Motion <id>` → a
-# /Copia/Motion/<id>.md you write. A Motion is the RECIPE for a movement (a
-# trigger word + the text that generates it + duration), NOT the frames. Firing a
-# Motion (chevron `!jump` in speech) runs Iris.move(motionText, frames) → an
-# OpenPose skeleton Sequence (the frames are copia:Moment, origin=movement,
-# inGroup=[the generated Sequence], ordered by copia:sequence — see copia:origin
-# and copia:Sequence). So: Motion (authored recipe) --motionGenerates--> Sequence
-# (the realized frames). The stick-figure UI window plays the Sequence; the Motion
-# is what you author + fire. Distinct from Sequence: Motion is the named, reusable
-# thing-you-make; Sequence is one realization of it.
-
-copia:Motion a owl:Class ;
-    rdfs:subClassOf git-lex:Thing ;
-    git-lex:foldered true ;
-    rdfs:label "Motion" ;
-    rdfs:comment "A named, reusable MOVEMENT — authored like an Outfit/Item. Holds the recipe (trigger word, generating text, duration); firing it (chevron, e.g. !jump) runs Iris.move → an OpenPose Sequence of origin=movement frames. The recipe, not the frames." ;
-    rdfs:subClassOf [
-        a owl:Restriction ;
-        owl:onProperty copia:motionId ;
-        owl:cardinality 1
-    ] .
-
-copia:motionId a owl:DatatypeProperty ;
-    rdfs:label "motionId" ;
-    rdfs:comment "Unique identifier for this motion (== filename, e.g. 'twirl', 'jump')." ;
-    rdfs:domain copia:Motion ;
-    rdfs:range xsd:string .
-
-copia:motionName a owl:DatatypeProperty ;
-    rdfs:label "motion name" ;
-    rdfs:comment "Short handle for the motion." ;
-    rdfs:domain copia:Motion ;
-    rdfs:range xsd:string .
-
-copia:motionTrigger a owl:DatatypeProperty ;
-    rdfs:label "motion trigger" ;
-    rdfs:comment "The chevron/speech token that FIRES this motion (e.g. 'jump' for !jump). Unique among motions; how speech summons the stick figure to move." ;
-    rdfs:domain copia:Motion ;
-    rdfs:range xsd:string .
-
-copia:motionText a owl:DatatypeProperty ;
-    rdfs:label "motion text" ;
-    rdfs:comment "What the body does, in plain words, e.g. 'a person jumps upward with both legs'. Kinematics only — no look or style." ;
-# Fed to the motion generator (HY-Motion via Iris.move) to produce the skeleton.
-# Look and style enter elsewhere entirely — render LoRAs and chevrons — so
-# putting them here would silently do nothing.
-    rdfs:domain copia:Motion ;
-    rdfs:range xsd:string .
-
-copia:motionFrames a owl:DatatypeProperty ;
-    rdfs:label "motion frames" ;
-    rdfs:comment "Output frame count @30fps (the clip length). 60=2s, 180=6s, 360=12s; ceiling 540 (18s, the trained-quality limit)." ;
-    rdfs:domain copia:Motion ;
-    rdfs:range xsd:integer .
-
-copia:motionDescription a owl:DatatypeProperty ;
-    rdfs:label "motion description" ;
-    rdfs:comment "What the motion is / when it's used (the authored prose). The kinematic detail lives in motionText." ;
-    rdfs:domain copia:Motion ;
-    rdfs:range xsd:string .
-
-copia:generatesSequenceId a owl:ObjectProperty ;
-    rdfs:label "generates sequence id" ;
-    rdfs:comment "A Sequence this Motion produced — value is its sequenceId. Multi-valued — one YAML list item each; do not repeat the key." ;
-# The Motion is the recipe; the Sequence(s) are its renderings — the realized
-# OpenPose frames. One recipe can be realized many times, which is why this is
-# unbounded.
-    rdfs:domain copia:Motion ;
-    rdfs:range copia:Sequence .
 
 
 # =============================================================================
