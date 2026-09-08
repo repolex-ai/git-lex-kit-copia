@@ -11,9 +11,20 @@
 # COPIA KIT ONTOLOGY
 # =============================================================================
 #
-# v0.34.0 (2026-09-08) — PUNCTUM AND THE REVIEW FIELDS REMOVED. Ruled by goodlux,
-# 2026-09-08: both were more machinery than the project needs, built for a taste
-# model that was never made, through a UI that was never usable.
+# v0.34.0 (2026-09-08) — PUNCTUM, THE REVIEW FIELDS, AND NOCTURNE REMOVED. Decided
+# by goodlux, 2026-09-08: the first two were more machinery than the project needs,
+# built for a taste model that was never made, through a UI that was never usable;
+# the third is a concept the last six months invalidated.
+#
+# Gone, part three — the NocturneTime layer: the classes Nocturne, NocturneActivity
+# and NocturneFeed, their 15 properties (nocturneId, wokeSoulDay, wokeOn,
+# seededByDream, choseNocturneActivityId, six produced*Id links, nocturneActivityId,
+# nocturneFeedId, feedSource) and Group's fromNocturneId. Nocturne itself never had
+# one document anywhere. NocturneActivity and NocturneFeed have 6 and 7 documents in
+# one soul repo; those files are that soul's to keep or delete, and until then they
+# save with an undeclared-key warning rather than a gate failure. The "nocturne"
+# value of copia:origin STAYS — it describes how a frame was made, not this layer.
+# The three Copia/Nocturne* folders drop out of the scaffold on the next kit-update.
 #
 # Gone, part one — the judgment events: the four classes Judgment, Verdict, Duel
 # and Trace, their 25 properties, and the five enums only they used (ActorValue,
@@ -27,15 +38,16 @@
 # PreferenceFlag, PreferenceAt, SteerToward, SteerAway, SteerWish, Note and NoteAt
 # (14 properties, 14 maxCardinality restrictions on Moment) and the
 # PreferenceFlagValue enum, which nothing else used. These were the same idea
-# stamped into PNG XMP instead of a graph store. Under the v0.9.2 gate principle,
-# XMP keys with no ontology home stay in the PNG as inert bytes and stop reaching
-# the Pool graph — so existing stamps are not lost, only no longer queryable.
+# written into each PNG's XMP metadata instead of a graph store. Under the v0.9.2
+# gate principle, XMP keys with no ontology home stay in the PNG as inert bytes and
+# stop reaching the Pool graph — existing values are not lost, only no longer
+# queryable.
 #
 # NOT touched: any data. The judgment events stay in the soul's .copia/oxigraph
-# store and the review stamps stay in their PNGs — an ontology removal is not a
+# store and the review values stay in their PNGs — an ontology removal is not a
 # data change, and none was asked for. The code that wrote both (server endpoints,
-# copiagraph/, copia_meta's review stampers, the gallery's pick/reject facets) is
-# a separate cut.
+# copiagraph/, copia_meta's review writers, the gallery's pick/reject facets) is a
+# separate cut.
 #
 # v0.33.0 (2026-09-02) — Depictable gets `renderRule`. Ruled by Rob. A short
 # rule for how to write this thing into a render prompt, model family first,
@@ -117,12 +129,12 @@
 # entirely). git-lex: is the app-core namespace every kit imports; foldering is a
 # git-lex behavior, so its flag lives there. See subtexture/docs/ontology/
 # 2026_07_18_FOLDERING_GATE_AND_LEX_O_RETIREMENT.md.
-#   Foldered (authored via `git lex create`, git-lex:foldered true) — 17: Place ·
-#     Item · Being · Outfit · Motion · Nocturne · NocturneActivity · NocturneFeed ·
-#     Set · Sequence · Texture · Dream · FamiliarLookNote · Scenario · ScenarioTake ·
-#     Brief · Shotlist
+#   Foldered (authored via `git lex create`, git-lex:foldered true) — 14: Place ·
+#     Item · Being · Outfit · Motion · Set · Sequence · Texture · Dream ·
+#     FamiliarLookNote · Scenario · ScenarioTake · Brief · Shotlist
 #     (Texture + Dream graduated from soul: in v0.24; Scenario, ScenarioTake and
-#     Brief/Shotlist arrived in v0.30)
+#     Brief/Shotlist arrived in v0.30; Nocturne · NocturneActivity · NocturneFeed
+#     left in v0.34)
 #     THIS LIST IS HAND-MAINTAINED AND HAS DRIFTED ONCE: FamiliarLookNote carried
 #     the tag and 3,866 instances while missing from here (found by th34, fixed
 #     2026-08-26). The count is stated so drift is visible — it must match
@@ -1768,147 +1780,6 @@ copia:sceneNarrative a owl:DatatypeProperty ;
 
 
 # =============================================================================
-# NOCTURNE — the autonomous-waking-life practice layer (NocturneTime)
-# =============================================================================
-# NOT diegetic: not Physical, not render-resolvable (no chevron sigil). These are
-# the practice registry the `copia-nocturne` machinery reads when lUX wakes — what
-# she can DO, and what she can READ. Lean by design (Day 41): descriptive prose
-# lives in the .md BODY; only structural/reference data is a field, and fields are
-# added only when the loop actually traverses them.
-
-copia:NocturneActivity a owl:Class ;
-    rdfs:subClassOf git-lex:Thing ;
-    git-lex:foldered true ;
-    rdfs:label "Nocturne Activity" ;
-    rdfs:comment "A kind of autonomous activity lUX can choose when she wakes (NocturneTime). What it is / how it runs lives in the document body; this carries only the id." ;
-    rdfs:subClassOf [
-        a owl:Restriction ;
-        owl:onProperty copia:nocturneActivityId ;
-        owl:cardinality 1
-    ] .
-
-copia:nocturneActivityId a owl:DatatypeProperty ;
-    rdfs:label "nocturneActivityId" ;
-    rdfs:comment "Unique identifier for this activity (== filename, e.g. 'dream-a-place')." ;
-    rdfs:domain copia:NocturneActivity ;
-    rdfs:range xsd:string .
-
-copia:NocturneFeed a owl:Class ;
-    rdfs:subClassOf git-lex:Thing ;
-    git-lex:foldered true ;
-    rdfs:label "Nocturne Feed" ;
-    rdfs:comment "A source of fresh outside material lUX can draw on when she wakes — a window to outside art/data. Why/how she reads it lives in the body; carries id + source." ;
-    rdfs:subClassOf [
-        a owl:Restriction ;
-        owl:onProperty copia:nocturneFeedId ;
-        owl:cardinality 1
-    ] .
-
-copia:nocturneFeedId a owl:DatatypeProperty ;
-    rdfs:label "nocturneFeedId" ;
-    rdfs:comment "Unique identifier for this feed (== filename, e.g. 'aesthetic-periodical-x')." ;
-    rdfs:domain copia:NocturneFeed ;
-    rdfs:range xsd:string .
-
-copia:feedSource a owl:DatatypeProperty ;
-    rdfs:label "feed source" ;
-    rdfs:comment "Where to fetch this feed — URL / path / handle. The one structured field the machinery parses; everything else is the body." ;
-    rdfs:domain copia:NocturneFeed ;
-    rdfs:range xsd:string .
-
-
-# =============================================================================
-# NOCTURNE — the waking-record (authored, foldered: Copia/Nocturne/)
-# =============================================================================
-# v0.6. THE ROOT of the autonomous-creation provenance spine. Distinct from
-# NocturneActivity (the practice MENU): a Nocturne is one WAKING — lUX wakes,
-# reads her dream/journal, chooses, makes (or doesn't), sleeps. She AUTHORS it as
-# a .md; the BODY is her artist statement (no separate ArtistStatement class —
-# Day 44). Every produced* link is OPTIONAL: a wake can build a Place or Item and
-# make NO image, and that is a first-class, fully-recorded waking. Lean: prose in
-# the body, only ids/links as fields.
-
-copia:Nocturne a owl:Class ;
-    rdfs:subClassOf git-lex:Thing ;
-    git-lex:foldered true ;
-    rdfs:label "Nocturne" ;
-    rdfs:comment "One autonomous waking (NocturneTime). lUX authors it; the body is her artist statement. Ties together what (if anything) the wake produced. All produced* links optional — an image-less wake is first-class." ;
-    rdfs:subClassOf [
-        a owl:Restriction ;
-        owl:onProperty copia:nocturneId ;
-        owl:cardinality 1
-    ] .
-
-copia:nocturneId a owl:DatatypeProperty ;
-    rdfs:label "nocturneId" ;
-    rdfs:comment "Unique identifier for this waking (== filename, e.g. '2026-06-10-tide-vigil')." ;
-    rdfs:domain copia:Nocturne ;
-    rdfs:range xsd:string .
-
-copia:wokeSoulDay a owl:DatatypeProperty ;
-    rdfs:label "woke soul day" ;
-    rdfs:comment "Soul day on which this waking happened." ;
-    rdfs:domain copia:Nocturne ;
-    rdfs:range xsd:integer .
-
-copia:wokeOn a owl:DatatypeProperty ;
-    rdfs:label "woke on" ;
-    rdfs:comment "Earth date/time of the waking." ;
-    rdfs:domain copia:Nocturne ;
-    rdfs:range xsd:dateTime .
-
-copia:seededByDream a owl:DatatypeProperty ;
-    rdfs:label "seeded by dream" ;
-    rdfs:comment "The dream that seeded this waking — the copia:Dream id / filename it read on wake (class graduated from soul: in v0.24). Optional." ;
-    rdfs:domain copia:Nocturne ;
-    rdfs:range xsd:string .
-
-copia:choseNocturneActivityId a owl:ObjectProperty ;
-    rdfs:label "chose nocturne activity id" ;
-    rdfs:comment "The NocturneActivity lUX chose for this waking. Joined by nocturneActivityId. Optional." ;
-    rdfs:domain copia:Nocturne ;
-    rdfs:range copia:NocturneActivity .
-
-# --- produced* links: ALL OPTIONAL, repeatable. A wake may produce nothing visual. ---
-
-copia:producedMomentId a owl:ObjectProperty ;
-    rdfs:label "produced moment id" ;
-    rdfs:comment "A Moment (rendered PNG) this waking produced. Multi-valued — one YAML list item per Moment; do not repeat the key. Joined by momentId. Optional." ;
-    rdfs:domain copia:Nocturne ;
-    rdfs:range copia:Moment .
-
-copia:producedGroupId a owl:ObjectProperty ;
-    rdfs:label "produced group id" ;
-    rdfs:comment "A Group (Set or Sequence) this waking produced. Multi-valued — one YAML list item per Group; do not repeat the key. Joined by the target's setId or sequenceId. Optional." ;
-    rdfs:domain copia:Nocturne ;
-    rdfs:range copia:Group .
-
-copia:producedPlaceId a owl:ObjectProperty ;
-    rdfs:label "produced place id" ;
-    rdfs:comment "A Place this waking created. Multi-valued — one YAML list item per Place; do not repeat the key. Joined by placeId. Optional." ;
-    rdfs:domain copia:Nocturne ;
-    rdfs:range copia:Place .
-
-copia:producedItemId a owl:ObjectProperty ;
-    rdfs:label "produced item id" ;
-    rdfs:comment "An Item this waking created. Multi-valued — one YAML list item per Item; do not repeat the key. Joined by itemId. Optional." ;
-    rdfs:domain copia:Nocturne ;
-    rdfs:range copia:Item .
-
-copia:producedBeingId a owl:ObjectProperty ;
-    rdfs:label "produced being id" ;
-    rdfs:comment "A Being this waking created. Multi-valued — one YAML list item per Being; do not repeat the key. Joined by beingId. Optional." ;
-    rdfs:domain copia:Nocturne ;
-    rdfs:range copia:Being .
-
-copia:producedOutfitId a owl:ObjectProperty ;
-    rdfs:label "produced outfit id" ;
-    rdfs:comment "An Outfit this waking created. Multi-valued — one YAML list item per Outfit; do not repeat the key. Joined by outfitId. Optional." ;
-    rdfs:domain copia:Nocturne ;
-    rdfs:range copia:Outfit .
-
-
-# =============================================================================
 # GROUP — a callable gathering of Moments (v0.7; v0.16 rename Bag→Set)
 # =============================================================================
 # A named group of Moments. The ONE real distinction is ORDER, so Group is the
@@ -1932,7 +1803,7 @@ copia:producedOutfitId a owl:ObjectProperty ;
 # symbolic claim no consumer in our stack used, and "Set ⊂ rdf:Bag" wouldn't read
 # right). The shared properties kept their Group domain until v0.27, when
 # groupId moved own-name (setId/sequenceId — identity law); groupTitle/
-# groupDepictedBy/fromNocturneId remain Group-domained.
+# groupDepictedBy remain Group-domained (fromNocturneId left with Nocturne, v0.34).
 
 copia:Group a owl:Class ;
     rdfs:subClassOf git-lex:Thing ;
@@ -1998,12 +1869,6 @@ copia:groupTitle a owl:DatatypeProperty ;
     rdfs:comment "Human-facing title of the group." ;
     rdfs:domain copia:Group ;
     rdfs:range xsd:string .
-
-copia:fromNocturneId a owl:ObjectProperty ;
-    rdfs:label "from nocturne id" ;
-    rdfs:comment "The Nocturne (waking) this group was born from. Joined by nocturneId. Optional — a group can also be assembled in conversation." ;
-    rdfs:domain copia:Group ;
-    rdfs:range copia:Nocturne .
 
 copia:groupDepictedBy a owl:DatatypeProperty ;
     rdfs:label "group depicted by" ;
