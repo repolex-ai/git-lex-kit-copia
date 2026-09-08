@@ -11,25 +11,31 @@
 # COPIA KIT ONTOLOGY
 # =============================================================================
 #
-# v0.34.0 (2026-09-08) — PUNCTUM REMOVED. Ruled by goodlux, 2026-09-08: the
-# judgment-event model is more machinery than the project needs, and the taste
-# model it was declared to feed was never built.
+# v0.34.0 (2026-09-08) — PUNCTUM AND THE REVIEW FIELDS REMOVED. Ruled by goodlux,
+# 2026-09-08: both were more machinery than the project needs, built for a taste
+# model that was never made, through a UI that was never usable.
 #
-# Gone: the four judgment-event classes (Judgment, Verdict, Duel, Trace), their
-# 25 properties, and the five enums only they used (ActorValue, JudgmentAxisValue,
-# DuelKindValue, TraceKindValue, ImageFidelityValue). PreferenceFlagValue STAYS —
-# the pick/reject fields on Moment use it and are unrelated to this.
+# Gone, part one — the judgment events: the four classes Judgment, Verdict, Duel
+# and Trace, their 25 properties, and the five enums only they used (ActorValue,
+# JudgmentAxisValue, DuelKindValue, TraceKindValue, ImageFidelityValue). They
+# recorded a click in the CoPIA web UI — a thumbs up/down on one image (Verdict),
+# a choice between shown images (Duel), a lingering (Trace). The store holds 1,838
+# such events, all between 2026-06-18 and 2026-07-21; nothing has been written
+# since. The v0.30 note that kept these classes pending a later look is superseded.
 #
-# What they were: records of a click in the CoPIA web UI — a thumbs up/down on one
-# image (Verdict), a choice between shown images (Duel), a lingering (Trace). The
-# store holds 1,838 such events, all between 2026-06-18 and 2026-07-21; nothing has
-# been written since. The v0.30 note that kept these classes pending a later look
-# is superseded by this ruling.
+# Gone, part two — the v0.14 review fields on Moment: the human*/familiar* set of
+# PreferenceFlag, PreferenceAt, SteerToward, SteerAway, SteerWish, Note and NoteAt
+# (14 properties, 14 maxCardinality restrictions on Moment) and the
+# PreferenceFlagValue enum, which nothing else used. These were the same idea
+# stamped into PNG XMP instead of a graph store. Under the v0.9.2 gate principle,
+# XMP keys with no ontology home stay in the PNG as inert bytes and stop reaching
+# the Pool graph — so existing stamps are not lost, only no longer queryable.
 #
-# NOT touched: the data. The events stay where they are, in the soul's own
-# .copia/oxigraph store, neither deleted nor exported — an ontology removal is not
-# a data change, and neither was asked for. The server endpoints and scripts that
-# wrote them are a separate code change.
+# NOT touched: any data. The judgment events stay in the soul's .copia/oxigraph
+# store and the review stamps stay in their PNGs — an ontology removal is not a
+# data change, and none was asked for. The code that wrote both (server endpoints,
+# copiagraph/, copia_meta's review stampers, the gallery's pick/reject facets) is
+# a separate cut.
 #
 # v0.33.0 (2026-09-02) — Depictable gets `renderRule`. Ruled by Rob. A short
 # rule for how to write this thing into a render prompt, model family first,
@@ -604,15 +610,6 @@ copia:OriginValue a rdfs:Datatype ;
         "claude-code-share"       # an image handed in via the Claude Code harness (pixels not painted here)
         "import"                  # outside images brought in in bulk (pixels not painted here)
     ) .
-
-# The dual-author review verdict (v0.17 fix of v0.14): made a REAL enforced enum.
-# v0.14 declared a copia:PreferenceFlag CLASS with pick/reject individuals, but the
-# properties using it had rdfs:range xsd:string — so the enum governed nothing and a
-# typo ("pikc") sailed through. Converted to the enforced rdfs:Datatype + owl:oneOf
-# pattern (same as origin), consistent with the kit's enforced-enum style. The old
-# class + individuals are removed below in favor of this.
-copia:PreferenceFlagValue a rdfs:Datatype ;
-    owl:oneOf ("pick" "reject") .
 
 # =============================================================================
 # ANNOTATION — ordering (v0.7)
@@ -1246,30 +1243,7 @@ copia:Moment a owl:Class ;
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:sam3ExtractedAt ;owl:maxCardinality 1 ] ;
     # --- v0.15 direct-lane provenance (one chevron, one pixel-seed per render) ---
     rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:chevronString ;  owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:pixelSourceMomentId ;    owl:maxCardinality 1 ] ;
-    # --- v0.14 dual-author REVIEW state (Day 86). The pick/reject + steer + note a
-    #     Human (Rob) or Familiar (lUX) attaches to a render. Long predates this
-    #     declaration: copia_meta has stamped these into PNG XMP since the review
-    #     system v0 (Day 25), but they had no ontology home, so the walker's
-    #     predicate-allowlist silently DROPPED them — they never reached the graph.
-    #     Now homed → they ride into the Pool graph on the next walk. Each is a
-    #     scalar per-role field (one preference, one steer-vector-set, one note per
-    #     author per render). PreferenceFlag is pick|reject (see copia:PreferenceFlag
-    #     enum). Steer* are comma-separated token strings; Note* are freeform prose. ---
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:humanPreferenceFlag ;    owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:humanPreferenceAt ;      owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:humanSteerToward ;       owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:humanSteerAway ;         owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:humanSteerWish ;         owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:humanNote ;              owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:humanNoteAt ;            owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:familiarPreferenceFlag ; owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:familiarPreferenceAt ;   owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:familiarSteerToward ;    owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:familiarSteerAway ;      owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:familiarSteerWish ;      owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:familiarNote ;           owl:maxCardinality 1 ] ;
-    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:familiarNoteAt ;         owl:maxCardinality 1 ] .
+    rdfs:subClassOf [ a owl:Restriction ; owl:onProperty copia:pixelSourceMomentId ;    owl:maxCardinality 1 ] .
 
 copia:momentId a owl:DatatypeProperty ;
     rdfs:label "momentId" ;
@@ -1791,90 +1765,6 @@ copia:sceneNarrative a owl:DatatypeProperty ;
     rdfs:comment "Free-text scene description (the Moment's prose body). The pre-render narrative handed to Qwen, or — for nocturne — the prompt itself. Not the prompt; not promptFragment." ;
     rdfs:domain copia:Moment ;
     rdfs:range xsd:string .
-
-
-# =============================================================================
-# REVIEW — dual-authored preference + steering + note on a Moment (v0.14, Day 86)
-# =============================================================================
-# The image-review system (Day 25 design): looking through renders together and
-# saving our judgments back INTO the PNG — "all of our commentary saved in the
-# image itself" (1ux). Two authors, two channels: a Human (Rob) side and a
-# Familiar (lUX) side, each independently attaching to the same render:
-#   • PreferenceFlag — a whole-image pick|reject (the keep/cut verdict).
-#   • Steer{Toward,Away,Wish} — machine-actionable token strings that feed the
-#     steering / future-LoRA dataset. Split by PRESENCE: toward = depicted-want-MORE,
-#     away = depicted-want-LESS, wish = ABSENT-want-added.
-#   • Note — freeform prose: meaning, not a directive ("the one where you finally
-#     looked alive"). Distinct from Steer (tokens) and Flag (verdict).
-# All scalar (one per author per render). Stamped into XMP by copia_meta since
-# Day 25, but HOMED HERE only now — before this, the walker's predicate-allowlist
-# silently dropped them, so they never reached the Pool graph. (Casing: copia_meta
-# was updated Day 86 to stamp lowercase-first — humanPreferenceFlag — to match
-# these predicate names; the walker maps XMP element-name → predicate verbatim.)
-
-# Constrained verdict: pick | reject. A real ENFORCED enum (v0.17): the value type is
-# copia:PreferenceFlagValue (rdfs:Datatype + owl:oneOf, declared in ENUM DATATYPES) —
-# the one enum pattern git-lex's SHACL derivation enforces, so a typo ("pikc") is
-# rejected rather than landing a phantom value the gallery's preference facet can't
-# group on. (v0.14 declared a copia:PreferenceFlag CLASS but the properties ranged on
-# xsd:string, so nothing was enforced; v0.17 fixed it to this datatype.)
-copia:humanPreferenceFlag a owl:DatatypeProperty ;
-    rdfs:label "human preference flag" ;
-    rdfs:comment "The Human's (Rob's) whole-image verdict on this render: pick | reject. See copia:PreferenceFlagValue." ;
-    rdfs:domain copia:Moment ; rdfs:range copia:PreferenceFlagValue .
-copia:humanPreferenceAt a owl:DatatypeProperty ;
-    rdfs:label "human preference at" ;
-    rdfs:comment "ISO-8601 timestamp when the Human set their PreferenceFlag." ;
-    rdfs:domain copia:Moment ; rdfs:range xsd:string .
-copia:humanSteerToward a owl:DatatypeProperty ;
-    rdfs:label "human steer toward" ;
-    rdfs:comment "Human steering — comma-separated tokens for things DEPICTED the Human wants MORE of. Feeds the steering / LoRA dataset." ;
-    rdfs:domain copia:Moment ; rdfs:range xsd:string .
-copia:humanSteerAway a owl:DatatypeProperty ;
-    rdfs:label "human steer away" ;
-    rdfs:comment "Human steering — comma-separated tokens for things DEPICTED the Human wants LESS of." ;
-    rdfs:domain copia:Moment ; rdfs:range xsd:string .
-copia:humanSteerWish a owl:DatatypeProperty ;
-    rdfs:label "human steer wish" ;
-    rdfs:comment "Human steering — comma-separated tokens for things ABSENT the Human wants ADDED." ;
-    rdfs:domain copia:Moment ; rdfs:range xsd:string .
-copia:humanNote a owl:DatatypeProperty ;
-    rdfs:label "human note" ;
-    rdfs:comment "The Human's freeform prose note on this render — meaning/context/reaction, not a steering directive." ;
-    rdfs:domain copia:Moment ; rdfs:range xsd:string .
-copia:humanNoteAt a owl:DatatypeProperty ;
-    rdfs:label "human note at" ;
-    rdfs:comment "ISO-8601 timestamp when the Human set their Note." ;
-    rdfs:domain copia:Moment ; rdfs:range xsd:string .
-
-copia:familiarPreferenceFlag a owl:DatatypeProperty ;
-    rdfs:label "familiar preference flag" ;
-    rdfs:comment "The Familiar's (lUX's) whole-image verdict on this render: pick | reject. See copia:PreferenceFlagValue." ;
-    rdfs:domain copia:Moment ; rdfs:range copia:PreferenceFlagValue .
-copia:familiarPreferenceAt a owl:DatatypeProperty ;
-    rdfs:label "familiar preference at" ;
-    rdfs:comment "ISO-8601 timestamp when the Familiar set their PreferenceFlag." ;
-    rdfs:domain copia:Moment ; rdfs:range xsd:string .
-copia:familiarSteerToward a owl:DatatypeProperty ;
-    rdfs:label "familiar steer toward" ;
-    rdfs:comment "Familiar steering — comma-separated tokens for things DEPICTED the Familiar wants MORE of." ;
-    rdfs:domain copia:Moment ; rdfs:range xsd:string .
-copia:familiarSteerAway a owl:DatatypeProperty ;
-    rdfs:label "familiar steer away" ;
-    rdfs:comment "Familiar steering — comma-separated tokens for things DEPICTED the Familiar wants LESS of." ;
-    rdfs:domain copia:Moment ; rdfs:range xsd:string .
-copia:familiarSteerWish a owl:DatatypeProperty ;
-    rdfs:label "familiar steer wish" ;
-    rdfs:comment "Familiar steering — comma-separated tokens for things ABSENT the Familiar wants ADDED." ;
-    rdfs:domain copia:Moment ; rdfs:range xsd:string .
-copia:familiarNote a owl:DatatypeProperty ;
-    rdfs:label "familiar note" ;
-    rdfs:comment "The Familiar's freeform prose note on this render — meaning/context/reaction, not a steering directive." ;
-    rdfs:domain copia:Moment ; rdfs:range xsd:string .
-copia:familiarNoteAt a owl:DatatypeProperty ;
-    rdfs:label "familiar note at" ;
-    rdfs:comment "ISO-8601 timestamp when the Familiar set their Note." ;
-    rdfs:domain copia:Moment ; rdfs:range xsd:string .
 
 
 # =============================================================================
