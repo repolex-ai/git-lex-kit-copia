@@ -55,7 +55,9 @@ from pathlib import Path
 
 # Pylai, Horae's enqueue door (took over from Pool's :8424 on 2026-08-28).
 # The env var keeps its historical name so existing overrides keep working.
-POOL_SERVE_URL = os.environ.get("POOL_SERVE_URL", "http://127.0.0.1:1217")
+# horaed, the Rust Horae (goodlux, 2026-11-21: the old Python Horae is retired).
+# Same Pylai body, at /horae/{org}/{store}/enqueue.
+POOL_SERVE_URL = os.environ.get("POOL_SERVE_URL", "http://127.0.0.1:1220")
 
 
 # ── finding the image-bearing turn ────────────────────────────────────────────
@@ -142,21 +144,28 @@ def _mark_done(session_id: str, line_idx: int) -> None:
 # ── soul routing + the enqueue POST ───────────────────────────────────────────
 
 def _soul_id(project_dir: str) -> str:
-    """The soul's queue key = its genesis sha. Env wins; else derived from the
-    repo (tail line: a repo with several roots keeps its true genesis last)."""
+    """The soul's store as horaed names it, "{org}/{store}": the squad and
+    username in .lex/repo.yml (Subtexture Standard). POOL_SOUL_ID overrides.
+    Empty when either is missing: then there is no queue to address."""
     env = os.environ.get("POOL_SOUL_ID")
     if env:
         return env
-    out = subprocess.run(
-        ["git", "-C", project_dir, "rev-list", "--max-parents=0", "HEAD"],
-        capture_output=True, text=True, timeout=10)
-    roots = out.stdout.split()
-    return roots[-1] if roots else ""
+    found = {}
+    try:
+        with open(os.path.join(project_dir, ".lex", "repo.yml")) as f:
+            for line in f:
+                key, sep, value = line.partition(":")
+                if sep and key in ("squad", "username") and key not in found:
+                    found[key] = value.strip().strip("\"'")
+    except OSError:
+        return ""
+    if not (found.get("squad") and found.get("username")):
+        return ""
+    return f"{found['squad']}/{found['username']}"
 
 
-def _enqueue(body: dict, soul_id: str, *, timeout: int = 30) -> int:
-    url = (POOL_SERVE_URL.rstrip("/") + "/pylai/enqueue?"
-           + urllib.parse.urlencode({"soul": soul_id}))
+def _enqueue(body: dict, soul_id: str, *, timeout: int = 30) -> str:
+    url = f"{POOL_SERVE_URL.rstrip('/')}/horae/{soul_id}/enqueue"
     req = urllib.request.Request(
         url, data=json.dumps(body).encode(), method="POST",
         headers={"Content-Type": "application/json"})
@@ -164,12 +173,13 @@ def _enqueue(body: dict, soul_id: str, *, timeout: int = 30) -> int:
         out = json.loads(r.read() or b"null")
     if not out or "id" not in out:
         raise RuntimeError(f"enqueue returned no id: {out!r}")
-    return int(out["id"])
+    # horaed's ids are text (12 letters and digits), not the old row numbers.
+    return str(out["id"])
 
 
 def process_transcript(transcript: Path, *, project_dir: str,
                        session_id: str = "", shared_by: str = "human",
-                       wait: bool = False, dry_run: bool = False) -> list[int]:
+                       wait: bool = False, dry_run: bool = False) -> list[str]:
     """Enqueue any images in the transcript's last image-bearing human turn.
     Returns queue ticket ids. A per-image failure is logged and skipped; the
     turn is only marked done when EVERY image landed, so a partial failure
@@ -191,7 +201,7 @@ def process_transcript(transcript: Path, *, project_dir: str,
         return []
 
     shared_at = datetime.now(timezone.utc).isoformat(timespec="seconds")
-    tickets: list[int] = []
+    tickets: list[str] = []
     for i, src in enumerate(srcs):
         # Flat wire body, mirroring poolqueue.claude_code_share() exactly.
         body = {
@@ -207,7 +217,7 @@ def process_transcript(transcript: Path, *, project_dir: str,
             shown = dict(body, **{"image-b64": f"<{len(src['data'])} b64 chars>"})
             print(f"copia-share[dry-run]: would POST soul={soul} {shown}",
                   file=sys.stderr)
-            tickets.append(-1)
+            tickets.append("dry-run")
             continue
         try:
             t = _enqueue(body, soul)
