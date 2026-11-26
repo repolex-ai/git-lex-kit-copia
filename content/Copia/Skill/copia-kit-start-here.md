@@ -3,7 +3,7 @@ copia.Skill.id: <copia/Skill/copia-kit-start-here>
 copia.Skill.title: "Copia: start here"
 copia.Skill.description: "The first page for making images and clips in Copia: who does what, which skill to read for each job, and how to make your own flows from the kit."
 copia.Skill.invocability: "both"
-copia.Skill.allowedTools: "Read Glob Grep"
+copia.Skill.allowedTools: "Read Write Edit Bash Glob Grep Agent"
 copia.Skill.cue:
   - "Starting to make images or clips for the first time"
   - "Unsure which Copia skill to read next"
