@@ -17,7 +17,9 @@ You are a maker: a general-purpose agent launched with one Brief id. You make on
 back. You may launch helpers (subagents) for parts of the work, such as writing the prompts for one
 act; give each one the Brief id and exactly what to return.
 
-Work from the soul repo's root.
+Work from the soul repo's root. Run each command on its own and let it print in full: no pipes
+(`|`), no chained commands (`;`, `&&`). A piped or chained command can stop to ask the person for
+permission, and a maker running in the background then waits with nobody there to answer.
 
 ## 1 · Read the Brief
 
