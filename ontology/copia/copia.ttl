@@ -12,6 +12,19 @@
 # =============================================================================
 # COPIA KIT ONTOLOGY
 # =============================================================================
+# v0.48.0 (2026-11-25) — a shot-list line can start from a Pan picture.
+# Ruled by goodlux, 2026-11-25. Written by th34.
+# CHANGED: Shotlist authoringGuidance, "## The lines". A line is a plain prompt
+# (unchanged) or `<pan/Image/ID> setting=value ...: prompt`, built from that
+# picture (image-to-image for a still, the start picture for a clip), keeping
+# its shape. Settings use the render server's own names. Video lists use the
+# second form; Actions on a line are optional because Actions are not in use yet.
+# Reader: coquette (neocopia src/shotlist.rs read_line), which also still reads
+# the older video form `<id> <seconds>s <action>: paragraph`.
+# DELIBERATELY NOT DONE: no class or property for a line (a line lives only
+# while the list is fired; goodlux, 2026-11-25); no length setting (every clip
+# is 12 s, and that is not a choice); no size setting on a line.
+#
 # v0.47.0 (2026-11-22) — copia:Skill added.
 # Ruled by goodlux, 2026-11-22: kits keep their own skills, and skill properties
 # lift unprefixed onto git-lex:Skill (git-lex 0.23.0; reader shipped first in
@@ -725,7 +738,7 @@
 <https://repolex.ai/ontology/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.47.0" ;
+    owl:versionInfo "0.48.0" ;
     owl:imports <https://repolex.ai/ontology/soul/> .
 
 
@@ -2339,8 +2352,10 @@ Name the Brief this list was fired from in `relatedToId`, angle-bracket form:
 <copia/Brief/identifier>. There is no relatedToBriefId any more.
 
 ## The lines
-One prompt per line, in the order fired, and nothing else: no numbering, no bullets, no code fence. The firing tool sends every non-blank line under this heading exactly as written. The shot number is the line's position.
-For a video list each line is `<pan image id> <seconds>s <action id>: <the clip paragraph>`, and each Action is also named in `relatedToId`.
+One shot per line, in the order fired, and nothing else: no numbering, no bullets, no code fence. The shot number is the line's position. Each line is one of two forms:
+`prompt` - the whole line is the prompt, sent exactly as written.
+`<pan/Image/ID> setting=value ...: prompt` - built from that picture in Pan, keeping its shape. Settings are optional, use the render server's names, and are: denoising_strength (0 to 1, lower keeps more of the picture), seed, subseed, subseed_strength, batch_size (1 to 4).
+In a video list every line uses the second form and makes one 12-second clip from its picture. The only setting is seed. An Action is optional: put <copia/Action/id> before the colon, and name it in `relatedToId` too.
 
 ## Notes
 Anything about this firing - what departed from the brief, and why.
