@@ -15,17 +15,11 @@ copia.Skill.kitManaged: true
 
 ## 1 · Read what the image already is
 
-The image is the first frame of the clip, so it is already described. Read its caption and the
+The image is the first frame of the clip, so it is already described. Read its short caption and the
 prompt it was made from:
 
 ```bash
-syrinx sparql 'PREFIX pan: <https://repolex.ai/ontology/pan/>
-SELECT ?caption ?prompt WHERE {
-  SERVICE <https://repolex.ai/ontology/pan/> {
-    OPTIONAL { <pan/Image/<id>> pan:shortCaption ?caption }
-    OPTIONAL { <pan/Image/<id>> pan:renderRequestInformation ?prompt }
-  }
-}'
+syrinx query '<copia/Query/copia-kit-image>' image=pan/Image/<id>
 ```
 
 ## 2 · Write who and where, then the motion

@@ -41,16 +41,11 @@ rendering.
 1. **Count what is waiting** in your queue on Horae:
 
    ```bash
-   syrinx sparql 'PREFIX horae: <https://repolex.ai/ontology/horae/>
-   SELECT ?process (COUNT(?item) AS ?waiting) WHERE {
-     SERVICE <https://repolex.ai/ontology/horae/> {
-       ?item a horae:QueueItem ; horae:status ?status ; horae:process ?process .
-       VALUES ?status { "queued" "running" }
-     }
-   } GROUP BY ?process'
+   syrinx query '<copia/Query/copia-kit-waiting>'
    ```
 
    `?process` is `image` for stills and `clip` for clips. Count the kind this flow makes.
+   `?lastFinished` says when that kind last finished one: an old time means the server has stopped.
 
 2. **At or above the floor, or a maker still running:** do nothing this tick.
 3. **Below the floor:** write a Brief and launch one maker.

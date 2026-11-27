@@ -18,14 +18,7 @@ copia.Skill.kitManaged: true
 The images in a set, with any rating and caption:
 
 ```bash
-syrinx sparql 'PREFIX pan: <https://repolex.ai/ontology/pan/>
-SELECT ?image ?rating ?caption WHERE {
-  SERVICE <https://repolex.ai/ontology/pan/> {
-    ?image a pan:Image ; pan:relatedToId <pan/ImageSet/<set-id>> .
-    OPTIONAL { ?image pan:rating ?rating }
-    OPTIONAL { ?image pan:shortCaption ?caption }
-  }
-} ORDER BY ?image'
+syrinx query '<copia/Query/copia-kit-set-images>' set=pan/ImageSet/<set-id>
 ```
 
 ## 2 · Open one
@@ -37,13 +30,7 @@ Open it at full size, one image at a time.
 Its caption and the prompt that made it:
 
 ```bash
-syrinx sparql 'PREFIX pan: <https://repolex.ai/ontology/pan/>
-SELECT ?caption ?prompt WHERE {
-  SERVICE <https://repolex.ai/ontology/pan/> {
-    OPTIONAL { <pan/Image/<id>> pan:longCaption ?caption }
-    OPTIONAL { <pan/Image/<id>> pan:renderRequestInformation ?prompt }
-  }
-}'
+syrinx query '<copia/Query/copia-kit-image>' image=pan/Image/<id>
 ```
 
 To make anything from an image (a clip, a new picture built on it), pass its Pan id. Horae fetches

@@ -12,6 +12,12 @@
 # =============================================================================
 # COPIA KIT ONTOLOGY
 # =============================================================================
+# v0.48.1 (2026-11-27, ruled by goodlux): COPIA:QUERY AUTHORING GUIDANCE FOR SERVICE.
+#   - copia:Query authoringGuidance now covers the required git-lex:service, in the
+#     exact wording of soul 0.16.2 (inherited from git-lex:Query in git-lex 0.26.0 /
+#     subtexture 0.8.0). Wording only, no property change. The kit now ships its
+#     first Query documents: content/Copia/Query/copia-kit-{set-images,image,waiting}.md.
+
 # v0.48.0 (2026-11-25) — a shot-list line can start from a Pan picture.
 # Ruled by goodlux, 2026-11-25. Written by th34.
 # CHANGED: Shotlist authoringGuidance, "## The lines". A line is a plain prompt
@@ -738,7 +744,7 @@
 <https://repolex.ai/ontology/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.48.0" ;
+    owl:versionInfo "0.48.1" ;
     owl:imports <https://repolex.ai/ontology/soul/> .
 
 
@@ -2390,7 +2396,7 @@ copia:shotlistMedium a owl:DatatypeProperty ;
 copia:Query a owl:Class ;
     rdfs:subClassOf git-lex:Query , git-lex:Thing ;
     git-lex:foldered true ;
-    git-lex:authoringGuidance "Put the executable SPARQL 1.1 read query in the first fenced ```sparql code block in the body; declare each parameter in parameter as name[:kind][=default] and use it in the query as ?name." ;
+    git-lex:authoringGuidance "Set service to the service that runs the query (git-lex, pan, ravel, horae, punctum, or syrinx for federated SERVICE queries); put the executable SPARQL 1.1 read query in the first fenced ```sparql code block in the body; declare each parameter in parameter as name[:kind][=default] and use it in the query as ?name." ;
     rdfs:label "Query" ;
     rdfs:comment "A saved read-only SPARQL 1.1 query in Copia/Query/<id>.md — single-store or federated across Copia and Pan via Syrinx SERVICE blocks." .
 
