@@ -59,7 +59,7 @@ update.
 |---|---|
 | `git lex create <class> <id>` | makes a new document |
 | `git lex save "<message>"` | saves your work |
-| `coquette image --shotlist '<copia/Shotlist/<id>>'` | fires a Shotlist, image or video |
+| `coquette image --shotlist '<copia/Shotlist/garden-walk>'` | fires the Shotlist `Copia/Shotlist/garden-walk.md`, image or video |
 | `coquette image "<prompt>"` | one image |
 | `coquette video "<prompt>" --source-img-id <pan id>` | one 12-second clip from a picture |
 | `coquette list [Being\|Outfit\|Place\|Item\|Action]` | what exists in your soul |

@@ -28,8 +28,9 @@ write the choice under `## Notes` in the Shotlist.
 
 ## 2 · Gather the objects
 
-Read the Being, Place and Outfit the Brief names, in full. If the Brief asks for a new one, or
-names one that does not exist (`coquette list`), make it with
+Read the Being, Place and Outfit the Brief names, in full. If one exists but a field the prompts
+need is empty (a name or a description), fill that field and list it in your report. If the Brief
+asks for a new one, or names one that does not exist (`coquette list`), make it with
 [copia-kit-base-make-being](/Copia/Skill/copia-kit-base-make-being.md),
 [copia-kit-base-make-place](/Copia/Skill/copia-kit-base-make-place.md) or
 [copia-kit-base-make-outfit](/Copia/Skill/copia-kit-base-make-outfit.md).
@@ -41,9 +42,13 @@ each prompt written by [copia-kit-base-krea2-prompting](/Copia/Skill/copia-kit-b
 (or [copia-kit-base-ltx-prompting](/Copia/Skill/copia-kit-base-ltx-prompting.md) for a video list). Its
 `relatedToId` names the Brief.
 
+Write the Shotlist with your file-writing tool, not a script. A long list can be written a few
+lines at a time, or handed out one act per helper, each returning its lines.
+
 ## 4 · Report
 
-Do not save; the orchestrator saves. Return, in a few lines:
+Do not save, even where another skill or `git lex create` says to: the orchestrator saves. Write
+your choices and any problems you met under `## Notes` in the Shotlist. Return, in a few lines:
 
 - the Shotlist id, which is also the set id the pictures join;
 - how many lines the dry run showed and how many were sent;

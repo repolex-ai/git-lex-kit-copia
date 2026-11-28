@@ -23,14 +23,15 @@ it was written from.
 git lex create brief <brief-id>
 ```
 
-Under `## The brief`, write what this set is to do: the Being, Place and Outfit, the number of
-shots, and the acts if it follows a Scenario. Under `## Why`, a line on what you are reaching for.
+Replace the body it makes with two headings. Under `## The brief`, write the instruction for the
+set: the Being, Place and Outfit, the number of shots, and the acts if it follows a Scenario. Under `## Why`, a line on what you are reaching for.
 A maker is handed a Brief that already exists and skips this step.
 
 ## 2 · Plan the shots
 
 Divide the shots evenly across the acts or beats. Within a beat, change one thing per shot: the
-pose, the action, the facing or the crop. Keep the camera position steady across the set.
+pose, the action, the facing or the crop. Keep the camera position steady within a beat, and across
+the set unless the Brief moves through the Place.
 
 ## 3 · Write the prompts
 

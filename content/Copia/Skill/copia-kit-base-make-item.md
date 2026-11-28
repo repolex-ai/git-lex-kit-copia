@@ -54,3 +54,5 @@ copia.Item.itemDescription: "a mustard-yellow wool cardigan, hip length, with fi
 ```bash
 git lex save "made <item-id>"
 ```
+
+A maker skips this step; the orchestrator saves.

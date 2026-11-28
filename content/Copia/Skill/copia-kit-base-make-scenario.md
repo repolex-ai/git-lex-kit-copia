@@ -69,3 +69,5 @@ The shot counts in the acts add up to the size of the set.
 ```bash
 git lex save "made <scenario-id>"
 ```
+
+A maker skips this step; the orchestrator saves.

@@ -12,6 +12,10 @@
 # =============================================================================
 # COPIA KIT ONTOLOGY
 # =============================================================================
+# v0.48.2 (2026-11-28): wording only. Brief guidance matches the loop skill;
+#   Shotlist and ScenarioTake name relatedToId instead of a "## References"
+#   heading; renderRule's <MODEL> is the model's name (KREA2 for stills).
+
 # v0.48.1 (2026-11-27, ruled by goodlux): COPIA:QUERY AUTHORING GUIDANCE FOR SERVICE.
 #   - copia:Query authoringGuidance now covers the required git-lex:service, in the
 #     exact wording of soul 0.16.2 (inherited from git-lex:Query in git-lex 0.26.0 /
@@ -744,7 +748,7 @@
 <https://repolex.ai/ontology/copia> a owl:Ontology ;
     rdfs:label "Copia Kit Ontology" ;
     rdfs:comment "The agent's curated outward face + the CoPIA render data model. Soul-adapter. Optional add-on for soul." ;
-    owl:versionInfo "0.48.1" ;
+    owl:versionInfo "0.48.2" ;
     owl:imports <https://repolex.ai/ontology/soul/> .
 
 
@@ -1052,7 +1056,7 @@ copia:Depictable a owl:Class ;
 
 copia:renderRule a owl:DatatypeProperty ;
     rdfs:label "render rule" ;
-    rdfs:comment "How to write this thing into a render prompt: MODEL: NEVER <words> → <what to write instead>. Never a rule without the arrow. Multi-valued — one list item each; do not repeat the key." ;
+    rdfs:comment "How to write this thing into a render prompt: <MODEL>: NEVER <words> → <what to write instead>, where <MODEL> is the model's name, KREA2 for stills. Never a rule without the arrow. Multi-valued — one list item each; do not repeat the key." ;
     rdfs:domain copia:Depictable ;
     rdfs:range xsd:string .
 
@@ -2210,9 +2214,9 @@ copia:ScenarioTake a owl:Class ;
     rdfs:label "ScenarioTake" ;
     rdfs:comment "One attempt at a Scenario. Intent and prediction go in the body BEFORE anything is fired — that is the entire point of the class. The scene is required and never inherited: it is what varies between takes." ;
     git-lex:authoringGuidance """
-## References (required — a take will not save without them)
-Name the Scenario, the Place, the Being(s) and the Outfit(s) this take uses in
-`relatedToId`, in angle-bracket form: <copia/Place/greenhouse>. One reference per
+Required, in the frontmatter, not the body: name the Scenario, the Place, the
+Being(s) and the Outfit(s) this take uses in the `relatedToId` key, in
+angle-bracket form: <copia/Place/greenhouse>. A take will not save without them. One reference per
 list item. The exact counts are printed beside the key in the document itself.
 There is no relatedToPlaceId any more; every reference goes in the one list.
 
@@ -2332,7 +2336,7 @@ copia:Brief a owl:Class ;
     rdfs:comment "What a skill was actually told to do, kept verbatim in the body. Written before the shot list it produces, and kept because a shot list you cannot compare to its instruction only tells you what happened, never whether it was what you asked for." ;
     git-lex:authoringGuidance """
 ## The brief
-The exact text handed to the skill, word for word. Not a summary - a brief you cannot compare against what actually ran is not a record of anything.
+The instruction the maker is handed: what this set is to do, its Being, Place and Outfit, and the number of shots. The maker reads these words as written, so they are also the record of what was asked. Not a summary written afterwards - a brief you cannot compare against what actually ran is not a record of anything.
 
 ## Why
 What you were reaching for with this wording, in a line or two.
@@ -2353,9 +2357,9 @@ copia:Shotlist a owl:Class ;
     rdfs:label "Shotlist" ;
     rdfs:comment "The lines that were fired, in fired order, kept in the body. Every shot list comes from a brief; naming which one is what makes the pair worth keeping." ;
     git-lex:authoringGuidance """
-## References (required — a shot list will not save without one)
-Name the Brief this list was fired from in `relatedToId`, angle-bracket form:
-<copia/Brief/identifier>. There is no relatedToBriefId any more.
+Required, in the frontmatter, not the body: name the Brief this list was fired
+from in the `relatedToId` key, angle-bracket form: <copia/Brief/identifier>. A
+shot list will not save without it. There is no relatedToBriefId any more.
 
 ## The lines
 One shot per line, in the order fired, and nothing else: no numbering, no bullets, no code fence. The shot number is the line's position. Each line is one of two forms:

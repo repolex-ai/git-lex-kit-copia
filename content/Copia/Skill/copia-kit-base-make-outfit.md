@@ -67,3 +67,5 @@ copia.Outfit.relatedToId:
 ```bash
 git lex save "made <outfit-id>"
 ```
+
+A maker skips this step; the orchestrator saves.

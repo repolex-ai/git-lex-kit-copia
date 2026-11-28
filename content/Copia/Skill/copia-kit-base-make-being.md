@@ -70,3 +70,5 @@ KREA2: NEVER <what not to write> → <what to write instead>
 ```bash
 git lex save "made <being-id>"
 ```
+
+A maker skips this step; the orchestrator saves.

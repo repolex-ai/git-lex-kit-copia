@@ -58,3 +58,5 @@ copia.Place.placeDescription: "a small walled back garden with a brick path, rai
 ```bash
 git lex save "made <place-id>"
 ```
+
+A maker skips this step; the orchestrator saves.

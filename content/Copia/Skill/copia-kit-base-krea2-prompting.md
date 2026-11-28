@@ -55,8 +55,19 @@ One line per figure, labeled to match the subject. One woman is `WOMAN`; two are
 - Describe only what is visible: body, skin, hair, eyes, what is worn. Not what the figure is doing.
 - To use a Being, put its name in capitals first, then its description:
   `WOMAN: MARA. MARA is a woman, slender, …`
-- To use an Outfit or Place, write its name in capitals. CoPIA records the names it finds in the
-  prompt with the image.
+- To use an Outfit, write its name in capitals, then its description:
+  `WOMAN: MARA. MARA is a woman, …, wearing THE LINEN DRESS, a loose white linen dress …`
+- To use a Place, write its name in capitals in `SUBJECT`, and put the parts of its description
+  that are in frame in `CONTEXT`.
+- coquette sends the prompt exactly as written: a name alone renders nothing, so the description
+  always follows it. CoPIA records the names it finds in the prompt with the image.
+- Write the name as a short phrase without dates or commas: a Place named "Old harbour, about
+  1900" is written `OLD HARBOUR`.
+- `coquette list` also shows names as `&id`, `$id` and `@id`. That notation is for chevrons on
+  CoPIA's shared surface, not for prompts.
+- A Being, Outfit or Place may carry `renderRule`s: `KREA2: NEVER <words> → <what to write
+  instead>`. They are for you, the writer. Follow one by writing its "instead" words. Never copy a
+  rule into the prompt, because "no X" in a prompt puts X in the image.
 
 ## CONTEXT
 
@@ -65,7 +76,7 @@ The action, what each figure is touching, and each face's expression.
 - Refer to figures by their labels, never by pronouns: `WOMAN2's cup`, not *her cup*.
 - Name an expression for each face in frame: *WOMAN1 is smiling.*
 - Name two or three objects at most, only those a figure is touching or beside. Every object
-  named takes space in the frame.
+  named takes space in the frame. A Place's renderRule that asks for more wins over this default.
 - An action may only touch something the prompt has already named.
 
 ## COMPOSITION
@@ -126,5 +137,8 @@ Write the whole prompt as usual. The prompt still describes the full image.
 - Cut any phrase that does not describe the image.
 - Do not mention the camera unless a camera should appear in the image.
 - Name only body parts the crop can show. Extra parts make the model add more body.
-- Name each body part once per prompt. A hand named twice can render as two hands.
+- Name each body part once per prompt. A hand named twice can render as two hands. When a Being
+  and an Outfit both describe the hair, keep one of them.
+- From a Being, Outfit or Place description, keep only what the crop shows: a close-up of the face
+  leaves out an ankle-length skirt.
 - Each line in a Shotlist holds one whole prompt, with the sections in order on one line.
