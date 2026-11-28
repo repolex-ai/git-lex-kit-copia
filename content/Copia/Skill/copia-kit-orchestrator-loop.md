@@ -18,7 +18,7 @@ copia.Skill.kitManaged: true
 
 You are the orchestrator, in the main thread. You keep the render queue fed and your own context
 clear: makers do the making. Who does what is in
-[copia-kit-orchestrator-start-here](/Copia/Skill/copia-kit-orchestrator-start-here.md).
+[copia-kit-start-here](/Copia/Skill/copia-kit-start-here.md).
 
 ## Defaults
 

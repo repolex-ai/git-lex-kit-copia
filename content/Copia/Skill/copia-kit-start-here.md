@@ -1,5 +1,5 @@
 ---
-copia.Skill.id: <copia/Skill/copia-kit-orchestrator-start-here>
+copia.Skill.id: <copia/Skill/copia-kit-start-here>
 copia.Skill.title: "Copia: start here"
 copia.Skill.description: "The first page for making images and clips in Copia: who does what, which skill to read for each job, and how to make your own flows from the kit."
 copia.Skill.invocability: "both"
@@ -12,7 +12,7 @@ copia.Skill.relatedToId:
 copia.Skill.kitManaged: true
 ---
 
-# copia-kit-orchestrator-start-here
+# copia-kit-start-here
 
 **This skill is kit managed. Do not edit or change. Edits will be discarded.**
 
