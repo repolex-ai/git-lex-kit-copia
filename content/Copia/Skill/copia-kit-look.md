@@ -18,7 +18,7 @@ copia.Skill.kitManaged: true
 The images in a set, with any rating and caption:
 
 ```bash
-syrinx query '<copia/Query/copia-kit-set-images>' set=pan/ImageSet/<set-id>
+syrinx query '<copia/Query/copia-kit-images-in-set>' set=pan/ImageSet/<set-id>
 ```
 
 ## 2 · Open one
@@ -30,7 +30,7 @@ Open it at full size, one image at a time.
 Its caption and the prompt that made it:
 
 ```bash
-syrinx query '<copia/Query/copia-kit-image>' image=pan/Image/<id>
+syrinx query '<copia/Query/copia-kit-image-information>' image=pan/Image/<id>
 ```
 
 To make anything from an image (a clip, a new picture built on it), pass its Pan id. Horae fetches

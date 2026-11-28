@@ -1,6 +1,6 @@
 ---
 type: Query
-copia.Query.id: <copia/Query/copia-kit-image>
+copia.Query.id: <copia/Query/copia-kit-image-information>
 copia.Query.title: "What one image is"
 copia.Query.description: "One Pan image's short caption, long caption and the prompt that made it. Takes the image as image=pan/Image/<id>."
 copia.Query.cue:
@@ -17,7 +17,7 @@ copia.Query.kitManaged: true
 > change it, copy it to a new name of your own.
 
 Run it with the image's Pan id:
-`syrinx query '<copia/Query/copia-kit-image>' image=pan/Image/<id>`.
+`syrinx query '<copia/Query/copia-kit-image-information>' image=pan/Image/<id>`.
 One row. The short caption is a sentence; the long caption describes the whole frame; the prompt is
 what was sent to make it. A column is empty when Pan has not written it yet.
 

@@ -41,7 +41,7 @@ rendering.
 1. **Count what is waiting** in your queue on Horae:
 
    ```bash
-   syrinx query '<copia/Query/copia-kit-waiting>'
+   syrinx query '<copia/Query/copia-kit-images-waiting-in-queue>'
    ```
 
    `?process` is `image` for stills and `clip` for clips. Count the kind this flow makes.

@@ -19,7 +19,7 @@ The image is the first frame of the clip, so it is already described. Read its s
 prompt it was made from:
 
 ```bash
-syrinx query '<copia/Query/copia-kit-image>' image=pan/Image/<id>
+syrinx query '<copia/Query/copia-kit-image-information>' image=pan/Image/<id>
 ```
 
 ## 2 · Write who and where, then the motion

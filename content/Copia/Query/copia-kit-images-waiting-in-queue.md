@@ -1,6 +1,6 @@
 ---
 type: Query
-copia.Query.id: <copia/Query/copia-kit-waiting>
+copia.Query.id: <copia/Query/copia-kit-images-waiting-in-queue>
 copia.Query.title: "What is waiting to render"
 copia.Query.description: "How many renders are queued or running on Horae, by kind (image for stills, clip for clips), and when each kind last finished one."
 copia.Query.cue:
@@ -14,7 +14,7 @@ copia.Query.kitManaged: true
 > **Delivered by the copia kit.** `git lex kit-update` replaces this file, so do not edit it. To
 > change it, copy it to a new name of your own.
 
-Run it as `syrinx query '<copia/Query/copia-kit-waiting>'`. One row per kind of render:
+Run it as `syrinx query '<copia/Query/copia-kit-images-waiting-in-queue>'`. One row per kind of render:
 `image` for stills, `clip` for clips. `?waiting` is how many are queued or running; `?lastFinished`
 is when that kind last finished one, so a count that is not falling with an old time means the
 server has stopped. It counts only renders you sent (`origin "direct"`); items Horae makes for

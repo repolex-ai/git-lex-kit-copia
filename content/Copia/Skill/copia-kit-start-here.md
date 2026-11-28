@@ -58,7 +58,7 @@ update.
 | `coquette image "<prompt>"` | one image |
 | `coquette video "<prompt>" --source-img-id <pan id>` | one 12-second clip from a picture |
 | `coquette list [Being\|Outfit\|Place\|Item\|Action]` | what exists in your soul |
-| `syrinx query` | lists the saved queries; `syrinx query '<copia/Query/copia-kit-waiting>'` runs one |
+| `syrinx query` | lists the saved queries; `syrinx query '<copia/Query/copia-kit-images-waiting-in-queue>'` runs one |
 | `syrinx sparql '<query>'` | asks Pan, Horae and your soul; `syrinx guide` teaches the queries |
 
 Every tool's `--help` lists all of its options. Add `-n` to any `coquette` send for a dry run.
