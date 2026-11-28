@@ -7,6 +7,8 @@ copia.Skill.allowedTools: "Read Write Edit Bash Glob Grep Agent"
 copia.Skill.cue:
   - "Starting to make images or clips for the first time"
   - "Unsure which Copia skill to read next"
+copia.Skill.relatedToId:
+  - <copia/Query/copia-kit-images-waiting-in-queue>
 copia.Skill.kitManaged: true
 ---
 

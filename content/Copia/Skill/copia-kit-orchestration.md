@@ -7,6 +7,8 @@ copia.Skill.allowedTools: "Read Write Edit Bash Glob Grep Agent"
 copia.Skill.cue:
   - "Starting a continuous flow of images or clips"
   - "A timer tick has fired"
+copia.Skill.relatedToId:
+  - <copia/Query/copia-kit-images-waiting-in-queue>
 copia.Skill.kitManaged: true
 ---
 

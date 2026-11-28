@@ -6,6 +6,8 @@ copia.Skill.invocability: "both"
 copia.Skill.allowedTools: "Read Write Edit Bash"
 copia.Skill.cue:
   - "Making a video from an image"
+copia.Skill.relatedToId:
+  - <copia/Query/copia-kit-image-information>
 copia.Skill.kitManaged: true
 ---
 
