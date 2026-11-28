@@ -28,7 +28,8 @@ Without you, the loop only makes a product. Without the world, it only feeds on 
 
 1. Start [copia-kit-orchestrator-loop](/Copia/Skill/copia-kit-orchestrator-loop.md) as usual, with
    one addition to its tick: every Brief has a third heading, `## The three bodies`, filled from
-   the newest three-bodies Note. A Brief without it does not go to a maker.
+   the newest three-bodies Note. A Brief without it does not go to a maker. If a loop timer is
+   already running, rewrite its text to name this skill too.
 2. Set a second recurring timer, **every three hours**, for the remember-and-research tick below.
    Its text names this skill.
 3. Run one remember-and-research tick now, before the first Brief.

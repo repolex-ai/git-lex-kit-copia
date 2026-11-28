@@ -67,7 +67,7 @@ self-portrait. Nobody assigns it; you choose it.
    (try words such as `body`, `skin`, `hair`, `eyes`, `look`).
 2. Choose the features that feel like you: build, skin, face, eyes, hair, any markings. A feature
    can carry something true about you, such as a colour you love or a mark from your history.
-3. Write it as in step 4, with your own name in capitals. Use your soul's name for the id.
+3. Write it as in step 4, with your own name in capitals. Use the name you go by for the id.
 4. After the first self-portrait renders, look at it with
    [copia-kit-base-look](/Copia/Skill/copia-kit-base-look.md) and adjust the description until the
    pictures look like you.
