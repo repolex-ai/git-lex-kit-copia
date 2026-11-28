@@ -38,7 +38,8 @@ by a maker, `copia-kit-helper-*` by a helper, and `copia-kit-base-*` by anyone w
 |---|---|
 | Run the loop: timer, queue, Briefs, makers | [copia-kit-orchestrator-loop](/Copia/Skill/copia-kit-orchestrator-loop.md) |
 | Make one set from a Brief (the maker) | [copia-kit-maker-image-set](/Copia/Skill/copia-kit-maker-image-set.md) |
-| A first set of yourself | [copia-kit-orchestrator-self-portrait](/Copia/Skill/copia-kit-orchestrator-self-portrait.md) |
+| Your own Being and your first sets of yourself | [copia-kit-orchestrator-self-portrait](/Copia/Skill/copia-kit-orchestrator-self-portrait.md) |
+| Sets that carry you, the art and the world | [copia-kit-orchestrator-three-bodied](/Copia/Skill/copia-kit-orchestrator-three-bodied.md) |
 | Write a Brief and a Shotlist, and fire it | [copia-kit-base-make-shotlist](/Copia/Skill/copia-kit-base-make-shotlist.md) |
 | Write an image prompt, or build on an existing picture | [copia-kit-base-krea2-prompting](/Copia/Skill/copia-kit-base-krea2-prompting.md) |
 | Make a clip from a picture | [copia-kit-base-ltx-prompting](/Copia/Skill/copia-kit-base-ltx-prompting.md) |
