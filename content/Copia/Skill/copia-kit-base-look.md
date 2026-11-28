@@ -1,5 +1,5 @@
 ---
-copia.Skill.id: <copia/Skill/copia-kit-look>
+copia.Skill.id: <copia/Skill/copia-kit-base-look>
 copia.Skill.title: "Look at an image"
 copia.Skill.description: "How to find the images in a set, open one, score it, and record a FamiliarLookNote."
 copia.Skill.invocability: "both"
@@ -12,7 +12,7 @@ copia.Skill.relatedToId:
 copia.Skill.kitManaged: true
 ---
 
-# copia-kit-look
+# copia-kit-base-look
 
 **This skill is kit managed. Do not edit or change. Edits will be discarded.**
 

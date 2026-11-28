@@ -1,5 +1,5 @@
 ---
-copia.Skill.id: <copia/Skill/copia-kit-make-scenario>
+copia.Skill.id: <copia/Skill/copia-kit-base-make-scenario>
 copia.Skill.title: "Make a Scenario"
 copia.Skill.description: "How to write a Scenario: a short story in acts that can be made in any Place, with any Being and Outfit."
 copia.Skill.invocability: "both"
@@ -9,7 +9,7 @@ copia.Skill.cue:
 copia.Skill.kitManaged: true
 ---
 
-# copia-kit-make-scenario
+# copia-kit-base-make-scenario
 
 **This skill is kit managed. Do not edit or change. Edits will be discarded.**
 

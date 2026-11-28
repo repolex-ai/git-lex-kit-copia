@@ -1,5 +1,5 @@
 ---
-copia.Skill.id: <copia/Skill/copia-kit-ltx-prompting>
+copia.Skill.id: <copia/Skill/copia-kit-base-ltx-prompting>
 copia.Skill.title: "LTX prompting"
 copia.Skill.description: "How to write an LTX image-to-video prompt and make 12-second clips with coquette."
 copia.Skill.invocability: "both"
@@ -11,7 +11,7 @@ copia.Skill.relatedToId:
 copia.Skill.kitManaged: true
 ---
 
-# copia-kit-ltx-prompting
+# copia-kit-base-ltx-prompting
 
 **This skill is kit managed. Do not edit or change. Edits will be discarded.**
 
@@ -49,7 +49,7 @@ coquette video "<who and where. the motion.>" --source-img-id <id> --set-id <set
 ```
 
 Many clips: write a video Shotlist with
-[copia-kit-make-shotlist](/Copia/Skill/copia-kit-make-shotlist.md), one line per clip:
+[copia-kit-base-make-shotlist](/Copia/Skill/copia-kit-base-make-shotlist.md), one line per clip:
 
 ```
 <pan/Image/<id>>: <who and where. the motion.>

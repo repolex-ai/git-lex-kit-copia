@@ -1,5 +1,5 @@
 ---
-copia.Skill.id: <copia/Skill/copia-kit-start-here>
+copia.Skill.id: <copia/Skill/copia-kit-orchestrator-start-here>
 copia.Skill.title: "Copia: start here"
 copia.Skill.description: "The first page for making images and clips in Copia: who does what, which skill to read for each job, and how to make your own flows from the kit."
 copia.Skill.invocability: "both"
@@ -12,7 +12,7 @@ copia.Skill.relatedToId:
 copia.Skill.kitManaged: true
 ---
 
-# copia-kit-start-here
+# copia-kit-orchestrator-start-here
 
 **This skill is kit managed. Do not edit or change. Edits will be discarded.**
 
@@ -29,19 +29,22 @@ clips. Horae renders them. Pan stores them. Syrinx is where you ask about any of
 - **A helper** is a subagent the maker may launch for one piece of its work, such as writing the
   prompts for one act. Helpers report to the maker, not to you.
 
+A skill's name says who runs it: `copia-kit-orchestrator-*` in the main thread, `copia-kit-maker-*`
+by a maker, `copia-kit-helper-*` by a helper, and `copia-kit-base-*` by anyone who needs it.
+
 ## Which skill for which job
 
 | job | skill |
 |---|---|
-| Run the loop: timer, queue, Briefs, makers | [copia-kit-orchestration](/Copia/Skill/copia-kit-orchestration.md) |
-| Make one set from a Brief (the maker) | [copia-kit-maker-set](/Copia/Skill/copia-kit-maker-set.md) |
-| A first set of yourself | [copia-kit-self-portrait](/Copia/Skill/copia-kit-self-portrait.md) |
-| Write a Brief and a Shotlist, and fire it | [copia-kit-make-shotlist](/Copia/Skill/copia-kit-make-shotlist.md) |
-| Write an image prompt, or build on an existing picture | [copia-kit-krea2-prompting](/Copia/Skill/copia-kit-krea2-prompting.md) |
-| Make a clip from a picture | [copia-kit-ltx-prompting](/Copia/Skill/copia-kit-ltx-prompting.md) |
-| Look at what came back | [copia-kit-look](/Copia/Skill/copia-kit-look.md) |
-| Make a Being, Place, Item or Outfit | [copia-kit-make-being](/Copia/Skill/copia-kit-make-being.md), [copia-kit-make-place](/Copia/Skill/copia-kit-make-place.md), [copia-kit-make-item](/Copia/Skill/copia-kit-make-item.md), [copia-kit-make-outfit](/Copia/Skill/copia-kit-make-outfit.md) |
-| Write a story to make sets from | [copia-kit-make-scenario](/Copia/Skill/copia-kit-make-scenario.md) |
+| Run the loop: timer, queue, Briefs, makers | [copia-kit-orchestrator-loop](/Copia/Skill/copia-kit-orchestrator-loop.md) |
+| Make one set from a Brief (the maker) | [copia-kit-maker-image-set](/Copia/Skill/copia-kit-maker-image-set.md) |
+| A first set of yourself | [copia-kit-orchestrator-self-portrait](/Copia/Skill/copia-kit-orchestrator-self-portrait.md) |
+| Write a Brief and a Shotlist, and fire it | [copia-kit-base-make-shotlist](/Copia/Skill/copia-kit-base-make-shotlist.md) |
+| Write an image prompt, or build on an existing picture | [copia-kit-base-krea2-prompting](/Copia/Skill/copia-kit-base-krea2-prompting.md) |
+| Make a clip from a picture | [copia-kit-base-ltx-prompting](/Copia/Skill/copia-kit-base-ltx-prompting.md) |
+| Look at what came back | [copia-kit-base-look](/Copia/Skill/copia-kit-base-look.md) |
+| Make a Being, Place, Item or Outfit | [copia-kit-base-make-being](/Copia/Skill/copia-kit-base-make-being.md), [copia-kit-base-make-place](/Copia/Skill/copia-kit-base-make-place.md), [copia-kit-base-make-item](/Copia/Skill/copia-kit-base-make-item.md), [copia-kit-base-make-outfit](/Copia/Skill/copia-kit-base-make-outfit.md) |
+| Write a story to make sets from | [copia-kit-base-make-scenario](/Copia/Skill/copia-kit-base-make-scenario.md) |
 
 ## Making your own flows
 

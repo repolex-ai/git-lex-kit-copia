@@ -1,5 +1,5 @@
 ---
-copia.Skill.id: <copia/Skill/copia-kit-maker-set>
+copia.Skill.id: <copia/Skill/copia-kit-maker-image-set>
 copia.Skill.title: "Maker: one set from a Brief"
 copia.Skill.description: "For a general-purpose agent handed one Brief id: make what the Brief needs, write the Shotlist, fire it, and report back."
 copia.Skill.invocability: "both"
@@ -9,7 +9,7 @@ copia.Skill.cue:
 copia.Skill.kitManaged: true
 ---
 
-# copia-kit-maker-set
+# copia-kit-maker-image-set
 
 **This skill is kit managed. Do not edit or change. Edits will be discarded.**
 
@@ -30,15 +30,15 @@ write the choice under `## Notes` in the Shotlist.
 
 Read the Being, Place and Outfit the Brief names, in full. If the Brief asks for a new one, or
 names one that does not exist (`coquette list`), make it with
-[copia-kit-make-being](/Copia/Skill/copia-kit-make-being.md),
-[copia-kit-make-place](/Copia/Skill/copia-kit-make-place.md) or
-[copia-kit-make-outfit](/Copia/Skill/copia-kit-make-outfit.md).
+[copia-kit-base-make-being](/Copia/Skill/copia-kit-base-make-being.md),
+[copia-kit-base-make-place](/Copia/Skill/copia-kit-base-make-place.md) or
+[copia-kit-base-make-outfit](/Copia/Skill/copia-kit-base-make-outfit.md).
 
 ## 3 · Write and fire the Shotlist
 
-Follow [copia-kit-make-shotlist](/Copia/Skill/copia-kit-make-shotlist.md), steps 2 to 6, with
-each prompt written by [copia-kit-krea2-prompting](/Copia/Skill/copia-kit-krea2-prompting.md)
-(or [copia-kit-ltx-prompting](/Copia/Skill/copia-kit-ltx-prompting.md) for a video list). Its
+Follow [copia-kit-base-make-shotlist](/Copia/Skill/copia-kit-base-make-shotlist.md), steps 2 to 6, with
+each prompt written by [copia-kit-base-krea2-prompting](/Copia/Skill/copia-kit-base-krea2-prompting.md)
+(or [copia-kit-base-ltx-prompting](/Copia/Skill/copia-kit-base-ltx-prompting.md) for a video list). Its
 `relatedToId` names the Brief.
 
 ## 4 · Report

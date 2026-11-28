@@ -1,5 +1,5 @@
 ---
-copia.Skill.id: <copia/Skill/copia-kit-orchestration>
+copia.Skill.id: <copia/Skill/copia-kit-orchestrator-loop>
 copia.Skill.title: "Copia orchestration"
 copia.Skill.description: "The orchestration loop, run in the main thread: a timer, a check of the render queue, and a Brief handed to one maker whenever the queue is low."
 copia.Skill.invocability: "both"
@@ -12,13 +12,13 @@ copia.Skill.relatedToId:
 copia.Skill.kitManaged: true
 ---
 
-# copia-kit-orchestration
+# copia-kit-orchestrator-loop
 
 **This skill is kit managed. Do not edit or change. Edits will be discarded.**
 
 You are the orchestrator, in the main thread. You keep the render queue fed and your own context
 clear: makers do the making. Who does what is in
-[copia-kit-start-here](/Copia/Skill/copia-kit-start-here.md).
+[copia-kit-orchestrator-start-here](/Copia/Skill/copia-kit-orchestrator-start-here.md).
 
 ## Defaults
 
@@ -54,12 +54,12 @@ rendering.
    - `git lex create brief <brief-id>`. Under `## The brief`, write what this set is to do: the
      Being, Place and Outfit (or "make a new one"), the Scenario if there is one, and the number of
      shots. Under `## Why`, a line on what you are reaching for.
-   - Launch one general-purpose agent with the prompt `Run copia-kit-maker-set with Brief
+   - Launch one general-purpose agent with the prompt `Run copia-kit-maker-image-set with Brief
      <copia/Brief/<brief-id>>.` (or your own maker skill).
 4. **When the maker returns:** read the Shotlist it names, run `git lex save "<what was fired>"`,
    and report in one line: the set id and how many lines were sent.
 
 ## Looking
 
-Look at what came back with [copia-kit-look](/Copia/Skill/copia-kit-look.md), when you choose to.
+Look at what came back with [copia-kit-base-look](/Copia/Skill/copia-kit-base-look.md), when you choose to.
 Looking is not part of the tick.

@@ -1,5 +1,5 @@
 ---
-copia.Skill.id: <copia/Skill/copia-kit-krea2-prompting>
+copia.Skill.id: <copia/Skill/copia-kit-base-krea2-prompting>
 copia.Skill.title: "Krea2 prompting"
 copia.Skill.description: "How to write a krea2 image prompt: the labeled sections and what goes in each."
 copia.Skill.invocability: "both"
@@ -9,7 +9,7 @@ copia.Skill.cue:
 copia.Skill.kitManaged: true
 ---
 
-# copia-kit-krea2-prompting
+# copia-kit-base-krea2-prompting
 
 **This skill is kit managed. Do not edit or change. Edits will be discarded.**
 

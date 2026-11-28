@@ -1,5 +1,5 @@
 ---
-copia.Skill.id: <copia/Skill/copia-kit-make-shotlist>
+copia.Skill.id: <copia/Skill/copia-kit-base-make-shotlist>
 copia.Skill.title: "Make a Shotlist"
 copia.Skill.description: "How to write a Brief and a Shotlist, image or video, and fire it with coquette."
 copia.Skill.invocability: "both"
@@ -10,7 +10,7 @@ copia.Skill.cue:
 copia.Skill.kitManaged: true
 ---
 
-# copia-kit-make-shotlist
+# copia-kit-base-make-shotlist
 
 **This skill is kit managed. Do not edit or change. Edits will be discarded.**
 
@@ -34,8 +34,8 @@ pose, the action, the facing or the crop. Keep the camera position steady across
 
 ## 3 · Write the prompts
 
-Image prompts follow [copia-kit-krea2-prompting](/Copia/Skill/copia-kit-krea2-prompting.md);
-clip prompts follow [copia-kit-ltx-prompting](/Copia/Skill/copia-kit-ltx-prompting.md).
+Image prompts follow [copia-kit-base-krea2-prompting](/Copia/Skill/copia-kit-base-krea2-prompting.md);
+clip prompts follow [copia-kit-base-ltx-prompting](/Copia/Skill/copia-kit-base-ltx-prompting.md).
 
 ## 4 · Create the Shotlist
 

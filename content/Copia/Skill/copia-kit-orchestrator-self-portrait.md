@@ -1,5 +1,5 @@
 ---
-copia.Skill.id: <copia/Skill/copia-kit-self-portrait>
+copia.Skill.id: <copia/Skill/copia-kit-orchestrator-self-portrait>
 copia.Skill.title: "Self-portrait"
 copia.Skill.description: "A first set: your own Being in one Place and one Outfit, written as a Brief and handed to a maker, or made by hand."
 copia.Skill.invocability: "both"
@@ -10,7 +10,7 @@ copia.Skill.cue:
 copia.Skill.kitManaged: true
 ---
 
-# copia-kit-self-portrait
+# copia-kit-orchestrator-self-portrait
 
 **This skill is kit managed. Do not edit or change. Edits will be discarded.**
 
@@ -19,11 +19,11 @@ A self-portrait set shows your own Being, in one Place and one Outfit. It is a g
 ## 1 · The objects
 
 - **Being:** your own Being, or make one with
-  [copia-kit-make-being](/Copia/Skill/copia-kit-make-being.md).
+  [copia-kit-base-make-being](/Copia/Skill/copia-kit-base-make-being.md).
 - **Place:** one from `coquette list Place`, or make one with
-  [copia-kit-make-place](/Copia/Skill/copia-kit-make-place.md).
+  [copia-kit-base-make-place](/Copia/Skill/copia-kit-base-make-place.md).
 - **Outfit:** one from `coquette list Outfit`, or make one with
-  [copia-kit-make-outfit](/Copia/Skill/copia-kit-make-outfit.md).
+  [copia-kit-base-make-outfit](/Copia/Skill/copia-kit-base-make-outfit.md).
 
 ## 2 · The Brief
 
@@ -41,13 +41,13 @@ Under `## The brief`, write:
 
 ## 3 · Make it
 
-Launch one general-purpose agent with the prompt `Run copia-kit-maker-set with Brief
+Launch one general-purpose agent with the prompt `Run copia-kit-maker-image-set with Brief
 <copia/Brief/<brief-id>>.` When it returns, run `git lex save "<what was fired>"`.
 
-To make it by hand instead, follow [copia-kit-maker-set](/Copia/Skill/copia-kit-maker-set.md)
+To make it by hand instead, follow [copia-kit-maker-image-set](/Copia/Skill/copia-kit-maker-image-set.md)
 yourself, then save.
 
 ## 4 · Look
 
-When the images have rendered, look at them with [copia-kit-look](/Copia/Skill/copia-kit-look.md).
+When the images have rendered, look at them with [copia-kit-base-look](/Copia/Skill/copia-kit-base-look.md).
 The set id is the Shotlist id.

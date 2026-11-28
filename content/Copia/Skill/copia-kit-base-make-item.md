@@ -1,5 +1,5 @@
 ---
-copia.Skill.id: <copia/Skill/copia-kit-make-item>
+copia.Skill.id: <copia/Skill/copia-kit-base-make-item>
 copia.Skill.title: "Make an Item"
 copia.Skill.description: "How to make an Item: one garment or one object."
 copia.Skill.invocability: "both"
@@ -9,7 +9,7 @@ copia.Skill.cue:
 copia.Skill.kitManaged: true
 ---
 
-# copia-kit-make-item
+# copia-kit-base-make-item
 
 **This skill is kit managed. Do not edit or change. Edits will be discarded.**
 

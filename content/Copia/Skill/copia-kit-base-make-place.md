@@ -1,5 +1,5 @@
 ---
-copia.Skill.id: <copia/Skill/copia-kit-make-place>
+copia.Skill.id: <copia/Skill/copia-kit-base-make-place>
 copia.Skill.title: "Make a Place"
 copia.Skill.description: "How to make a Place: a location that can be named in a prompt."
 copia.Skill.invocability: "both"
@@ -9,7 +9,7 @@ copia.Skill.cue:
 copia.Skill.kitManaged: true
 ---
 
-# copia-kit-make-place
+# copia-kit-base-make-place
 
 **This skill is kit managed. Do not edit or change. Edits will be discarded.**
 

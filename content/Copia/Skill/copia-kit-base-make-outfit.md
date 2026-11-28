@@ -1,5 +1,5 @@
 ---
-copia.Skill.id: <copia/Skill/copia-kit-make-outfit>
+copia.Skill.id: <copia/Skill/copia-kit-base-make-outfit>
 copia.Skill.title: "Make an Outfit"
 copia.Skill.description: "How to make an Outfit: a named set of garment Items worn together."
 copia.Skill.invocability: "both"
@@ -9,7 +9,7 @@ copia.Skill.cue:
 copia.Skill.kitManaged: true
 ---
 
-# copia-kit-make-outfit
+# copia-kit-base-make-outfit
 
 **This skill is kit managed. Do not edit or change. Edits will be discarded.**
 
@@ -24,7 +24,7 @@ coquette list Outfit
 ## 2 · Make the Items
 
 Make one Item for each garment, with `affordance: wearable`. See
-[copia-kit-make-item](/Copia/Skill/copia-kit-make-item.md).
+[copia-kit-base-make-item](/Copia/Skill/copia-kit-base-make-item.md).
 
 ## 3 · Create the Outfit
 
